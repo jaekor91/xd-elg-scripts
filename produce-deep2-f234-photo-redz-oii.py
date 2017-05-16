@@ -294,6 +294,6 @@ class_breakdown([2, 3, 4],[pcat2["cn"],pcat3["cn"],pcat4["cn"]],[pcat2["TARG_WEI
 class_breakdown([2, 3, 4],[pcat2["cn"],pcat3["cn"],pcat4["cn"]],[pcat2["TARG_WEIGHT"],pcat3["TARG_WEIGHT"],pcat4["TARG_WEIGHT"]], [area_f2,area_f3,area_f4],rwd="W")
 # Density (weighted divided by area)
 class_breakdown([2, 3, 4],[pcat2["cn"],pcat3["cn"],pcat4["cn"]],[pcat2["TARG_WEIGHT"],pcat3["TARG_WEIGHT"],pcat4["TARG_WEIGHT"]], [area_f2,area_f3,area_f4],rwd="D")
-print("Note: D2unboserved should be equal to zero for weighted and density case.")
+print("Note: D2unboserved should be equal to zero for weighted and density cases.")
 print("Completed.\n")
 
