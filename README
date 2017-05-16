@@ -1,0 +1,8 @@
+
+produce-deep2-f234-photo-redz-oii.py
+
+xd-elg-utils.py:
+	This module contains all custom functions used in the scripts.
+
+xd-elg-download.txt:
+	Contains wget commands for downloading relevant files.
