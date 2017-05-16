@@ -21,3 +21,6 @@
 # wget http://deep.ps.uci.edu/DR4/data/windowf.41.fits.gz
 # wget http://deep.ps.uci.edu/DR4/data/windowf.42.fits.gz
 
+
+# Download survey-bricks-dr3.fits
+wget http://portal.nersc.gov/project/cosmo/data/legacysurvey/dr3/survey-bricks-dr3.fits.gz
