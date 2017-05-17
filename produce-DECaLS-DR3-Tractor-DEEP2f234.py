@@ -111,6 +111,7 @@ DR3f4_trimmed = np.copy(DR3f4[idx])
 print("Completed.")
 
 
+##############################################################################	
 print("3. Save the trimmed catalogs.")
 # Field 2
 cols = fits.ColDefs(DR3f2_trimmed)
