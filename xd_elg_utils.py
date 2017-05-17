@@ -4,6 +4,8 @@ from astropy.wcs import WCS
 import numpy.lib.recfunctions as rec
 from os import listdir
 from os.path import isfile, join
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
 large_random_constant = -999119283571
 deg2arcsec=3600
@@ -401,7 +403,114 @@ def save_fits_join(data1,data2, fname):
     tbhdu.writeto(fname, clobber=True)
     
     return 
+
+def fits_append(table, new_col, col_name, idx1, idx2):
+    """
+    Given fits table and field column/name pair,
+    append the new field to the table using the idx1 and idx2 that correspond to 
+    fits table and new column indices.
+    """
+    global large_random_constant
+    new_col_sorted = np.ones(table.shape[0])*large_random_constant
+    new_col_sorted[idx1] = new_col[idx2]
     
+    new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
+    return new_table
+    
+    
+
+def apply_star_mask(fits):
+    ibool = ~load_star_mask(fits) 
+    
+    return fits[ibool]
+
+def load_grz_flux(fits):
+    """
+    Return raw (un-dereddened) g,r,z flux values.
+    """
+    g = fits['decam_flux'][:][:,1]
+    r = fits['decam_flux'][:][:,2]
+    z = fits['decam_flux'][:][:,4]
+    
+    return g,r,z
+
+def is_grzflux_pos(grzflux):
+    """
+    Given a list [gflux, rflux, zflux], return a boolean array that tells whether each object has all good fluxes or not.
+    """
+    ibool = (grzflux[0]>0) & (grzflux[1]>0) & (grzflux[2]>0)
+    return ibool
+
+
+
+def check_astrometry(ra1,dec1,ra2,dec2,pt_size=0.3):
+    """
+    Given two sets of ra/dec's return median difference in degrees.
+    """
+    ra_diff = ra2-ra1
+    dec_diff = dec2-dec1
+    ra_med_diff = np.median(ra_diff)
+    dec_med_diff = np.median(dec_diff)
+    return ra_med_diff, dec_med_diff
+
+
+
+def crossmatch_cat1_to_cat2(ra1, dec1, ra2, dec2, tol=1./(deg2arcsec+1e-12)):
+    """
+    Return indices of cat1 (e.g., DR3) and cat2 (e.g., DEE2) cross matched to tolerance. 
+
+    Note: Function used to cross-match DEEP2 and DR3 catalogs in each field 
+    and test for any astrometric discrepancies. That is, for every object in 
+    DR3, find the nearest object in DEEP2. For each DEEP2 object matched, 
+    pick DR3 object that is the closest. The surviving objects after these 
+    matching process are the cross-matched set.
+    """
+    
+    # Match cat1 to cat2 using astropy functions.
+    idx_cat1_to_cat2, d2d = match_cat1_to_cat2(ra1, dec1, ra2, dec2)
+    
+    # Indicies of unique cat2 objects that were matched.
+    cat2matched = np.unique(idx_cat1_to_cat2)
+    
+    # For each cat2 object matched, pick cat1 object that is the closest. 
+    # Skip if the closest objects more than tol distance away.
+    idx1 = [] # Place holder for indices
+    idx2 = []
+    tag = np.arange(ra1.size,dtype=int)
+    for e in cat2matched:
+        ibool = (idx_cat1_to_cat2==e)
+        candidates = tag[ibool]
+        dist2candidates = d2d[ibool]
+        # Index of the minimum distance cat1 object
+        if dist2candidates.min()<tol:
+            idx1.append(candidates[np.argmin(dist2candidates)])
+            idx2.append(e)
+    
+    # Turning list of indices into numpy arrays.
+    idx1 = np.asarray(idx1)
+    idx2 = np.asarray(idx2)
+    
+    # Return the indices of cat1 and cat2 of cross-matched objects.
+    return idx1, idx2
+
+
+
+def match_cat1_to_cat2(ra1, dec1, ra2, dec2):
+    """
+    "c = SkyCoord(ra=ra1*u.degree, dec=dec1*u.degree)  
+    catalog = SkyCoord(ra=ra2*u.degree, dec=dec2*u.degree)  
+    idx, d2d, d3d = c.match_to_catalog_sky(catalog)  
+
+    idx are indices into catalog that are the closest objects to each of the coordinates in c, d2d are the on-sky distances between them, and d3d are the 3-dimensional distances." -- astropy documentation.  
+
+    Fore more information: http://docs.astropy.org/en/stable/coordinates/matchsep.html#astropy-coordinates-matching 
+    """    
+    cat1 = SkyCoord(ra=ra1*u.degree, dec=dec1*u.degree)  
+    cat2 = SkyCoord(ra=ra2*u.degree, dec=dec2*u.degree)  
+    idx, d2d, d3d = cat1.match_to_catalog_sky(cat2)
+    
+    return idx, d2d.degree    
+
 
 
 
