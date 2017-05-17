@@ -1,3 +1,4 @@
+
 # Load modules
 import numpy as np
 from astropy.io import fits
@@ -150,3 +151,40 @@ dr3f4_glim_deep2 = rec.append_fields(dr3f4_glim_deep2, "DEEP2_matched", DEEP2_ma
 save_fits(dr3f4_glim_deep2,"DECaLS-DR3-DEEP2f4-glim24.fits")
 print("Completed.\n")
 
+
+
+
+##############################################################################
+print("4. Estimating DR3 area after imposing DEEP2 mask and Tycho-2 stellar mask \n\
+    (based on the fraction of objects masked.)")
+# Field 2
+area_f2 = est_spec_area("windowf.21.fits")+est_spec_area("windowf.22.fits")
+# print(area_f2)
+# Field 3
+area_f3 = est_spec_area("windowf.31.fits")+est_spec_area("windowf.32.fits")+est_spec_area("windowf.33.fits")
+# Field 4
+area_f4 = est_spec_area("windowf.41.fits")+est_spec_area("windowf.42.fits")
+
+
+# Making correction according to # of objects masked by star mask.
+print("Field 2")
+fname ="DECaLS-DR3-Tractor-DEEP2f2.fits"
+table = load_fits_table(fname)
+area_f2 *= true_false_fraction(load_star_mask(table))[-1]
+print("Intersection area: %.4f" % area_f2)
+
+print("Field 3")
+fname ="DECaLS-DR3-Tractor-DEEP2f3.fits"
+table = load_fits_table(fname)
+area_f3 *= true_false_fraction(load_star_mask(table))[-1]
+print("Intersection area: %.4f" % area_f3)
+
+print("Field 4")
+fname ="DECaLS-DR3-Tractor-DEEP2f4.fits"
+table = load_fits_table(fname)
+area_f4 *= true_false_fraction(load_star_mask(table))[-1]
+print("Intersection area: %.4f" % area_f4)
+
+area = [area_f2,area_f3,area_f4]
+np.savetxt("intersection-area-f234",area)
+print("Completed.\n")
