@@ -1,8 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from astropy.io import ascii, fits
 from astropy.wcs import WCS
 import numpy.lib.recfunctions as rec
+from os import listdir
+from os.path import isfile, join
 
 large_random_constant = -999119283571
 deg2arcsec=3600
@@ -282,3 +283,290 @@ def class_names():
     Provide a list of class names.
     """
     return ["Gold", "Silver", "LowOII","NoOII", "LowZ", "NoZ", "D2reject", "D2unobserved"]
+
+
+
+def return_bricknames(ra, dec, br_name, ra_range, dec_range,tol):
+    ibool = (ra>(ra_range[0]-tol)) & (ra<(ra_range[1]+tol)) & (dec>(dec_range[0]-tol)) & (dec<(dec_range[1]+tol))
+    return  br_name[ibool]
+
+
+
+
+
+
+def combine_tractor(fits_directory):
+    """
+    Given the file directory, find all Tractor fits files combine them and return as a rec-array.
+    """
+    onlyfiles = [f for f in listdir(fits_directory) if isfile(join(fits_directory, f))]
+    print("Number of files in %s %d" % (fits_directory, len(onlyfiles)-1))
+    
+    
+    DR3 = None
+    for i,e in enumerate(onlyfiles,start=1):
+        # If the file ends with "fits"
+        if e[-4:] == "fits":
+            print("Combining file %d. %s" % (i,e))
+            # If DR3 has been set with something.
+            tmp_table = apply_mask(fits.open(fits_directory+e)[1].data)
+            if DR3 is not None:
+                DR3 = np.hstack((DR3, tmp_table))
+            else:
+                DR3 = tmp_table
+                
+    return DR3
+
+def apply_mask(table):
+    """
+    Given a tractor catalog table, apply the standard mask. brick_primary and flux inverse variance. 
+    """
+    brick_primary = load_brick_primary(table)
+    givar, rivar, zivar = load_grz_invar(table)
+    ibool = (brick_primary==True) & (givar>0) & (rivar>0) &(zivar>0) 
+    table_trimmed = np.copy(table[ibool])
+
+    return table_trimmed
+    
+def load_grz_anymask(fits):
+    g_anymask = fits['DECAM_ANYMASK'][:][:,1]
+    r_anymask = fits['DECAM_ANYMASK'][:][:,2]
+    z_anymask = fits['DECAM_ANYMASK'][:][:,4]
+    
+    return g_anymask, r_anymask, z_anymask
+
+def load_grz_allmask(fits):
+    g_allmask = fits['DECAM_ALLMASK'][:][:,1]
+    r_allmask = fits['DECAM_ALLMASK'][:][:,2]
+    z_allmask = fits['DECAM_ALLMASK'][:][:,4]
+    
+    return g_allmask, r_allmask, z_allmask
+
+
+def load_radec(fits):
+    ra = fits["ra"][:]
+    dec= fits["dec"][:]
+    return ra, dec
+
+
+def load_brick_primary(fits):
+    return fits['brick_primary'][:]
+
+
+def load_shape(fits):
+    r_dev = fits['SHAPEDEV_R'][:]
+    r_exp = fits['SHAPEEXP_R'][:]
+    return r_dev, r_exp
+
+def load_grz_invar(fits):
+    givar = fits['decam_flux_ivar'][:][:,1]
+    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
+    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
+    return givar, rivar, zivar
+
+def load_star_mask(table):
+    return table["TYCHOVETO"][:].astype(int).astype(bool)
+
+
+def load_grz(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    g = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]))
+    r = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]))
+    z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
+    return g, r, z    
+
+def load_fits_table(fname):
+    """Given the file name, load  the first extension table."""
+    return fits.open(fname)[1].data
+
+def save_fits(data, fname):
+    """
+    Given a rec array and a file name (with "fits" filename), save it.
+    """
+    cols = fits.ColDefs(np.copy(data)) # This is somehow necessary.
+    tbhdu = fits.BinTableHDU.from_columns(cols)
+    tbhdu.writeto(fname, clobber=True)
+    
+    return 
+
+def save_fits_join(data1,data2, fname):
+    """
+    Given a rec array and a file name (with "fits" filename), save it.
+    """
+    
+    data = rec.merge_arrays((data1,data2), flatten=True, usemask=False,asrecarray=True)
+    cols = fits.ColDefs(data) 
+    tbhdu = fits.BinTableHDU.from_columns(cols)
+    tbhdu.writeto(fname, clobber=True)
+    
+    return 
+    
+
+
+
+##############################################################################
+# The following is adpated from the URL indicated below.
+# """
+#     ImagingLSS
+#     https://github.com/desihub/imaginglss/blob/master/imaginglss/analysis/tycho_veto.py
+
+#     veto objects based on a star catalogue.
+#     The tycho vetos are based on the email discussion at:
+#     Date: June 18, 2015 at 3:44:09 PM PDT
+#     To: decam-data@desi.lbl.gov
+#     Subject: decam-data Digest, Vol 12, Issue 29
+#     These objects takes a decals object and calculates the
+#     center and rejection radius for the catalogue in degrees.
+#     Note : The convention for veto flags is True for 'reject',
+#     False for 'preserve'.
+
+#     apply_tycho takes the galaxy catalog and appends a Tychoveto column
+#     the code works fine for ELG and LRGs. For other galaxy type, you need to adjust it!
+# """
+
+# Import modules
+import sys
+
+def BOSS_DR9(tycho):
+    bmag = tycho['BMAG']
+    # BOSS DR9-11
+    b = bmag.clip(6, 11.5)
+    R = (0.0802 * b ** 2 - 1.86 * b + 11.625) / 60. #
+    return R
+
+def DECAM_LRG(tycho):
+    vtmag = tycho['VTMAG']
+    R = 10 ** (3.5 - 0.15 * vtmag) / 3600.
+    return R
+
+DECAM_ELG = DECAM_LRG
+
+def DECAM_QSO(tycho):
+    vtmag = tycho['VTMAG']
+    # David Schlegel recommends not applying a bright star mask
+    return vtmag - vtmag
+
+def DECAM_BGS(tycho):
+    vtmag = tycho['VTMAG']
+    R = 10 ** (2.2 - 0.15 * vtmag) / 3600.
+    return R
+
+def radec2pos(ra, dec):
+    """ converting ra dec to position on a unit sphere.
+        ra, dec are in degrees.
+    """
+    pos = np.empty(len(ra), dtype=('f8', 3))
+    ra = ra * (np.pi / 180)
+    dec = dec * (np.pi / 180)
+    pos[:, 2] = np.sin(dec)
+    pos[:, 0] = np.cos(dec) * np.sin(ra)
+    pos[:, 1] = np.cos(dec) * np.cos(ra)
+    return pos
+
+def tycho(filename):
+    """
+    read the Tycho-2 catalog and prepare it for the mag-radius relation
+    """
+    dataf = fits.open(filename)
+    data = dataf[1].data
+    tycho = np.empty(len(data),
+        dtype=[
+            ('RA', 'f8'),
+            ('DEC', 'f8'),
+            ('VTMAG', 'f8'),
+            ('VMAG', 'f8'),
+            ('BMAG', 'f8'),
+            ('BTMAG', 'f8'),
+            ('VARFLAG', 'i8'),
+            ])
+    tycho['RA'] = data['RA']
+    tycho['DEC'] = data['DEC']
+    tycho['VTMAG'] = data['MAG_VT']
+    tycho['BTMAG'] = data['MAG_BT']
+    vt = tycho['VTMAG']
+    bt = tycho['BTMAG']
+    b = vt - 0.09 * (bt - vt)
+    v = b - 0.85 * (bt - vt)
+    tycho['VMAG']=v
+    tycho['BMAG']=b
+    dataf.close()
+    return tycho
+
+
+def txts_read(filename):
+    obj = np.loadtxt(filename)
+    typeobj = np.dtype([
+              ('RA','f4'), ('DEC','f4'), ('COMPETENESS','f4'),
+              ('rflux','f4'), ('rnoise','f4'), ('gflux','f4'), ('gnoise','f4'),
+              ('zflux','f4'), ('znoise','f4'), ('W1flux','f4'), ('W1noise','f4'),
+              ('W2flux','f4'), ('W2noise','f4')
+              ])
+    nobj = obj[:,0].size
+    data = np.zeros(nobj, dtype=typeobj)
+    data['RA'][:] = obj[:,0]
+    data['DEC'][:] = obj[:,1]
+    data['COMPETENESS'][:] = obj[:,2]
+    data['rflux'][:] = obj[:,3]
+    data['rnoise'][:] = obj[:,4]
+    data['gflux'][:] = obj[:,5]
+    data['gnoise'][:] = obj[:,6]
+    data['zflux'][:] = obj[:,7]
+    data['znoise'][:] = obj[:,8]
+    data['W1flux'][:] = obj[:,9]
+    data['W1noise'][:] = obj[:,10]
+    data['W2flux'][:] = obj[:,11]
+    data['W2noise'][:] = obj[:,12]
+    #datas = np.sort(data, order=['RA'])
+    return data
+
+def veto(coord, center, R):
+    """
+        Returns a veto mask for coord. any coordinate within R of center
+        is vet.
+        Parameters
+        ----------
+        coord : (RA, DEC)
+        center : (RA, DEC)
+        R     : degrees
+        Returns
+        -------
+        Vetomask : True for veto, False for keep.
+    """
+    from sklearn.neighbors import KDTree
+    pos_stars = radec2pos(center[0], center[1])
+    R = 2 * np.sin(np.radians(R) * 0.5)
+    pos_obj = radec2pos(coord[0], coord[1])
+    tree = KDTree(pos_obj)
+    vetoflag = ~np.zeros(len(pos_obj), dtype='?')
+    arg = tree.query_radius(pos_stars, r=R)
+    arg = np.concatenate(arg)
+    vetoflag[arg] = False
+    return vetoflag
+
+
+
+def apply_tycho(objgal, tychofn,galtype='LRG'):
+    # reading tycho star catalogs
+    tychostar = tycho(tychofn)
+    #
+    # mag-radius relation
+    #
+    if galtype == 'LRG' or galtype == 'ELG':    # so far the mag-radius relation is the same for LRG and ELG
+        radii = DECAM_LRG(tychostar)
+    else:
+        sys.exit("Check the apply_tycho function for your galaxy type")
+    #
+    #
+    # coordinates of Tycho-2 stars
+    center = (tychostar['RA'], tychostar['DEC'])
+    #
+    #
+    # coordinates of objects (galaxies)
+    coord = (objgal['ra'], objgal['dec'])
+    #
+    #
+    # a 0.0 / 1.0 array (1.0: means the object is contaminated by a Tycho-2 star, so 0.0s are good)
+    tychomask = (~veto(coord, center, radii)).astype('f4')
+    objgal = rec.append_fields(objgal, ['TYCHOVETO'], data=[tychomask], dtypes=tychomask.dtype, usemask=False)
+    return objgal
