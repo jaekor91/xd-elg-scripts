@@ -1,18 +1,385 @@
 import numpy as np
+import numpy.lib.recfunctions as rec
+
 from astropy.io import ascii, fits
 from astropy.wcs import WCS
-import numpy.lib.recfunctions as rec
-from os import listdir
-from os.path import isfile, join
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+
+from os import listdir
+from os.path import isfile, join
+
 import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
+import extreme_deconvolution as XD
+
+import confidence_contours as cc
+from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
 
 large_random_constant = -999119283571
 deg2arcsec=3600
+
+
+def load_params_XD_fit(i,K,tag=""):
+    fname = ("%d-params-fit-amps-glim24-K%d"+tag+".npy") %(i, K)
+    amp = np.load(fname)
+    fname = ("%d-params-fit-means-glim24-K%d"+tag+".npy") %(i, K)
+    mean= np.load(fname)
+    fname = ("%d-params-fit-covars-glim24-K%d"+tag+".npy") %(i, K)
+    covar  = np.load(fname)
+    return amp, mean, covar
+
+def load_params_XD_init(i,K,tag=""):
+    fname = ("%d-params-init-amps-glim24-K%d"+tag+".npy") %(i, K)
+    amp = np.load(fname)
+    fname = ("%d-params-init-means-glim24-K%d"+tag+".npy") %(i, K)
+    mean= np.load(fname)
+    fname = ("%d-params-init-covars-glim24-K%d"+tag+".npy") %(i, K)
+    covar  = np.load(fname)
+    return amp, mean, covar
+
+def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, mask=None, fname=None, pt_size=5, show=False):
+    """
+    See the output.
+    """
+    bnd_lw =1
+    
+    # Unpack the colors.
+    xgr = ydata[:,0]; yrz = ydata[:,1]
+    if mask is not None:
+        yrz = yrz[mask]
+        xgr = xgr[mask]
+    
+    # Broad boundary
+    # xbroad, ybroad = generate_broad()
+    
+    # Figure ranges
+    grmin = -1.
+    rzmin = -.75
+    grmax = 2.5
+    rzmax = 2.75
+    # histogram binwidth
+    bw = 0.05
+    # Number of components/linewidth
+    K = Sxamp_init.size
+    elw = 1. # ellipse linewidth
+    ea = 0.75 # ellipse transparency
+    
+    
+    # Create figure 
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14,14))
+
+    # 1: Plot the dots and the initial and final component gaussians.
+    ax1.scatter(xgr,yrz, c="black",s=pt_size, edgecolors="none")
+    # Initial
+    for i in range(K):
+        cc.plot_cov_ellipse(Sxcovar_init[i], Sxmean_init[i], volume=.6827, ax=ax1, ec="red", a=ea, lw=elw/2.) #1-sig 
+        cc.plot_cov_ellipse(Sxcovar_init[i], Sxmean_init[i], volume=.9545, ax=ax1, ec="red", a=ea, lw=elw/2.) #2-sig
+        cc.plot_cov_ellipse(Sxcovar[i], Sxmean[i], volume=.6827, ax=ax1, ec="blue", a=ea, lw=elw)#1-sig 
+        cc.plot_cov_ellipse(Sxcovar[i], Sxmean[i], volume=.9545, ax=ax1, ec="blue", a=ea, lw=elw)#2-sig
+    
+    # FDR boundary:
+    ax1.plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
+    ax1.plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
+    ax1.plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
+    ax1.plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
+    # Broad
+    # ax1.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    ax1.set_xlabel("$g-r$",fontsize=18)
+    ax1.set_ylabel("$r-z$",fontsize=18)
+    ax1.axis("equal")
+    ax1.axis([grmin, grmax, rzmin, rzmax])
+
+    # 2: Histogram in r-z
+    ax2.hist(yrz, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step", orientation="horizontal")
+    # Gaussian components
+    xvec = np.arange(-3,3,0.01) # vector range
+    sum_init = np.zeros_like(xvec) # place holder for gaussians.
+    sum_fit = np.zeros_like(xvec)
+    for i in range(K):
+        yvec = Sxamp_init[i]*stats.multivariate_normal.pdf(xvec, mean=Sxmean_init[i][1], cov=Sxcovar_init[i][1,1])        
+        sum_init += yvec
+        ax2.plot(yvec, xvec,lw=elw, color ="red", alpha=0.5)
+        yvec = Sxamp[i]*stats.multivariate_normal.pdf(xvec, mean=Sxmean[i][1], cov=Sxcovar[i][1,1])        
+        sum_fit += yvec
+        ax2.plot(yvec, xvec,lw=elw, color ="blue", alpha=0.5)
+    ax2.plot(sum_init, xvec,lw=elw*1.5, color ="red", alpha=1.)
+    ax2.plot(sum_fit, xvec,lw=elw*1.5, color ="blue", alpha=1.)
+    # Deocration     
+    ax2.set_ylabel("$r-z$",fontsize=18)
+    ax2.set_xlabel("Normalized density", fontsize=15)
+    ax2.set_ylim([rzmin, rzmax])
+    
+    
+    # 3: Histogram in g-r
+    ax3.hist(xgr, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step")
+    # Gaussian components
+    xvec = np.arange(-3,3,0.01) # vector range
+    sum_init = np.zeros_like(xvec) # place holder for gaussians.
+    sum_fit = np.zeros_like(xvec)
+    for i in range(K):
+        yvec = Sxamp_init[i]*stats.multivariate_normal.pdf(xvec, mean=Sxmean_init[i][0], cov=Sxcovar_init[i][0,0])        
+        sum_init += yvec
+        ax3.plot(xvec,yvec,lw=elw, color ="red", alpha=0.5)
+        yvec = Sxamp[i]*stats.multivariate_normal.pdf(xvec, mean=Sxmean[i][0], cov=Sxcovar[i][0,0])        
+        sum_fit += yvec
+        ax3.plot(xvec, yvec,lw=elw, color ="blue", alpha=0.5)
+    ax3.plot(xvec,sum_init, lw=elw*1.5, color ="red", alpha=1.)
+    ax3.plot(xvec,sum_fit,lw=elw*1.5, color ="blue", alpha=1.)    
+    # Decoration
+    ax3.set_xlabel("$g-r$",fontsize=18)
+    ax3.set_ylabel("Normalized density", fontsize=15)
+    ax3.set_xlim([grmin, grmax])
+    
+    
+    # 4: Plot the dots and the isocontours of GMM at 2, 10, 50, 90, 98
+    ax4.scatter(xgr,yrz, c="black",s=pt_size, edgecolors="none")
+    # Plot isocontours
+    magmin = min(grmin, rzmin)
+    magmax = max(grmax, rzmax)
+    vec = np.linspace(magmin,magmax, num=1e3,endpoint=True)
+    X,Y = np.meshgrid(vec, vec) # grid of point
+    Z = summed_gm(np.transpose(np.array([Y,X])), Sxmean, Sxcovar, Sxamp) # evaluation of the function on the grid
+    Xrange = Yrange = [magmin,magmax]; # Estimating density levels.
+    cvs = [0.98, 0.90, 0.50, 0.10, 0.02] # contour levels
+    cvsP =inverse_cdf_gm(cvs,Xrange, Yrange, Sxamp, Sxcovar,  Sxmean, gridspacing=0.5e-2,gridnumber = 1e3)
+    ax4.contour(X,Y,Z,cvsP,linewidths=1.5, colors=["black", "blue", "red", "orange", "yellow"])     
+    # FDR boundary:
+    ax4.plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
+    ax4.plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
+    ax4.plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
+    ax4.plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
+    # Broad
+    # ax4.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    ax4.set_xlabel("$g-r$",fontsize=18)
+    ax4.set_ylabel("$r-z$",fontsize=18)
+    ax4.axis("equal")
+    ax4.axis([grmin, grmax, rzmin, rzmax])
+    
+    
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)    
+    if show:
+        plt.show()
+    plt.close()
+    
+def XD_gr_rz_fit(ydata, ycovar, weight, niter, K, maxsnm=True, subsample = False, fixamp = None, snm=0, init_var=0.5**2, w_reg = 0.05**2):
+    """
+    Given the appropriately formmated data, make fits and return the best
+    fit parameters (and the corresponding initial values).
+    
+    K: Number of components
+    """
+    # If subsmaple is true and the number of data points is greater than M ~ 2,000 than subsample before proceeding.
+    M = 3000
+    if (ydata.shape[0] > M) & subsample:
+        a = np.arange(0,M,1, dtype=int)
+        ibool = np.random.choice(a, size=M, replace=False, p=None)
+        ydata = ydata[ibool]
+        ycovar = ycovar[ibool]
+        weight = weight[ibool]
+
+    # Place holder for the log-likelihood
+    loglike = large_random_constant
+    best_loglike = large_random_constant
+
+    # Make niter number of fits
+    for i in range(niter):
+        if (i%2==0) & (niter<25):
+            print(i)
+        if (i%10==0) & (niter>25):
+            print(i)            
+            
+        # Get initial condition
+        xamp_init, xmean_init, xcovar_init = XD_init(K, ydata, init_var)
+
+        # Copy the initial condition.
+        xamp = np.copy(xamp_init); xmean = np.copy(xmean_init); xcovar = np.copy(xcovar_init)
+
+        # XD fit
+        loglike = XD.extreme_deconvolution(ydata, ycovar, xamp, xmean, xcovar, weight=weight, tol=1e-06, w=w_reg, maxsnm=maxsnm, fixamp=fixamp, splitnmerge=snm)
+
+        if loglike > best_loglike:
+            best_loglike = loglike
+            Sxamp_init, Sxmean_init, Sxcovar_init = xamp_init, xmean_init, xcovar_init
+            Sxamp, Sxmean, Sxcovar = xamp, xmean, xcovar
+
+    
+    return Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar    
+
+
+
+def sample_GMM(Sxamp,Sxmean, Sxcovar, ycovar):
+    """
+    Return a sample based on the GMM input.
+    """
+    N = ycovar.shape[0] # Number of data points. 
+    sample = []
+    # For each data point, generate a sample based on the specified GMM. 
+    for i in range(N):
+        sample.append(sample_GMM_generate(Sxamp,Sxmean, Sxcovar, ycovar[i]))
+    sample = np.asarray(sample)
+#     print sample.shape, sample
+    xgr_sample, yrz_sample = sample[:,0], sample[:,1]
+    return xgr_sample, yrz_sample
+
+def sample_GMM_generate(Sxamp,Sxmean, Sxcovar, cov):
+    """
+    sample from a gaussian mixture
+    """
+    # Number of components.
+    K = Sxamp.size
+    if K == 1:
+#         print(Sxmean[0], (Sxcovar+cov)
+        one_sample = np.random.multivariate_normal(Sxmean[0], (Sxcovar+cov)[0], size=1)[0]
+        return one_sample
+    
+    # Choose from the number based on multinomial
+    m = np.where(np.random.multinomial(1,Sxamp)==1)[0][0]
+    # Draw from the m-th gaussian.
+    one_sample = np.random.multivariate_normal(Sxmean[m], Sxcovar[m]+cov, size=1)[0]
+    return one_sample
+
+def plot_XD_fit_K(ydata, ycovar, Sxamp, Sxmean, Sxcovar, fname=None, pt_size=5, mask=None, show=False):
+    """
+    Used for model selection.
+    """
+    bnd_lw = 1.
+    # Unpack the colors.
+    xgr = ydata[:,0]; yrz = ydata[:,1]
+    if mask is not None:
+        yrz = yrz[mask]
+        xgr = xgr[mask]
+        
+    # # Broad boundary
+    # xbroad, ybroad = generate_broad()
+    # Figure ranges
+    grmin = -1.
+    rzmin = -.75
+    grmax = 2.5
+    rzmax = 2.75
+    
+    # Create figure 
+    f, axarr = plt.subplots(2, 2, figsize=(14,14))
+
+    # First panel is the original.
+    axarr[0,0].scatter(xgr,yrz, c="black",s=pt_size, edgecolors="none")
+    # FDR boundary:
+    axarr[0,0].plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
+    axarr[0,0].plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
+    axarr[0,0].plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
+    axarr[0,0].plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
+    # # Broad
+    # axarr[0,0].plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    axarr[0,0].set_xlabel("$g-r$",fontsize=18)
+    axarr[0,0].set_ylabel("$r-z$",fontsize=18)
+    axarr[0,0].set_title("Data",fontsize=15)        
+    axarr[0,0].axis("equal")
+    axarr[0,0].axis([grmin, grmax, rzmin, rzmax]) 
+    
+    
+    # The remaining three are simulation based on the fit.
+    sim_counter = 1
+    for i in range(1,4):
+        xgr_sample, yrz_sample = sample_GMM(Sxamp,Sxmean, Sxcovar, ycovar)
+        axarr[i//2, i%2].scatter(xgr_sample,yrz_sample, c="black",s=pt_size, edgecolors="none")
+        # FDR boundary:
+        axarr[i//2, i%2].plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
+        axarr[i//2, i%2].plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
+        axarr[i//2, i%2].plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
+        axarr[i//2, i%2].plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
+        # Broad
+        # axarr[i//2, i%2].plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+        # Decoration
+        axarr[i//2, i%2].set_xlabel("$g-r$",fontsize=18)
+        axarr[i//2, i%2].set_ylabel("$r-z$",fontsize=18)
+        axarr[i//2, i%2].set_title("Simulation %d" % sim_counter,fontsize=15); sim_counter+=1
+        axarr[i//2, i%2].axis("equal")
+        axarr[i//2, i%2].axis([grmin, grmax, rzmin, rzmax])     
+
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)    
+    if show:
+        plt.show()
+    plt.close()    
+
+def save_params(Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, i, K, tag=""):
+    fname = ("%d-params-fit-amps-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxamp)
+    fname = ("%d-params-fit-means-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxmean)
+    fname = ("%d-params-fit-covars-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxcovar)
+    # Initi parameters
+    fname = ("%d-params-init-amps-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxamp_init)
+    fname = ("%d-params-init-means-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxmean_init)
+    fname = ("%d-params-init-covars-glim24-K%d"+tag) %(i, K)
+    np.save(fname, Sxcovar_init)
+    return
+
+def amp_init(K):
+    return np.ones(K,dtype=np.float)/np.float(K)
+
+def mean_init(K, ydata):
+    S = np.random.randint(low=0,high=ydata.shape[0],size=K)
+    return ydata[S]
+
+def covar_init(K, init_var):
+    covar = np.zeros((K, 2,2))
+    for i in range(K):
+        covar[i] = np.diag((init_var, init_var))
+    return covar 
+
+def XD_init(K, ydata, init_var):
+    xamp_init = amp_init(K)
+    # print xamp_init, xamp_init.shape
+    xmean_init = mean_init(K, ydata)
+    # print xmean_init, xmean_init.shape
+    xcovar_init = covar_init(K, init_var)
+    # print xcovar_init, xcovar_init.shape
+    
+    return xamp_init, xmean_init, xcovar_init
+
+
+
+
+
+
+def grz2gr_rz(grz):
+    return np.transpose(np.asarray([grz[0]-grz[1], grz[1]-grz[2]]))
+
+def fvar2mvar(f, fivar):
+    return (1.08574)**2/(f**2 * fivar)
+    
+def gr_rz_covariance(grzflux, grzivar):
+    gflux = grzflux[0]
+    rflux = grzflux[1]
+    zflux = grzflux[2]
+    givar = grzivar[0]
+    rivar = grzivar[1]
+    zivar = grzivar[2]
+    
+    gvar = fvar2mvar(gflux,givar)
+    rvar = fvar2mvar(rflux,rivar)
+    zvar = fvar2mvar(zflux,zivar)
+    
+    gr_rz_covar = np.zeros((gvar.size ,2,2))
+    for i in range(gvar.size):
+#         if i % 100 == 0:
+#             print i
+        gr_rz_covar[i] = np.asarray([[gvar[i]+rvar[i], rvar[i]],[rvar[i], rvar[i]+zvar[i]]])
+    
+    return gr_rz_covar
+
 
 def pow_legend(params_pow):
     alpha, A = params_pow
