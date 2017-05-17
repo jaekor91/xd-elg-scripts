@@ -90,10 +90,8 @@ print("Completed.")
 print("2b. Append Tycho2 stark mask field.")
 # Field 2 
 DR3f2 = apply_tycho(DR3f2,"tycho2.fits",galtype="ELG")
-
 # Field 3
 DR3f3 = apply_tycho(DR3f3,"tycho2.fits",galtype="ELG")
-
 # Field 4 
 DR3f4 = apply_tycho(DR3f4,"tycho2.fits",galtype="ELG")
 print("Completed.")
