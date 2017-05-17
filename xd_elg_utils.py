@@ -6,9 +6,263 @@ from os import listdir
 from os.path import isfile, join
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import scipy.stats as stats
+import scipy.optimize as opt
+import matplotlib.pyplot as plt
+
 
 large_random_constant = -999119283571
 deg2arcsec=3600
+
+def pow_legend(params_pow):
+    alpha, A = params_pow
+    return r"$A=%.2f,\,\, \alpha=%.2f$" % (A, alpha)
+
+def broken_legend(params_broken):
+    alpha, beta, fs, phi = params_broken
+    return r"$\alpha=%.2f, \,\, \beta=%.2f, \,\, f_i=%.2f, \,\, \phi=%.2f$" % (alpha, beta, fs, phi)
+
+
+def broken_pow_phi_init(flux_centers, best_params_pow, hist,bw, fluxS):
+    """
+    Return initial guess for phi.
+    """
+    # selecting one non-zero bin
+    c_S = 0;
+    while c_S == 0:
+        S = np.random.randint(low=0,high=flux_centers.size,size=1)
+        f_S = flux_centers[S]
+        c_S = hist[S]
+        
+    alpha = -best_params_pow[0]
+    beta = best_params_pow[0]
+    phi = c_S/broken_pow_law([alpha, beta, fluxS, 1.], f_S)/bw
+    
+    # phi
+    return phi[0]
+
+
+def pow_law(params, flux):
+    A = params[1]
+    alpha = params[0]
+    return A* flux**alpha
+
+def broken_pow_law(params, flux):
+    alpha = params[0]
+    beta = params[1]
+    fs = params[2]
+    phi = params[3]
+    return phi/((flux/fs)**alpha+(flux/fs)**beta + 1e-12)
+
+def pow_param_init(left_hist, left_f, right_hist, right_f, bw):
+    """
+    Return initial guess for the exponent and normalization.
+    """
+    # selecting non-zero bin one from left and one from right. 
+    c_L = 0; c_R = 0
+    while c_L==0 or c_R == 0 or c_L >= c_R:
+        L = np.random.randint(low=0,high=left_hist.size,size=1)
+        f_L = left_f[L]
+        c_L = left_hist[L]
+        R = np.random.randint(low=0,high=right_hist.size,size=1)
+        f_R = right_f[R]
+        c_R = right_hist[R]
+#     print(L,R)
+    # exponent
+    alpha_init = np.log(c_L/np.float(c_R))/np.log(f_L/np.float(f_R))
+    A_init = c_L/(f_L**alpha_init * bw)
+    
+    ans = np.zeros(2, dtype=np.float)
+    ans[0] = alpha_init
+    ans[1] = A_init
+    return ans
+
+def mag2flux(mag):
+    return 10**(0.4*(22.5-mag))
+        
+
+
+def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol =1e-5, broken_tol=1e-2, fname=None):
+    """
+    Given the magnitudes and the corresponding weight, and the parameters for the histogram, 
+    return the best fit parameters for a power law and a broken power law.
+    
+    Note: This function could be much more modular. But for now I keep it as it is.
+    """
+    # Computing the histogram.
+    bins = np.arange(magmin, magmax+bw*0.9, bw) # I am not sure what this is necessary but this works.
+    if cn2fit<6:
+        hist, bin_edges = np.histogram(mag, weights=weight/np.float(area), bins=bins)
+    else: # If D2reject, then do not weight except for the area.
+        hist, bin_edges = np.histogram(mag,weights=np.ones(mag.size)/np.float(area), bins=bins)        
+
+    # Compute the median magnitude
+    magmed = np.median(mag)
+
+    # Compute bin centers. Left set and right set.
+    bin_centers = (bin_edges[:-1]+bin_edges[1:])/2.
+    ileft = bin_centers < magmed
+    # left and right counts
+    left_hist = hist[ileft]
+    right_hist = hist[~ileft]
+    # left and right flux
+    left_f = mag2flux(bin_centers[ileft])
+    right_f = mag2flux(bin_centers[~ileft])
+    flux_centers = mag2flux(bin_centers)
+
+
+    # Place holder for the best parameters
+    best_params_pow = np.zeros(2,dtype=np.float) 
+
+    # Empty list for the negative log-likelihood
+    list_nloglike = []
+    best_nloglike = -100.
+
+    # Define negative total loglikelihood function given the histogram.
+    def ntotal_loglike_pow(params):
+        """
+        Total log likelihood.
+        """
+        total_loglike = 0
+
+        for i in range(flux_centers.size):
+            total_loglike += stats.poisson.logpmf(hist[i].astype(int), pow_law(params, flux_centers[i])*bw)
+
+        return -total_loglike
+
+    # fit for niter times 
+    print("Fitting power law")
+    counter = 0
+    while counter < niter:
+        # Generate initial parameters
+        init_params = pow_param_init(left_hist, left_f, right_hist, right_f, bw)
+    #     print(init_param)
+
+        # Optimize the parameters.
+        res = opt.minimize(ntotal_loglike_pow, init_params,tol=pow_tol,method="Nelder-Mead" )
+        if res["success"]:
+            counter+=1
+            if counter % 2 == 0:
+                print(counter)
+#             print(counter)
+    #         print(res["x"])
+            fitted_params = res["x"]
+
+            # Calculate the negative total likelihood
+            nloglike = ntotal_loglike_pow(fitted_params)
+            list_nloglike.append(nloglike)
+
+            # If loglike is the highest among seen, then update the parameters.
+            if nloglike > best_nloglike:
+                best_nloglike = nloglike
+                best_params_pow = fitted_params
+
+#     print(best_params_pow)
+
+
+
+    # Place holder for the best parameters
+    best_params_broken = np.zeros(4,dtype=np.float) 
+
+    # Empty list for the negative log-likelihood
+    list_nloglike = []
+    best_nloglike = -100.
+
+    # Define negative total loglikelihood function given the histogram.
+    def ntotal_loglike_broken(params):
+        """
+        Total log likelihood for broken power law.
+        """
+        total_loglike = 0
+
+        for i in range(flux_centers.size):
+            total_loglike += stats.poisson.logpmf(hist[i].astype(int), broken_pow_law(params, flux_centers[i])*bw)
+
+        return -total_loglike
+
+
+    # fit for niter times 
+    print("Fitting broken power law")
+    counter = 0
+    while counter < niter:
+        # Generate initial parameters
+        phi = broken_pow_phi_init(flux_centers, best_params_pow, hist, bw, mag2flux(magmed))
+        alpha = -best_params_pow[0]
+        beta = best_params_pow[0]
+        init_params = [alpha, beta,mag2flux(magmed), phi]
+    #     print(init_params)
+
+        # Optimize the parameters.
+        res = opt.minimize(ntotal_loglike_broken, init_params,tol=broken_tol,method="Nelder-Mead" )
+        if res["success"]:
+            counter+=1
+            if counter % 2 == 0:
+                print(counter)            
+    #         print(res["x"])
+            fitted_params = res["x"]
+
+            # Calculate the negative total likelihood
+            nloglike = ntotal_loglike_broken(fitted_params)
+            list_nloglike.append(nloglike)
+
+            # If loglike is the highest among seen, then update the parameters.
+            if nloglike > best_nloglike:
+                best_nloglike = nloglike
+                best_params_broken = fitted_params
+
+#     print(best_params_broken)
+
+    # power law fit
+    xvec = np.arange(magmin, magmax, 1e-3)
+    yvec = pow_law(best_params_pow, mag2flux(xvec))*np.float(bw)
+    pow_str = pow_legend(best_params_pow)
+    plt.plot(xvec,yvec, c = "red", label = pow_str)
+    # broken  power law fit
+    yvec = broken_pow_law(best_params_broken, mag2flux(xvec))*np.float(bw)
+    broken_str = broken_legend(best_params_broken)
+    plt.plot(xvec,yvec, c = "blue", label=broken_str)
+    # hist
+    plt.bar(bin_edges[:-1], hist, width=bw, alpha=0.5, color="g")
+    # deocration
+    plt.legend(loc="upper left")
+    plt.xlim([magmin,magmax])
+    plt.xlabel(r"Mag")
+    plt.ylabel(r"Number per %.2f mag bin"%bw)
+    if fname is not None:
+        plt.savefig(fname+".png", bbox_inches="tight", dpi=400)
+    # plt.show()
+    plt.close()
+
+    return best_params_pow, best_params_broken
+
+
+
+def combine_grz(list1,list2,list3):
+    """
+    Convenience function for combining three sets data in a list.
+    """
+    g = np.concatenate((list1[0], list2[0], list3[0]))
+    r = np.concatenate((list1[1], list2[1], list3[1]))
+    z = np.concatenate((list1[2], list2[2], list3[2]))
+    return [g, r,z]
+
+
+def true_false_fraction(ibool):
+    """
+    Given boolean index array count true and false proportion and print.
+    """
+    counts = np.bincount(ibool)
+    tot = np.sum(counts).astype(float)
+    print("True: %d (%.4f)| False: %d (%.4f)" % (counts[1], counts[1]/tot, counts[0], counts[0]/tot))
+    return [counts[1], counts[1]/tot, counts[0], counts[0]/tot]
+
+
+def load_cn(fits):
+    return fits["cn"].astype(int)
+
+
+def load_DEEP2matched(table):
+    return table["DEEP2_matched"][:]    
 
 
 def window_mask(ra, dec, w_fname):
@@ -404,6 +658,9 @@ def save_fits_join(data1,data2, fname):
     
     return 
 
+def load_weight(fits):
+    return fits["TARG_WEIGHT"]    
+
 def fits_append(table, new_col, col_name, idx1, idx2):
     """
     Given fits table and field column/name pair,
@@ -416,7 +673,10 @@ def fits_append(table, new_col, col_name, idx1, idx2):
     
     new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
     return new_table
-    
+
+def load_fits_table(fname):
+    """Given the file name, load  the first extension table."""
+    return fits.open(fname)[1].data
     
 
 def apply_star_mask(fits):
@@ -433,6 +693,54 @@ def load_grz_flux(fits):
     z = fits['decam_flux'][:][:,4]
     
     return g,r,z
+
+def load_grz_invar(fits):
+    givar = fits['decam_flux_ivar'][:][:,1]
+    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
+    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
+    return givar, rivar, zivar    
+
+def reasonable_mask(table, decam_mask = "all"):
+    """
+    Given DECaLS table, return a boolean index array that indicates whether an object passed flux positivity, reasonable color range, and allmask conditions
+    """
+    grzflux = load_grz_flux(table)
+    ibool1 = is_grzflux_pos(grzflux)
+    
+    grz = load_grz(table)
+    ibool2 = is_reasonable_color(grz) 
+    
+    if decam_mask == "all":
+        grz_allmask = load_grz_allmask(table)
+        ibool3 = pass_grz_decammask(grz_allmask)
+    else:
+        grz_anymask = load_grz_anymask(table)
+        ibool3 = pass_grz_decammask(grz_anymask)        
+        
+    grzivar = load_grz_invar(table)
+    ibool4 = pass_grz_SN(grzflux, grzivar, thres=2)
+
+    return ibool1&ibool2&ibool3&ibool4
+
+def pass_grz_SN(grzflux, grzivar, thres=2):
+    gf, rf, zf = grzflux
+    gi, ri, zi = grzivar
+    
+    return ((gf*np.sqrt(gi))>thres)&((rf*np.sqrt(ri))>thres)&((zf*np.sqrt(zi))>thres)
+    
+def pass_grz_decammask(grz_decammask):
+    gm, rm, zm = grz_decammask
+    return (gm==0) & (rm==0) & (zm==0)
+
+def is_reasonable_color(grz):
+    """
+    Given grz mag list, check whether colors lie within a reasonable range.
+    """
+    g,r,z = grz
+    gr = g-r
+    rz = r-z
+    
+    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)    
 
 def is_grzflux_pos(grzflux):
     """
