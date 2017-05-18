@@ -20,11 +20,11 @@ tractor_file_downloaded = True
 
 ##############################################################################
 if not tractor_file_downloaded: # If the tractor files are not downloaded.
-	print("1. Generate download scripts for Tractor files.")
+	print("1. Generate download scripts for relevant Tractor files.")
 	print("This step generates three files that the user can use to download\n\
-		the relevant tractor files.")
+	the relevant tractor files.")
 	print("To identify relevant bricks use survey-bricks-dr3.fits which the user\n\
-		should have downloaded. Approximate fields ranges.\n\
+	should have downloaded. Approximate field ranges.\n\
 	\n\
 	Field 2\n\
 	RA bounds: [251.3, 253.7]\n\
@@ -65,17 +65,17 @@ if not tractor_file_downloaded: # If the tractor files are not downloaded.
 	    f.close()
 	print("Completed")
 	print("Exiting the program. Please download the necessary files using the script\n\
-		and re-run the program.")
+		and re-run the program with tractor_file_downloaded=True.")
 	sys.exit()
 else:
 	print("Proceeding using the downloaded tractor files.")
 	print("Within data_directory, Tractor files should be \n\
-		saved in directories in DR3-f**.")
+		saved in directories in \DR3-f**\.")
 
 
 ##############################################################################	
-print("2. Combine all Tractor files by field, append Tycho-2 mask, and the \n\
-	DEEP2 window funtions.")
+print("2. Combine all Tractor files by field, append Tycho-2 stellar mask column, \n\
+	and mask objects using DEEP2 window funtions.")
 print("2a. Combining the tractor files: Impose mask conditions (brick_primary==True\n\
 	and flux inverse variance positive).")
 # Field 2
@@ -96,7 +96,7 @@ DR3f3 = apply_tycho(DR3f3,"tycho2.fits",galtype="ELG")
 DR3f4 = apply_tycho(DR3f4,"tycho2.fits",galtype="ELG")
 print("Completed.")
 
-print("2c. Impose the window functions.")
+print("2c. Impose DEEP2 window functions.")
 # Field 2
 idx = np.logical_or(window_mask(DR3f2["ra"], DR3f2["dec"], "windowf.21.fits"), window_mask(DR3f2["ra"], DR3f2["dec"], "windowf.22.fits"))
 DR3f2_trimmed = DR3f2[idx]
