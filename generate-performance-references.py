@@ -79,7 +79,7 @@ print("Completed.\n")
 ##############################################################################
 print("3. Print FDR cut result.")
 print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
-      "DESI", "Total", "Eff", "FoM", "\\\\ \hline"]) )
+      "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline") 
 return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
