@@ -1,9 +1,83 @@
+###################################################################################################
+Python and package vesrions: 
 
-produce-deep2-f234-photo-redz-oii.py
+	A) Python: Python 3.5.2 :: Anaconda custom (x86_64)
 
+	B) Python packages 
+		- NumPy: v1.12.1
+		- Astropy: v1.1.1
+		- SciPy: v1.2.0
+		- Matplotlib: v1.5.1
+
+	C) Extreme deconvolution:
+		Package written by Jo Bovy and available via https://github.com/jobovy/extreme-deconvolution
+		I downloaded the master branch zip file (May 16, 2017) and installed it on 
+		local laptop, following the instruction in INSTALL_PYTNON.
+		URL: https://github.com/jobovy/extreme-deconvolution.git
+
+
+###################################################################################################
+Reproducibility
+	The following series of scripts can be used to reproduce the results/figures/
+	tables given in the paper.
+	
+	A) Download scripts 
+		- xd-elg-download.sh:
+			Describes where and how all the relevant files can be obtained from the web.
+			For certain files, "wget <url>" commands are provided for convenience.
+			Download all the files before using "reproducibility" section below.
+
+		- DR3-DEEP2f**-tractor-download.sh:
+			Used to download tractor files as described in xd-elg-download.sh script.
+
+
+	B) Scripts for preparing and combining DEEP2 and DECaLS DR3 data:
+		- produce-deep2-f234-photo-redz-oii.py:
+			Combine extended DEEP2 pcat catalogs, impose badflag==0 and window function masks, append
+			colummns from redshift catalogs, DEEP2 color-selection catalogs, and selection probability
+			catalogs. For each remaining DEEP2 object, compute class number.
+
+		- produce-DECaLS-DR3-Tractor-DEEP2f234.py:
+			Show how DR3-DEEP2f**-tractor-download.sh scripts were generated using DECaLS DR3 bircks
+			file. Combine all relevant Tractor files and mask objects that do not have positive flux
+			invariance and brickprimary !=0. Append Tycho-2 stellar mask column and impose DEEP2
+			window functions.
+
+		- produce-DECaLS-DR3-DEEP2-f234.py:
+			Load processed DEEP2 and DECaLS catalogs. Apply Tycho-2 stellar masks to DECaLS objects
+			impose flux positivity condition. Cross-match the two catalogs within respective field.
+			After accounting for astrometric differences (in median), append select information from 
+			DEEP2 to DECaLS catalogs. Save the whole DECaLS catalog with an additional column indicating
+			whether the object was found in DEEP2 or not. Lastly, estimate the area of intersection
+			of the two survey based on point Monte Carlo method.
+
+		Note 1: These scripts should be ran sequentially.
+
+
+	C) Scripts for training obtaining XD selection model parameters
+		- fit-dNdm-glim24.py
+
+		- fit-GMM-glim24.py
+
+
+	D) Scripts for figures and tables for the paper
+		- plot-classes.py: Used to plot various classes whose definitions are given
+			in the paper.
+
+###################################################################################################
+
+
+
+
+Scripts for exploring XD ELG target selection
+
+
+###################################################################################################
+
+Utilities
 xd-elg-utils.py:
 	This module contains all custom functions used in the scripts.
 
-xd-elg-download.txt:
-	Contains wget commands for downloading relevant files. 
+
+
 
