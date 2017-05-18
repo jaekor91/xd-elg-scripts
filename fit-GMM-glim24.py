@@ -60,8 +60,8 @@ print("Completed.\n")
 
 ##############################################################################
 print("2. Put the data in appropriate form for processing.")
-gr_rz=grz2gr_rz(grz)
-gr_rz_covar = gr_rz_covariance(grzflux, grzivar)
+rz_gr=grz2rz_gr(grz)
+rz_gr_covar = rz_gr_covariance(grzflux, grzivar)
 
 print("Completed.\n")
 
@@ -74,15 +74,15 @@ maxsnm= True # Try maximum number of splitand merge?
 init_var = 0.5**2
 pt_size = 3.
 
-for i in range(1):
+for i in range(6):
     print(cnames[i])
 
     # Sub-select the data
     ibool = cn==i
-    ydata = gr_rz[ibool]; ycovar = gr_rz_covar[ibool]; weight = w[ibool]
+    ydata = rz_gr[ibool]; ycovar = rz_gr_covar[ibool]; weight = w[ibool]
     print("Num data points: %d" % ydata.shape[0])
 
-    for K in range(1,2):
+    for K in range(1,4):
         if K == 3:
             niter=10
         else: 
@@ -102,34 +102,35 @@ print("Completed.\n")
         
 
 
-# ##############################################################################
-# print("4. Fitting GMM with K=1,2,...7 for DEEP2reject class. Sub-sampling points.")
-# i = 6
-# pt_size = 1.5
-# niter = 10
-# maxsnm = False; snm = 3
-# subsample = True
-# init_var = 0.5**2
+##############################################################################
+print("4. Fitting GMM with K=1,2,...7 for DEEP2reject class. Sub-sampling points.")
+i = 6
+pt_size = 1.5
+niter = 10
+maxsnm = False; snm = 3
+subsample = True
+init_var = 0.5**2
 
-# print(cnames[i])
+print(cnames[i])
 
-# # Sub-select the data
-# ibool = cn==i
-# ydata = gr_rz[ibool]; ycovar = gr_rz_covar[ibool]; weight = np.ones(ydata.shape[0])
-# print("Num data points: %d" % ydata.shape[0])
+# Sub-select the data
+ibool = cn==i
+ydata = rz_gr[ibool]; ycovar = rz_gr_covar[ibool]; weight = np.ones(ydata.shape[0])
 
-# for K in range(1,8):
-#     print("Component number K = %d" % K)
-#     # Make the fit
-#     Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar = XD_gr_rz_fit(ydata, ycovar, weight, niter, K,maxsnm=maxsnm, init_var=init_var, w_reg = 0.05**2) 
+print("Num data points: %d" % ydata.shape[0])
+
+for K in range(1,8):
+    print("Component number K = %d" % K)
+    # Make the fit
+    Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar = XD_gr_rz_fit(ydata, ycovar, weight, niter, K,maxsnm=maxsnm, init_var=init_var, w_reg = 0.05**2) 
     
-#     # Plot initial and final fits and save.
-#     fname = "%d-fit-cc-glim24-K%d" %(i, K)
-#     plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, fname=fname, pt_size=pt_size)
+    # Plot initial and final fits and save.
+    fname = "%d-fit-cc-glim24-K%d" %(i, K)
+    plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, fname=fname, pt_size=pt_size)
 
-#     # Save the best fit parameters.
-#     save_params(Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, i, K)
-# print("Completed.\n")
+    # Save the best fit parameters.
+    save_params(Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxmean, Sxcovar, i, K)
+print("Completed.\n")
 
 
 

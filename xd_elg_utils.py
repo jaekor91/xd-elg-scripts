@@ -18,8 +18,122 @@ import matplotlib.pyplot as plt
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
 
+colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
+cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
+
 large_random_constant = -999119283571
 deg2arcsec=3600
+
+def FDR_cut(grz):
+    """
+    Given a list [g,r,z] magnitudes, apply the cut and return an indexing boolean vector.
+    """
+    g,r,z=grz; yrz = (r-z); xgr = (g-r)
+    ibool = (r<23.4) & (yrz>.3) & (yrz<1.6) & (xgr < (1.15*yrz)-0.15) & (xgr < (1.6-1.2*yrz))
+    return ibool
+    
+
+def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_size=0.5):
+    """
+    Given [g,r,z] list, cn, weight of objects in a catalog and a particular class number and area, 
+    plot the selected one in its color.
+    
+    fname convention:
+    
+    cc-(grz or grzperp)-(mag)(lim)-(cn)(cname)-(mask1)-(mask2)-...
+    """
+    global colors
+    global cnames
+    bnd_lw =2
+    
+    # Unpack the colors.
+    g,r,z=grz; xrz = (r-z); ygr = (g-r)
+    if mask is not None:
+        xrz = xrz[mask]
+        ygr = ygr[mask]
+        cn = cn[mask]
+        weight = weight[mask]
+    
+    fig = plt.figure(figsize=(5,5))
+
+    if pick is None:
+        plt.scatter(xrz, ygr,c="black",s=pt_size, edgecolors="none")
+    else:
+        plt.scatter(xrz[cn==pick],ygr[cn==pick], c=colors[pick],s=pt_size*6, edgecolors="none", marker="s")
+        raw = np.sum(cn==pick)
+        if pick <6:
+            density = np.sum(weight[cn==pick])/area
+        else:
+            density = np.sum(cn==pick)/area
+        title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
+        plt.title(title_str,fontsize=15)
+
+    # FDR boundary practice:
+    plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
+    plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="blue")
+    plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="blue")
+    plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="blue")
+    # Broad
+#     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    plt.xlabel("$r-z$",fontsize=15)
+    plt.ylabel("$g-r$",fontsize=15)
+    plt.axis("equal")
+    plt.axis([-.5, 2.0, -.5, 2.0])
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)    
+    # plt.show()
+    plt.close()
+
+def plot_grz_class_all(grz, cn, weight, area, mask=None, fname=None, pt_size1=0.5, pt_size2=0.3):
+    """
+    Given [g,r,z] list, cn, weight of objects in a catalog and a particular class number and area, 
+    plot all the objects in their respective colors. 
+    
+    fname convention:
+    
+    cc-(grz or grzperp)-(mag)(lim)-cnAll-(mask1)-(mask2)-...
+    """
+    global colors
+    global cnames
+    bnd_lw =2
+    
+    # Unpack the colors.
+    g,r,z=grz; xrz = (r-z); ygr = (g-r)
+    if mask is not None:
+        xrz = xrz[mask]
+        ygr = ygr[mask]
+        cn = cn[mask]
+        weight = weight[mask]
+    
+    fig = plt.figure(figsize=(5,5))
+
+    for i,e in enumerate(cnames):
+        if i < 6:
+            plt.scatter(xrz[cn==i], ygr[cn==i], c=colors[i],s=pt_size1, edgecolors="none", marker="s")
+        elif i ==6:
+            plt.scatter(xrz[cn==i], ygr[cn==i], c=colors[i],s=pt_size2, edgecolors="none", marker="s")
+            
+
+    # FDR boundary practice:
+    plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
+    plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="blue")
+    plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="blue")
+    plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="blue")
+    # Broad
+#     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    plt.xlabel("$r-z$",fontsize=15)
+    plt.ylabel("$g-r$",fontsize=15)
+    plt.axis("equal")
+    plt.axis([-.5, 2.0, -.5, 2.0])
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)    
+    # plt.show()
+    plt.close()
+
 
 
 def load_params_XD_fit(i,K,tag=""):
@@ -56,10 +170,10 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     # xbroad, ybroad = generate_broad()
     
     # Figure ranges
-    grmin = -1.
-    rzmin = -.75
+    grmin = -.5
+    rzmin = -.5
     grmax = 2.5
-    rzmax = 2.75
+    rzmax = 2.5
     # histogram binwidth
     bw = 0.05
     # Number of components/linewidth
