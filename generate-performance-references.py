@@ -69,5 +69,11 @@ print("Completed.\n")
 ##############################################################################
 print("2. Impose FDR cut.")
 iFDR = FDR_cut(grz)
-generate_table_header()
-class_breakdown_cut(cn[iFDR], w[iFDR], area, rwd="D", num_classes=8)
+print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", "FoM", "\\\\ \hline"]) )
+return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
+print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
+     return_format = return_format,\
+     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+     ))

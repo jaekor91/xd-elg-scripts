@@ -1,11 +1,22 @@
 import numpy as np
 
+cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
 
-def class_breakdown_cut(cn, weight, area, rwd="D", num_classes=8):
+def class_breakdown_cut(cn, weight, area,rwd="D", num_classes=8, \
+     return_format= ["cut", "rwd" ,"type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched",
+      "DESI", "Total", "Eff", "FoM"],\
+     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+     ):
     """
     Given class number, weights, and areas, return the breakdown of object 
-    for each class.
+    for each class. 
+
+    return_format: A list that shows which information should be included in the returned string.
+        For each element in the array, if the object is a string in cnames, then the corresponding
+        classes counts is printed. Also, DESI, Total and Eff are special strings that the function
+        knows how to compute.
+    class_eff: Short for class efficiency. Assign expected yield to Gold through DR3unmatched objects.
     """
     
     # Computing counts
@@ -16,11 +27,30 @@ def class_breakdown_cut(cn, weight, area, rwd="D", num_classes=8):
     else:
         counts = generate_density_breakdown(cn, weight, area, num_classes)
 
-    # Total or average counts
-    if rwd in ["R", "W"]:
-        print(str_counts("Total", rwd, counts))
-    else:
-        print(str_counts("Avg.", rwd, counts))        
+    Total = np.sum(counts)
+    DESI = np.sum(np.asarray(class_eff)*counts)
+    eff = DESI/Total
+
+    output_str = []
+    for e in return_format:
+        if e in cnames:
+            idx = cnames.index(e)
+            output_str.append("%d"%counts[idx])
+        elif e == "Total":
+            output_str.append("%d"%Total)
+        elif e == "DESI":
+            output_str.append("%d"%DESI)
+        elif e == "Eff":
+            output_str.append("%.3f"%eff)
+        elif e == "rwd":
+            output_str.append(rwd)
+        else:
+            output_str.append(e)
+
+    return " & ".join(output_str)
+
+
+         
 
     
 def str_counts(fn, rwd_str, counts):
