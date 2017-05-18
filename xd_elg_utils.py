@@ -13,7 +13,7 @@ import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
-import extreme_deconvolution as XD
+# import extreme_deconvolution as XD
 
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
@@ -47,10 +47,10 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     bnd_lw =1
     
     # Unpack the colors.
-    xgr = ydata[:,0]; yrz = ydata[:,1]
+    xrz = ydata[:,0]; ygr = ydata[:,1]
     if mask is not None:
-        yrz = yrz[mask]
-        xgr = xgr[mask]
+        ygr = ygr[mask]
+        xrz = xrz[mask]
     
     # Broad boundary
     # xbroad, ybroad = generate_broad()
@@ -72,7 +72,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14,14))
 
     # 1: Plot the dots and the initial and final component gaussians.
-    ax1.scatter(xgr,yrz, c="black",s=pt_size, edgecolors="none")
+    ax1.scatter(xrz,ygr, c="black",s=pt_size, edgecolors="none")
     # Initial
     for i in range(K):
         cc.plot_cov_ellipse(Sxcovar_init[i], Sxmean_init[i], volume=.6827, ax=ax1, ec="red", a=ea, lw=elw/2.) #1-sig 
@@ -81,20 +81,18 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
         cc.plot_cov_ellipse(Sxcovar[i], Sxmean[i], volume=.9545, ax=ax1, ec="blue", a=ea, lw=elw)#2-sig
     
     # FDR boundary:
-    ax1.plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
-    ax1.plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
-    ax1.plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
-    ax1.plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
-    # Broad
-    # ax1.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    ax1.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="red")
+    ax1.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="red")
+    ax1.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="red")
+    ax1.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="red")    
     # Decoration
-    ax1.set_xlabel("$g-r$",fontsize=18)
-    ax1.set_ylabel("$r-z$",fontsize=18)
+    ax1.set_xlabel("$r-z$",fontsize=18)
+    ax1.set_ylabel("$g-r$",fontsize=18)
     ax1.axis("equal")
-    ax1.axis([grmin, grmax, rzmin, rzmax])
+    ax1.axis([rzmin, rzmax, grmin, grmax])
 
     # 2: Histogram in r-z
-    ax2.hist(yrz, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step", orientation="horizontal")
+    ax2.hist(ygr, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step", orientation="horizontal")
     # Gaussian components
     xvec = np.arange(-3,3,0.01) # vector range
     sum_init = np.zeros_like(xvec) # place holder for gaussians.
@@ -109,13 +107,13 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     ax2.plot(sum_init, xvec,lw=elw*1.5, color ="red", alpha=1.)
     ax2.plot(sum_fit, xvec,lw=elw*1.5, color ="blue", alpha=1.)
     # Deocration     
-    ax2.set_ylabel("$r-z$",fontsize=18)
+    ax2.set_ylabel("$g-r$",fontsize=18)
     ax2.set_xlabel("Normalized density", fontsize=15)
-    ax2.set_ylim([rzmin, rzmax])
+    ax2.set_ylim([grmin, grmax])
     
     
     # 3: Histogram in g-r
-    ax3.hist(xgr, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step")
+    ax3.hist(xrz, bins = np.arange(grmin, grmax+0.9*bw, bw), weights=weight, normed=True, color="black", histtype="step")
     # Gaussian components
     xvec = np.arange(-3,3,0.01) # vector range
     sum_init = np.zeros_like(xvec) # place holder for gaussians.
@@ -130,13 +128,13 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     ax3.plot(xvec,sum_init, lw=elw*1.5, color ="red", alpha=1.)
     ax3.plot(xvec,sum_fit,lw=elw*1.5, color ="blue", alpha=1.)    
     # Decoration
-    ax3.set_xlabel("$g-r$",fontsize=18)
+    ax3.set_xlabel("$r-z$",fontsize=18)
     ax3.set_ylabel("Normalized density", fontsize=15)
-    ax3.set_xlim([grmin, grmax])
+    ax3.set_xlim([rzmin, rzmax])
     
     
     # 4: Plot the dots and the isocontours of GMM at 2, 10, 50, 90, 98
-    ax4.scatter(xgr,yrz, c="black",s=pt_size, edgecolors="none")
+    ax4.scatter(xrz,ygr, c="black",s=pt_size, edgecolors="none")
     # Plot isocontours
     magmin = min(grmin, rzmin)
     magmax = max(grmax, rzmax)
@@ -148,17 +146,15 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     cvsP =inverse_cdf_gm(cvs,Xrange, Yrange, Sxamp, Sxcovar,  Sxmean, gridspacing=0.5e-2,gridnumber = 1e3)
     ax4.contour(X,Y,Z,cvsP,linewidths=1.5, colors=["black", "blue", "red", "orange", "yellow"])     
     # FDR boundary:
-    ax4.plot([-4, 0.195], [0.3, 0.30], 'k-', lw=bnd_lw, c="red")
-    ax4.plot([0.195, 0.706],[0.3, 0.745], 'k-', lw=bnd_lw, c="red")
-    ax4.plot([0.706, -0.32], [0.745, 1.6], 'k-', lw=bnd_lw, c="red")
-    ax4.plot([-0.32, -4],[1.6, 1.6], 'k-', lw=bnd_lw, c="red")
-    # Broad
-    # ax4.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    ax4.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="red")
+    ax4.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="red")
+    ax4.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="red")
+    ax4.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="red")    
     # Decoration
-    ax4.set_xlabel("$g-r$",fontsize=18)
-    ax4.set_ylabel("$r-z$",fontsize=18)
+    ax4.set_xlabel("$r-z$",fontsize=18)
+    ax4.set_ylabel("$g-r$",fontsize=18)
     ax4.axis("equal")
-    ax4.axis([grmin, grmax, rzmin, rzmax])
+    ax4.axis([rzmin, rzmax, grmin, grmax])
     
     
     if fname is not None:
@@ -190,7 +186,7 @@ def XD_gr_rz_fit(ydata, ycovar, weight, niter, K, maxsnm=True, subsample = False
 
     # Make niter number of fits
     for i in range(niter):
-        if (i%2==0) & (niter<25):
+        if (i%2==0) & (niter<=25):
             print(i)
         if (i%10==0) & (niter>25):
             print(i)            
@@ -357,6 +353,9 @@ def XD_init(K, ydata, init_var):
 def grz2gr_rz(grz):
     return np.transpose(np.asarray([grz[0]-grz[1], grz[1]-grz[2]]))
 
+def grz2rz_gr(grz):
+    return np.transpose(np.asarray([grz[1]-grz[2], grz[0]-grz[1]]))    
+
 def fvar2mvar(f, fivar):
     return (1.08574)**2/(f**2 * fivar)
     
@@ -379,6 +378,26 @@ def gr_rz_covariance(grzflux, grzivar):
         gr_rz_covar[i] = np.asarray([[gvar[i]+rvar[i], rvar[i]],[rvar[i], rvar[i]+zvar[i]]])
     
     return gr_rz_covar
+
+def rz_gr_covariance(grzflux, grzivar):
+    gflux = grzflux[0]
+    rflux = grzflux[1]
+    zflux = grzflux[2]
+    givar = grzivar[0]
+    rivar = grzivar[1]
+    zivar = grzivar[2]
+    
+    gvar = fvar2mvar(gflux,givar)
+    rvar = fvar2mvar(rflux,rivar)
+    zvar = fvar2mvar(zflux,zivar)
+    
+    rz_gr_covar = np.zeros((gvar.size ,2,2))
+    for i in range(gvar.size):
+#         if i % 100 == 0:
+#             print i
+        rz_gr_covar[i] = np.asarray([[rvar[i]+zvar[i], rvar[i]],[rvar[i], gvar[i]+rvar[i]]])
+    
+    return rz_gr_covar    
 
 
 def pow_legend(params_pow):
@@ -652,8 +671,8 @@ def window_mask(ra, dec, w_fname):
     
     # Convert ra/dec to pixel values and round.
     px, py = w.wcs_world2pix(ra, dec, 0)
-    px_round = np.round(py)
-    py_round = np.round(px)
+    px_round = np.round(py).astype(int)
+    py_round = np.round(px).astype(int)
   
     # Creating the array.
     idx = np.zeros(px_round.size, dtype=bool)
