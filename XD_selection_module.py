@@ -101,69 +101,8 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
     gvar = (const * 10**(0.4*(mag-glim)))**2
     rvar = (const * 10**(0.4*(mag-gr_ref-rlim)))**2
     zvar = (const * 10**(0.4*(mag-gr_ref-rz_ref-zlim)))**2        
-
-    # Calculate the densities.
-    # Helper function 1.
-    def GMM_vectorized(gr, rz, amps, means, covars, gvar, rvar, zvar):
-        """
-        Color-color density.
-
-        Note 1: This routine was originally written based on gr vs. rz convention. However, I decided to adopt
-        rz vs. gr convention and therefore, the user must provide "gr=rz, rz=gr" as input in order for this
-        function to work properly.
-
-        Params
-        ------
-        gvar, rvar, zvar: Pre-computed errors based on individual grz values scaled from 5-sigma detection limits.
-        """
-        # Place holder for return array.
-        density = np.zeros(gr.size,dtype=np.float)
-        
-        # Compute 
-        for i in range(amps.size):
-            # Calculating Sigma+Error
-            C11 = covars[i][0,0]+gvar+rvar
-            C12 = covars[i][0,1]+rvar
-            C22 = covars[i][1,1]+rvar+zvar
-            
-            # Compute the determinant
-            detC = C11*C22-C12**2
-            
-            # Compute variables
-            x11 = (gr-means[i][0])**2
-            x12 = (gr-means[i][0])*(rz-means[i][1])
-            x22 = (rz-means[i][1])**2
-            
-            # Calculating the exponetial
-            EXP = np.exp(-(C22*x11-2*C12*x12+C11*x22)/(2.*detC+1e-12))
-            
-            density += amps[i]*EXP/(2*np.pi*np.sqrt(detC)+1e-12)
-        
-        return density
-
-
-    # Helper function 2.
-    def dNdm(params, flux):
-        num_params = params.shape[0]
-        if num_params == 2:
-            return pow_law(params, flux)
-        elif num_params == 4:
-            return broken_pow_law(params, flux)
-
-    # Helper function 3.
-    def pow_law(params, flux):
-        A = params[1]
-        alpha = params[0]
-        return A* flux**alpha
-
-    # Helper function 4.
-    def broken_pow_law(params, flux):
-        alpha = params[0]
-        beta = params[1]
-        fs = params[2]
-        phi = params[3]
-        return phi/((flux/fs)**alpha+(flux/fs)**beta + 1e-12)
  
+     # Calculate the densities.
     FoM_num = np.zeros_like(gr)
     FoM_denom = np.zeros_like(gr)
     for i in range(7): # number of classes.
@@ -177,6 +116,67 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
     iXD = FoM>last_FoM
     
     return iXD, FoM
+
+# Helper function 1.
+def GMM_vectorized(gr, rz, amps, means, covars, gvar, rvar, zvar):
+    """
+    Color-color density.
+
+    Note 1: This routine was originally written based on gr vs. rz convention. However, I decided to adopt
+    rz vs. gr convention and therefore, the user must provide "gr=rz, rz=gr" as input in order for this
+    function to work properly.
+
+    Params
+    ------
+    gvar, rvar, zvar: Pre-computed errors based on individual grz values scaled from 5-sigma detection limits.
+    """
+    # Place holder for return array.
+    density = np.zeros(gr.size,dtype=np.float)
+    
+    # Compute 
+    for i in range(amps.size):
+        # Calculating Sigma+Error
+        C11 = covars[i][0,0]+gvar+rvar
+        C12 = covars[i][0,1]+rvar
+        C22 = covars[i][1,1]+rvar+zvar
+        
+        # Compute the determinant
+        detC = C11*C22-C12**2
+        
+        # Compute variables
+        x11 = (gr-means[i][0])**2
+        x12 = (gr-means[i][0])*(rz-means[i][1])
+        x22 = (rz-means[i][1])**2
+        
+        # Calculating the exponetial
+        EXP = np.exp(-(C22*x11-2*C12*x12+C11*x22)/(2.*detC+1e-12))
+        
+        density += amps[i]*EXP/(2*np.pi*np.sqrt(detC)+1e-12)
+    
+    return density
+
+
+# Helper function 2.
+def dNdm(params, flux):
+    num_params = params.shape[0]
+    if num_params == 2:
+        return pow_law(params, flux)
+    elif num_params == 4:
+        return broken_pow_law(params, flux)
+
+# Helper function 3.
+def pow_law(params, flux):
+    A = params[1]
+    alpha = params[0]
+    return A* flux**alpha
+
+# Helper function 4.
+def broken_pow_law(params, flux):
+    alpha = params[0]
+    beta = params[1]
+    fs = params[2]
+    phi = params[3]
+    return phi/((flux/fs)**alpha+(flux/fs)**beta + 1e-12)    
 
 
 def generate_XD_model_dictionary(param_directory, tag1="glim24", tag2="", K_i = [2,2,2,2,3,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
@@ -216,4 +216,129 @@ def load_params_XD(param_directory,i,K,tag0="fit",tag1="glim24",tag2=""):
     mean= np.load(fname)
     fname = (param_directory+"%d-params-"+tag0+"-covars-"+tag1+"-K%d"+tag2+".npy") %(i, K)
     covar  = np.load(fname)
-    return amp, mean, covar        
+    return amp, mean, covar
+
+
+
+
+def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
+                          gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
+                          reg_r=1e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
+                          maxmag = 24., fname=None, K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
+    """
+    Summary: 
+        - Set up a grid in the selection design region with the given grid parameters. 
+            The grid is a rec array and has the following columns:
+            gr, rz, mag, n_i (i in cnames), n_good, n_tot, FoM, select. The meaning of these values should be obvious.
+        - For each cell, compute n_i, n_good, n_tot, FoM using the input parameters.
+        - Rank order the cells and indicate whether each cell is included in the selection or not.
+        - r is regularization parameter for FoM.
+
+    Parameters:
+        param_directory: Directory where model parameters are saved
+        glim, rlim, zlim: 5-sigma detection limiting magnitudes. 
+        gr_ref, rz_ref: Number density conserving global error reference point.
+        reg_r: Regularization parameter. Empirically set to avoid pathologic 
+            behaviors of the selection boundary.
+        f_i: Various class weights for FoM.
+        gmin, gmax: Minimum and maximum g-magnitude range to consider.
+        K_i and dNdm_type: See generate_XD_model_dictionary() doc string.
+        w_mag: Width in magnitude direction. 
+        w_cc: Width in color-color grid.
+
+    """
+
+    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type)
+
+    # Create the grid.
+    grid = generate_grid(w_cc, w_mag, minmag, maxmag)
+    
+    # cell volume
+    Vcell = w_cc**2 * w_mag
+    
+    # Extracting the cell centers.
+    gr = grid["gr"][:]
+    rz = grid["rz"][:]
+    mag = grid["mag"][:]
+    flux = mag2flux(mag)
+    points = np.transpose(np.array([gr,rz]));
+    
+    # Compute the densities.
+    for i in range(7):
+        cname = cnames[i]
+        grid[cname][:] = GMM(points, mag,  params[i, "amp"], params[i, "mean"],params[i, "covar"],glim, rlim, zlim, gr_dec,rz_dec,zaxis=zaxis) * dNdm(params[(i,"dNdm")], flux) * Vcell
+        grid["Total"][:] += grid[cname][:] # Computing the total
+        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+    
+    # Computing FoM
+    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    
+    # Rank order the cells according to FoM number.
+    grid.sort(order='FoM')
+    grid[:] = grid[::-1]
+    
+    # Selecting cells until the desired number N_tot is reached.
+    N = 0
+    last_FoM = 0
+    for i in range(mag.size):
+        if (N < N_tot):
+            N += grid["Total"][i]
+            grid["select"][i] = 1
+            last_FoM = grid["FoM"][i]
+        else:
+            break               
+    
+    return grid, last_FoM    
+
+
+def generate_grid(w_cc, w_mag, minmag, maxmag):
+    # Global params.
+    xmin1,xmax1 = (-1.0,0.20)
+    ymin1,ymax1 = (-.50,2.5)
+    xmin2,xmax2 = (0.2,1.2)
+    ymin2,ymax2 = (0.0,2.5)
+    zmin,zmax = (minmag,maxmag)
+
+    # +w*0.5 to center. Also note the convention [start, end)
+    x1 = np.arange(xmin1,xmax1 + w_cc*0.9, w_cc)  + w_cc*0.5
+    y1 = np.arange(ymin1,ymax1 + w_cc*0.9, w_cc ) + w_cc*0.5
+    z1 = np.arange(zmin,zmax + w_mag*0.9, w_mag) + w_mag*0.5
+    xv1, yv1,zv1 = np.meshgrid(x1, y1,z1)
+    nx1,ny1,nz1 = (x1.size, y1.size, z1.size)
+    xv1, yv1, zv1 = np.transpose(np.transpose(np.asarray([xv1,yv1,zv1])).reshape((nx1*ny1*nz1,3)))
+    x2 = np.arange(xmin2+ w_cc*0.9,xmax2 + w_cc*0.9, w_cc)  + w_cc*0.5
+    y2 = np.arange(ymin2+ w_cc*0.9,ymax2 + w_cc*0.9, w_cc ) + w_cc*0.5
+    z2 = np.arange(zmin,zmax + w_mag*0.9, w_mag) + w_mag*0.5
+    xv2, yv2,zv2 = np.meshgrid(x2, y2,z2)
+    nx2,ny2,nz2 = (x2.size, y2.size, z2.size)
+    xv2, yv2, zv2 = np.transpose(np.transpose(np.asarray([xv2,yv2,zv2])).reshape((nx2*ny2*nz2,3)))
+
+#         print("Total number of cells: %d " % (nx1*ny1*nz1+nx2*ny2*nz2))
+
+    xv =np.concatenate((xv1,xv2))
+    yv = np.concatenate((yv1,yv2))
+    zv = np.concatenate((zv1,zv2))
+
+    grid = np.rec.fromarrays((xv, yv, zv,\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size,dtype=bool)), \
+      dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
+             ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
+             ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
+             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('FoM','f8'), ('select','i4')]);
+
+    return grid    
+
+
+#    # Plot selectin boundaries if requested
+#     if slices is not None:
+# #         iselect = grid["select"]==1
+#         iselect = grid["Gold"]>0.01
+#         for i,m in enumerate(slices):
+#             if movie:
+#                 plot_slice(grid, m,fname,show, movie_tag=i)
+#             else:
+#                 plot_slice(grid, m,fname,show, movie_tag=None)     
