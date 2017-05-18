@@ -48,16 +48,20 @@ Reproducibility
 			impose flux positivity condition. Cross-match the two catalogs within respective field.
 			After accounting for astrometric differences (in median), append select information from 
 			DEEP2 to DECaLS catalogs. Save the whole DECaLS catalog with an additional column indicating
-			whether the object was found in DEEP2 or not. Lastly, estimate the area of intersection
-			of the two survey based on point Monte Carlo method.
+			whether the object was found in DEEP2 or not. Lastly, estimate and save the area of 
+			intersection of the two survey based on point Monte Carlo method.
 
 		Note 1: These scripts should be ran sequentially.
 
 
 	C) Scripts for training obtaining XD selection model parameters
-		- fit-dNdm-glim24.py
+		- fit-dNdm-glim24.py:
+			Load the intersection set data, set basic parameters for fitting, and fit power law or
+			broken power law to number density distribution in g-magnitude.
 
-		- fit-GMM-glim24.py
+		- fit-GMM-glim24.py:
+			
+
 
 
 	D) Scripts for figures and tables for the paper

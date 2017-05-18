@@ -81,7 +81,8 @@ print("Total area used for fitting %.3f" % area_total)
 
 
 ##############################################################################
-print("3. Fitting and saving the results in numpy format.")
+print("3. Fitting and saving the results in numpy format.\n \
+	Figures of plots are saved as **-fit-dNdm-glim24.png")
 
 for i in range(7):
 	print(cnames[i])
