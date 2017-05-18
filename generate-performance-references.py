@@ -23,7 +23,8 @@ cn2 = load_cn(set2)
 w2 = load_weight(set2)
 grzflux2 = load_grz_flux(set2)
 grzivar2 = load_grz_invar(set2)
-d2m2 = load_DEEP2matched(set2) # DEEP2_matched? 
+d2m2 = load_DEEP2matched(set2) # DEEP2_matched?
+redz2 = load_redz(set2)
 
 # Field 3
 set3 = load_fits_table("DECaLS-DR3-DEEP2f3-glim24.fits")
@@ -34,6 +35,7 @@ w3 = load_weight(set3)
 grzflux3 = load_grz_flux(set3)
 grzivar3 = load_grz_invar(set3)
 d2m3 = load_DEEP2matched(set3) # DEEP2_matched? 
+redz3 = load_redz(set3)
 
 # Field 4
 set4 = load_fits_table("DECaLS-DR3-DEEP2f4-glim24.fits")
@@ -44,6 +46,7 @@ w4 = load_weight(set4)
 grzflux4 = load_grz_flux(set4)
 grzivar4 = load_grz_invar(set4)
 d2m4 = load_DEEP2matched(set4) # DEEP2_matched? 
+redz4 = load_redz(set4)
 
 
 # Load the intersection area
@@ -57,6 +60,7 @@ grzflux = combine_grz(grzflux2, grzflux3, grzflux4)
 grzivar = combine_grz(grzivar2, grzivar3, grzivar4)
 d2m = np.concatenate((d2m2, d2m3, d2m4))
 num_unmatched = (d2m==0).sum()
+redz = np.concatenate((redz2, redz3, redz4))
 # print("Total number of unmatched objects: %d" % num_unmatched)
 # print("In density: %.2f" % (num_unmatched/area.sum()))
 # print((cn<0).sum())
@@ -69,6 +73,11 @@ print("Completed.\n")
 ##############################################################################
 print("2. Impose FDR cut.")
 iFDR = FDR_cut(grz)
+print("Completed.\n")
+
+
+##############################################################################
+print("3. Print FDR cut result.")
 print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "FoM", "\\\\ \hline"]) )
 return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
@@ -77,3 +86,14 @@ print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format,\
      class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
      ))
+print("Completed.\n")
+
+
+##############################################################################
+print("4. Plot n(z) for the selection.")
+dz = 0.05
+plot_dNdz_selection(cn, w, iFDR, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
+	iselect2=None, plot_total=True, fname="dNdz-FDR-DEEP2-Total.png", color1="black", color2="red", color_total="green",\
+	label1="FDR", label2="", label_total="DEEP2 Total")
+
+print("Completed.\n")

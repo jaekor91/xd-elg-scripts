@@ -31,7 +31,7 @@ def FDR_cut(grz):
     g,r,z=grz; yrz = (r-z); xgr = (g-r)
     ibool = (r<23.4) & (yrz>.3) & (yrz<1.6) & (xgr < (1.15*yrz)-0.15) & (xgr < (1.6-1.2*yrz))
     return ibool
-    
+
 
 def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_size=0.5):
     """
@@ -1193,6 +1193,12 @@ def load_grz_flux(fits):
     z = fits['decam_flux'][:][:,4]
     
     return g,r,z
+
+def load_redz(fits):
+    """
+    Return redshift
+    """
+    return fits["RED_Z"]
 
 def load_grz_invar(fits):
     givar = fits['decam_flux_ivar'][:][:,1]
