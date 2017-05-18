@@ -13,8 +13,13 @@ deg2arcsec=3600
 # Data directory (set by the user)
 data_directory = "./"
 
+cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "","D2unobserved"]
+
+
 ##############################################################################
-print("1. Load DEEP2 pcats files for Field 2, 3, and 4.")
+print("1. Load and combine DEEP2 extended pcat files for Fields 2, 3, and 4, respectively.")
+print("File names for Fields 2 and 3: pcat_ext.**.fits")
+print("File name for Field 4: deep2-f4-photo-newman.fits")
 # fp = 21, 22
 pcat21 = fits.open(data_directory+"pcat_ext.21.fits")
 pcat22 = fits.open(data_directory+"pcat_ext.22.fits")
@@ -39,7 +44,7 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("2. Impose BADFLAG==0 mask")
+print("2. Mask BADFLAG==0 objects.")
 # Field 2
 pcat2_good = pcat2[pcat2["BADFLAG"]==0]
 
@@ -53,7 +58,7 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("3. Impose window function mask")
+print("3. Mask objects that lie outside DEEP2 window functions.")
 # Field 2
 idx = np.logical_or(window_mask(pcat2_good["RA_DEEP"], pcat2_good["DEC_DEEP"], "windowf.21.fits"), window_mask(pcat2_good["RA_DEEP"], pcat2_good["DEC_DEEP"], "windowf.22.fits"))
 pcat2_trimmed = pcat2_good[idx]
@@ -70,7 +75,7 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("4. Save the trimmed DEEP2 photometric catalogs")
+print("4. Save the trimmed DEEP2 photometric catalogs as deep2-f**-photo-trimmed.fits.")
 # Field 2
 cols = fits.ColDefs(pcat2_trimmed)
 tbhdu = fits.BinTableHDU.from_columns(cols)
@@ -90,7 +95,8 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("5. Estimate the spectroscopic area using window functions")
+print("5. Estimate the spectroscopic area using window functions.")
+print("File names: windowf.**.fits")
 # Field 2
 area_f2 = est_spec_area("windowf.21.fits")+est_spec_area("windowf.22.fits")
 print("Field 2 area: %.3f" % area_f2)
@@ -112,9 +118,9 @@ print("Completed.\n")
 ##############################################################################
 print("6. Load other catalogs.")
 print("color-selection.txt: Catalog that provides DEEP2 BRI color selection information.\n \
-	 Contains ra, dec, and color selection flag. object ID, RA, dec, whether the object \n \
-	 would have been targeted if in EGS (1=yes, 0=no), and whether it would have been \n \
-	 targeted in a non-EGS field. Provided by Jeff Newman")
+    Contains object ID, RA, dec, whether the object would have been targeted if in EGS. \n \
+    (1=yes, 0=no), and whether it would have been targeted in a non-EGS field.\n \
+    Provided by Jeff Newman")
 DEEP2color = ascii.read("color-selection.txt")
 DEEP2color_OBJNO = np.asarray(DEEP2color["col1"])
 DEEP2color_ra = np.asarray(DEEP2color["col2"])
@@ -134,9 +140,7 @@ print("Completed.\n")
 
 print("deep2-f**-redz-oii.fits: DEEP2 redshift catalogs that John Moustakas provided.\n \
 	Extract OBJNO, RA, DEC, OII_3727, OII_3727_ERR, ZHELIO, ZHELIO_ERR, ZQUALITY.\n \
-	Note 1: oii 3727, oii 3727 err, integrated [OII] flux and uncertainty. Note\n \
-	that the uncertainty equals -2.0 if the line could not be measured.\n \
-	Note 1b: Negative errors have the following meaning\n \
+	Note 1: Negative errors have the following meaning\n \
     \t-1.0 = line not detected with amplitude S/N > 1.5. Upper limit calculated.\n \
     \t-2.0 = line not measured (not in spectral range)\n \
 	Note 2: For ZQUALITY values, see http://deep.ps.uci.edu/DR4/zquality.html.")
@@ -156,6 +160,7 @@ print("Completed.\n")
 print("7. Append additional columns to the photometric catalogs from others.")
 print("7a. Append redshift catalogs.")
 col_name_list = ["OBJNO_zcat", "RA_zcat", "DEC_zcat", "OII_3727","OII_3727_ERR", "RED_Z", "Z_ERR", "ZQUALITY_JOHN", "TARG_WEIGHT"]
+print("Columns added: " + ", ".join(col_name_list))
 # Field 2
 pcat2 = fits.open("deep2-f2-photo-trimmed.fits")[1].data
 idx1, idx2 = match_objno(pcat2["OBJNO"], f2_objno)
@@ -191,6 +196,7 @@ print("Completed.\n")
 
 print("7b. Append probability information.")
 col_name_list = ["OBJNO_prob", "weight"]
+print("Columns added: " + ", ".join(col_name_list))
 new_col_list = [DEEP2weight_OBJNO, DEEP2weight_weight]
 # Field 2
 idx1, idx2 = match_objno(pcat2["OBJNO"], DEEP2weight_OBJNO)
@@ -211,8 +217,9 @@ print("Completed.\n")
 
 print("7c. Append color-selection information.")
 # List of new columns to be appended
-col_name_list = ["OBJNO_color", "RA_color", "DEC_color", "BRI_cut"]
-new_col_list = [DEEP2color_OBJNO, DEEP2color_ra, DEEP2color_dec, DEEP2color_BRI]
+col_name_list = ["OBJNO_color", "BRI_cut"]
+print("Columns added: " + ", ".join(col_name_list))
+new_col_list = [DEEP2color_OBJNO, DEEP2color_BRI]
 # Field 2
 idx1, idx2 = match_objno(pcat2["OBJNO"], DEEP2color_OBJNO)
 for i in range(len(new_col_list)):
@@ -236,7 +243,11 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("8. Append the class column based on the information above.")
+print("8. Compute the class number based on the information above and append to the table.")
+print("Recall: ")
+for cn in range(9):
+    print("cn%d: %s", (cn, cnames[cn]))
+
 col_name_list = ["cn"]
 # Field 2
 new_col_list = [generate_class_col(pcat2)]
@@ -266,7 +277,7 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("9. Save the resulting catalog.")
+print("9. Save the resulting catalogs.")
 # Field 2
 cols = fits.ColDefs(pcat2)
 tbhdu = fits.BinTableHDU.from_columns(cols)
@@ -282,10 +293,10 @@ cols = fits.ColDefs(pcat4)
 tbhdu = fits.BinTableHDU.from_columns(cols)
 tbhdu.writeto('deep2-f4-photo-redz-oii.fits', clobber=True)
 print("Completed.\n")
-
+    
 
 ##############################################################################
-print("10. Print the class breakdown in latex format.")
+print("10. Print the class breakdown in LaTex format.")
 table_header = generate_table_header()
 print(table_header)
 # Raw number
