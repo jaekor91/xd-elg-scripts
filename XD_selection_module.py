@@ -220,6 +220,8 @@ def load_params_XD(param_directory,i,K,tag0="fit",tag1="glim24",tag2=""):
 
 
 
+def mag2flux(mag):
+    return 10**(0.4*(22.5-mag))
 
 def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
@@ -261,12 +263,17 @@ def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
     rz = grid["rz"][:]
     mag = grid["mag"][:]
     flux = mag2flux(mag)
-    points = np.transpose(np.array([gr,rz]));
+
+    # Compute the global error noise corresponding to each objects.
+    const = 2.5/(5*np.log(10)) 
+    gvar = (const * 10**(0.4*(mag-glim)))**2
+    rvar = (const * 10**(0.4*(mag-gr_ref-rlim)))**2
+    zvar = (const * 10**(0.4*(mag-gr_ref-rz_ref-zlim)))**2            
     
     # Compute the densities.
     for i in range(7):
         cname = cnames[i]
-        grid[cname][:] = GMM(points, mag,  params[i, "amp"], params[i, "mean"],params[i, "covar"],glim, rlim, zlim, gr_dec,rz_dec,zaxis=zaxis) * dNdm(params[(i,"dNdm")], flux) * Vcell
+        grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
         grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
     
