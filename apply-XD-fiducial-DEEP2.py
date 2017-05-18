@@ -71,39 +71,94 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("2. Impose XD cut.")
-last_FoM = 0.502
-param_directory = "./" # Directory where the parameters are saved.
-# Unpack variables
-g,r,z = grz
-givar, rivar, zivar = grzivar
-gflux, rflux, zflux = grzflux
+print("2. Compute XD projection based on fiducial set of parameters.")
+param_directory = "./"
+fname = "XD-bnd-fiducial-gr-rz"
+w_mag = 0.05/2.
+w_cc = 0.025/2
 
-iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
-                       rz_ref=0.5,reg_r=1e-4/(0.025**2 * 0.05),f_i=[1., 1., 0., 0.25, 0., 0.25, 0.],\
-                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
-print("Completed.\n")
+slices = None # np.arange(21.5, 24.0, wmag)
+grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
+                          gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
+                          reg_r=1e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
+                          maxmag = 24., fname=None, K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+print("Computed last FoM based: %.3f"%last_FoM)
 
 
 ##############################################################################
-print("3. Print FDR cut result.")
+print("3. Print XD projection result.")
 print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline") 
-return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+
+return_format = ["XD", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
-     return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
-     ))
+
+print(class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0.25, 0., 0., 0.]))
 print("Completed.\n")
 
 
-##############################################################################
-print("4. Plot n(z) for the selection.")
-dz = 0.05
-fname = "dNdz-XD-fiducial-DEEP2-Total.png"
-plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
-	iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
-	label1="FDR", label2="", label_total="DEEP2 Total")
 
-print("Completed.\n")
+
+# ##############################################################################
+# print("2. Impose XD cut.")
+# param_directory = "./" # Directory where the parameters are saved.
+# # last_FoM = 0.502
+# # Unpack variables
+# g,r,z = grz
+# givar, rivar, zivar = grzivar
+# gflux, rflux, zflux = grzflux
+
+# iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
+#                        rz_ref=0.5,reg_r=1e-4/(0.025**2 * 0.05),f_i=[1., 1., 0., 0.25, 0., 0.25, 0.],\
+#                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+# print("Completed.\n")
+
+
+
+# ##############################################################################
+# print("3. Print XD cut result.")
+# print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+#       "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline") 
+
+# return_format = ["XD", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+
+#       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
+# print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
+#      return_format = return_format,\
+#      class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+#      ))
+# print("Completed.\n")
+
+
+# ##############################################################################
+# print("4. Plot n(z) for the selection.")
+# dz = 0.05
+# fname = "dNdz-XD-fiducial-DEEP2-Total.png"
+# plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
+# 	iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
+# 	label1="FDR", label2="", label_total="DEEP2 Total")
+
+# print("Completed.\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
