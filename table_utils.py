@@ -15,7 +15,8 @@ def class_breakdown_cut(cn, weight, area,rwd="D", num_classes=8, \
     return_format: A list that shows which information should be included in the returned string.
         For each element in the array, if the object is a string in cnames, then the corresponding
         classes counts is printed. Also, DESI, Total and Eff are special strings that the function
-        knows how to compute.
+        knows how to compute. The final entry is how the user wants to format the end. For example, 
+        "\\\\ \\hline"
     class_eff: Short for class efficiency. Assign expected yield to Gold through DR3unmatched objects.
     """
     
@@ -32,7 +33,7 @@ def class_breakdown_cut(cn, weight, area,rwd="D", num_classes=8, \
     eff = DESI/Total
 
     output_str = []
-    for e in return_format:
+    for e in return_format[:-1]:
         if e in cnames:
             idx = cnames.index(e)
             output_str.append("%d"%counts[idx])
@@ -46,8 +47,10 @@ def class_breakdown_cut(cn, weight, area,rwd="D", num_classes=8, \
             output_str.append(rwd)
         else:
             output_str.append(e)
+    output_str = " & ".join(output_str)            
+    output_str+=return_format[-1]
 
-    return " & ".join(output_str)
+    return output_str
 
          
 
