@@ -38,7 +38,7 @@ dr3f2 = dr3f2[ibool2]
 dr3f3 = dr3f3[ibool3]
 dr3f4 = dr3f4[ibool4]
 
-print("Load grz magnitudes. Expected warnings about division by zero.")
+print("Load grz magnitudes.")
 # Loading mag and flux
 grz2 = load_grz(dr3f2)
 grz3 = load_grz(dr3f3)
@@ -47,7 +47,8 @@ grz4 = load_grz(dr3f4)
 print("Completed.\n")
 
 ##############################################################################
-print("2. Cross-matching DR3 objects with g<24.0 and DEEP2 objects within each field.")
+print("2. Cross-matching DR3 objects with g<24.0 and DEEP2 objects within each field.\n\
+    Check astrometric difference.")
 
 glim = 24.0
 print("Field 2")
