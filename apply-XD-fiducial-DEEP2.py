@@ -13,6 +13,7 @@ large_random_constant = -999119283571
 deg2arcsec=3600
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
+class_eff = [1., 1., 0., 0.6, 0., 0.25, 0., 0.]
 
 ##############################################################################
 print("1. Load DR3-DEEP2 data.")
@@ -69,7 +70,6 @@ redz = np.concatenate((redz2, redz3, redz4))
 cn[cn<0] = 7
 print("Completed.\n")
 
-
 ##############################################################################
 print("2. Compute XD projection based on fiducial set of parameters.")
 param_directory = "./"
@@ -120,22 +120,18 @@ print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "N
 return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
-     return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
-     ))
+     return_format = return_format))
 
 # XD cut
 return_format = ["XD", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
-     return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
-     ))
+     return_format = return_format))
 
 # XD projection
 return_format = ["XD", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0.25, 0., 0., 0.]))
+print(class_breakdown_cut_grid(grid, return_format))
 
 print("Completed.\n")
 
@@ -143,35 +139,35 @@ print("Completed.\n")
 ##############################################################################
 print("4. Plot n(z) for the selection.")
 dz = 0.05
-fname = "dNdz-XD-fiducial-DEEP2-Total.png"
-plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
-	iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
-	label1="FDR", label2="", label_total="DEEP2 Total")
+fname = "dNdz-XD-fiducial-FDR-DEEP2.png"
+plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, \
+	iselect2=iFDR, plot_total=False, fname=fname, color1="black", color2="red", color_total="green",\
+	label1="XD fid.", label2="FDR", label_total="DEEP2 Total")
 
 print("Completed.\n")
 
 
 ##############################################################################
 print("5. Create many slices for a movie/stills.")
-bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
-fname = "XD-fiducial"
+  # bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
+  # fname = "XD-fiducial"
 
-print("5a. Creating stills")
-for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-	print("Slice %.3f"%m)
-	XD.plot_slice(grid, m, bnd_fig_directory, fname)
-print("Completed.\n")
+  # print("5a. Creating stills")
+  # for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
+  # 	print("Slice %.3f"%m)
+  # 	XD.plot_slice(grid, m, bnd_fig_directory, fname)
+  # print("Completed.\n")
 
-print("5b. Creating a movie")
-dm = w_mag
-for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-	print("Index %d, Slice %.3f" % (i,m))
-	XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)	
+  # print("5b. Creating a movie")
+  # dm = w_mag
+  # for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+  # 	print("Index %d, Slice %.3f" % (i,m))
+  # 	XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)	
 
-print("Completed.\n")
+  # print("Completed.\n")
 
-print("Command for creating a movie.:\n \
-	ffmpeg -r 6 -start_number 0 -i XD-fiducial-mag0-%d.png -vcodec mpeg4 -y XD-fiducial-movie.mp4")
+  # print("Command for creating a movie.:\n \
+  # 	ffmpeg -r 6 -start_number 0 -i XD-fiducial-mag0-%d.png -vcodec mpeg4 -y XD-fiducial-movie.mp4")
 
 
 
