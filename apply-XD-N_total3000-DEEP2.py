@@ -193,17 +193,17 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("7. Create many slices for a movie/stills.")
+print("9. Create many slices for a movie/stills.")
 # bnd_fig_directory = "./bnd_fig_directory/XD-Ntot3000-fiducial-comparison/"
 # fname = "XD-Ntot3000-fiducial-comparison"
 
-# print("7a. Creating stills")
+# print("9a. Creating stills")
 # for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
 #     print("Slice %.3f"%m)
 #     XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname)
 # print("Completed.\n")
 
-# print("7b. Creating a movie")
+# print("9b. Creating a movie")
 # dm = w_mag
 # for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
 #     print("Index %d, Slice %.3f" % (i,m))
