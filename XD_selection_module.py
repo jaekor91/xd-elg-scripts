@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+# For numba
+import os
+os.environ['NUMBA_NUM_THREADS'] = "1"
+import numba as nb
+
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
@@ -396,5 +401,106 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
 
     return
 
+def plot_slice_compare(grid, grid_ref, m, bnd_fig_directory, fname="", movie_tag=None):
+    """
+    Given the projected grid, grid2, magnitude m, and the directory address, create a figure of changes
+    at the given slice m. Note that the grid must have the same registrations.
+
+    color scheme:
+    - Green: Regions where both old and new boundaries overlap.
+    - Blue: Regions where the new boundary exclude the old.
+    - Red: Regions where the new boundary is excluded where the old isn't.
+
+    movie_tag: Must be an integer. Used to index slices that together can turn into a movie.
+    """
+    # Cell size
+    cell_size=5.
+    
+    # Extract fields that are needed.
+    # new grid
+    gr = grid["gr"][:]
+    rz = grid["rz"][:]
+    mag = grid["mag"][:]
+    iselect = grid["select"][:]==1
+
+    # old grid
+    gr2 = grid_ref["gr"][:]
+    rz2 = grid_ref["rz"][:]
+    mag2 = grid_ref["mag"][:]
+    iselect2 = grid_ref["select"][:]==1    
+
+    # Picking out the right cells.
+    mags = np.unique(grid["mag"][:])
+    m_cell = mags[closest_idx(mags,m)]# The nearest center value 
+    imag = mag == m_cell
+    imag2 = mag2 == m_cell
+
+    # Redefine variables based on the selection.
+    ibool = iselect & imag # Only the selected cells with mag == m_cell            
+    gr = gr[ibool]
+    rz = rz[ibool]
+    ibool2 = iselect2 & imag2
+    gr2 = gr2[ibool2]
+    rz2 = rz2[ibool2]
+
+    # Calculating venn diagram
+    iAND12, i1NOT2, i2NOT1 = find_floating_point_venn_diagram(gr,rz, gr2, rz2)    
+
+    # Plotting
+
+    # In new but not old
+    plt.scatter(rz[i1NOT2], gr[i1NOT2], edgecolors="none", s=cell_size, c="blue", alpha= 1.)
+    # In old but not new
+    plt.scatter(rz2[i2NOT1], gr2[i2NOT1], edgecolors="none", s=cell_size, c="red", alpha= 1.)
+    # Intersection region
+    plt.scatter(rz[iAND12], gr[iAND12], edgecolors="none", s=cell_size, c="green", alpha=1.)
+
+    # Boundaries
+    bnd_lw =2
+    # FDR boundary:
+    plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="red")
+    plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="red")
+    plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="red")
+    plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="red") 
+
+    # Decoration
+    # Figure ranges
+    plt.ylabel("$g-r$",fontsize=18)
+    plt.xlabel("$r-z$",fontsize=18)
+    plt.axis("equal")
+    plt.axis([-0.5, 2.0, -0.5, 1.5])    
+
+    plt.title("mag = %.3f" % m_cell, fontsize=15)
+
+    # Save 
+    if movie_tag is not None: # Then generate images with proper numbering for making a movie.
+        plt.savefig((bnd_fig_directory+fname+"-mag%d-%d.png"%(0*1000,movie_tag)), bbox_inches="tight", dpi=400)
+    else:
+        plt.savefig((bnd_fig_directory+fname+"-mag%d.png"%(m_cell*1000)), bbox_inches="tight", dpi=400)            
+    plt.close()
+
+    return    
+
 def closest_idx(arr, val):
     return np.argmin(np.abs(arr-val))
+
+@nb.jit(nopython=True)
+def find_floating_point_venn_diagram(x1, y1, x2, y2):
+    """
+    Given two 2D point sets, find the Venn diagram. 
+    """
+    iAND12 = np.zeros(x1.size, dtype=nb.boolean)
+    i1NOT2 = np.ones(x1.size, dtype=nb.boolean)
+    i2NOT1 = np.ones(x2.size, dtype=nb.boolean)
+
+    for i in range(x1.size):
+        ex, ey = x1[i], y1[i]
+        AND_tmp = False
+        for j in range(x2.size):
+            if (np.abs(ex-x2[j])<1e-8) & (np.abs(ey-y2[j])<1e-8):
+                iAND12[i] = True
+                i2NOT1[j] = False
+                i1NOT2[i] = False                
+                break
+
+    return iAND12, i1NOT2, i2NOT1

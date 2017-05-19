@@ -84,7 +84,7 @@ grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4,
                           reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
-print("Computed last FoM based: %.3f"%last_FoM)
+print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
 
 
@@ -140,37 +140,74 @@ print(class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0
 print("Completed.\n")
 
 
-##############################################################################
-print("4. Plot n(z) for the selection.")
-dz = 0.05
-fname = "dNdz-XD-fNoZ50-DEEP2-Total.png"
-plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
-    iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
-    label1="FDR", label2="", label_total="DEEP2 Total")
+# ##############################################################################
+# print("4. Plot n(z) for the selection.")
+# dz = 0.05
+# fname = "dNdz-XD-fNoZ50-DEEP2-Total.png"
+# plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
+#     iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
+#     label1="FDR", label2="", label_total="DEEP2 Total")
 
+# print("Completed.\n")
+
+
+# ##############################################################################
+# print("5. Create many slices for a movie/stills.")
+# bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50/"
+# fname = "XD-fNoZ50"
+
+# print("5a. Creating stills")
+# for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
+#     print("Slice %.3f"%m)
+#     XD.plot_slice(grid, m, bnd_fig_directory, fname)
+# print("Completed.\n")
+
+# print("5b. Creating a movie")
+# dm = w_mag
+# for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+#     print("Index %d, Slice %.3f" % (i,m))
+#     XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)   
+
+# print("Completed.\n")
+
+# print("Command for creating a movie.:\n \
+#     ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-movie.mp4")
+
+
+##############################################################################
+print("6. To compare, compute XD projection based on fiducial set of parameters.")
+param_directory = "./"
+f_i = [1., 1., 0., 0.25, 0., 0.25, 0.]
+
+slices = None # np.arange(21.5, 24.0, wmag)
+start = time.time()
+grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
+                          gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
+                          reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+print("Time taken: %.2f seconds" % (time.time()-start))
+print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
 
 
 ##############################################################################
-print("5. Create many slices for a movie/stills.")
-bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50/"
-fname = "XD-fNoZ50"
+print("7. Create many slices for a movie/stills .")
+bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50-fiducial-comparison/"
+fname = "XD-fNoZ50-fiducial-comparison"
 
-print("5a. Creating stills")
+print("7a. Creating stills")
 for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
     print("Slice %.3f"%m)
-    XD.plot_slice(grid, m, bnd_fig_directory, fname)
+    XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname)
 print("Completed.\n")
 
-print("5b. Creating a movie")
+print("7b. Creating a movie")
 dm = w_mag
 for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
     print("Index %d, Slice %.3f" % (i,m))
-    XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)   
+    XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname, movie_tag=i)   
 
 print("Completed.\n")
 
 print("Command for creating a movie.:\n \
-    ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-movie.mp4")
-
-
+    ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-fiducial-comparison-movie.mp4")
