@@ -227,7 +227,7 @@ def mag2flux(mag):
 def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
                           reg_r=1e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
-                          maxmag = 24., fname=None, K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
     """
     Summary: 
         - Set up a grid in the selection design region with the given grid parameters. 

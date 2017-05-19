@@ -73,7 +73,6 @@ print("Completed.\n")
 ##############################################################################
 print("2. Compute XD projection based on fiducial set of parameters.")
 param_directory = "./"
-fname = "XD-bnd-fiducial-gr-rz"
 w_mag = 0.05/2.
 w_cc = 0.025/2.
 f_i = [1., 1., 0., 0.25, 0., 0.25, 0.]
@@ -83,7 +82,7 @@ start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
                           reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
-                          maxmag = 24., fname=None, K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based: %.3f"%last_FoM)
 print("Completed.\n")
