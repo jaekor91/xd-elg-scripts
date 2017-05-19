@@ -177,7 +177,6 @@ iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, ziv
                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Completed.\n")
 
-
 ##############################################################################
 print("8. Plot n(z) for the selection.")
 dz = 0.05
