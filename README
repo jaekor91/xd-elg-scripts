@@ -30,7 +30,6 @@ Reproducibility
 		- DR3-DEEP2f**-tractor-download.sh:
 			Used to download tractor files as described in xd-elg-download.sh script.
 
-
 	B) Scripts for preparing and combining DEEP2 and DECaLS DR3 data:
 		- produce-deep2-f234-photo-redz-oii.py:
 			Combine extended DEEP2 pcat catalogs, impose badflag==0 and window function masks, append
@@ -53,34 +52,63 @@ Reproducibility
 
 		Note 1: These scripts should be ran sequentially.
 
-
 	C) Scripts for training obtaining XD selection model parameters
 		- fit-dNdm-glim24.py:
 			Load the intersection set data, set basic parameters for fitting, and fit power law or
 			broken power law to number density distribution in g-magnitude.
 
 		- fit-GMM-glim24.py:
-			
-
-
+			Load the intersection set data, set basic parameters for fitting, and fit Gaussian Mixture Models
+			with varying number of componets to the gr vs. rz color-color density distribution.
 
 	D) Scripts for figures and tables for the paper
-		- plot-classes.py: Used to plot various classes whose definitions are given
-			in the paper.
+		- plot-classes.py: 
+			Make gr vs. rz plots of various classes whose definitions are given in the paper.
+
+		- generate-performance-references.py:
+			Apply the FDR selection to the DEEP2 intersection set data. Show dNdz plot as well as
+			the breakdown of classes in LaTex format.
+
+		- apply-XD-fiducial-DEEP2.py:
+			XD method applied with a fiducial set of parameters. Show the breakdown of classes and
+			the corresponding dNdz plot, breakdown based on projections, plot boundary images,
+			and create a movie.
+
+		- apply-XD-fNoZ50-DEEP2.py:
+			The same as apply-XD-fiducial-DEEP2.py except using fNoZ = 0.5 instead of fNoZ = 0.25.
+			Comparison to the fiducial case is shown through stills and a movie.
+
+		- apply-XD-N_total3000-DEEP2.py:
+			The same as apply-XD-fiducial-DEEP2.py except using N_total = 3000 instead of 2400.
+			Comparison to the fiducial case is shown through stills and a movie.
+
+		- apply-XD-zlim22p9-DEEP2.py:
+			The same as apply-XD-fiducial-DEEP2.py except using zlim = 22.9 instead of 22.4.
+			Comparison to the fiducial case is shown through stills and a movie.
+
+		- 
+
+
 
 ###################################################################################################
-
-
-
-
-Scripts for exploring XD ELG target selection
-
+Explore XD method
+	The following set of scripts are provided so that the user can explore the XD ELG selection
+	algorithm. 
 
 ###################################################################################################
-
 Utilities
-xd-elg-utils.py:
-	This module contains all custom functions used in the scripts.
+	A) xd_elg_utils.py:
+		This module contains the majority of custom functions used in the scripts above.
+
+	B) table_utils.py:
+		Thie module contains routines used to create latex tables.
+
+	C) confidence_contours.py and confidence_level_height_estimation.py:
+		Routines used in XD GMM fit plots.
+
+	D) XD_selection_module.py:
+		Include routines used for generating XD selection on DECaLS targets and making projections.
+		Also include utitlies to plot XD boundaries and movies.
 
 
 
