@@ -28,7 +28,7 @@ deg2arcsec=3600
 
 def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
-     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.2, wNoZ=0.5):
+     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5):
     """
     Given class number (cn), mask (iselect1), weights (w), redshifts, class efficiencies, plot the redshift
     histogram. 
@@ -53,7 +53,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
         # NoOII:
         ibool = (cn==3) 
         N_NoOII = NoOII_eff*w[ibool].sum();
-        plt.bar(left=0.6, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color_total, \
+        plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color_total, \
                 edgecolor =color_total, label=label_total+" NoOII (Proj.)", hatch="*")
         # NoZ:
         ibool = (cn==5) 
@@ -70,14 +70,19 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
         # NoOII:
         ibool = (cn==3) & iselect2
         N_NoOII = NoOII_eff*w[ibool].sum();
-        plt.bar(left=0.6, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color2, \
+        plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+ " NoOII (Proj.)", hatch="*")
+    
+        plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff, N_NoOII/(wNoOII/dz)/NoOII_eff], color=color1, linewidth=2.0)
+
+
         # NoZ:
         ibool = (cn==5) & iselect2
         N_NoZ = NoZ_eff*w[ibool].sum();
         plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+" NoZ (Proj.)")         
 
+        plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color1, linewidth=2.0)
 
     # Selection 1.
     ibool = np.logical_or((cn==0),(cn==1)) & iselect1 # Total
@@ -87,13 +92,19 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
     # NoOII:
     ibool = (cn==3) & iselect1
     N_NoOII = NoOII_eff*w[ibool].sum();
-    plt.bar(left=0.6, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color1, \
+    plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color1, \
             edgecolor =color1, label=label1+" NoOII (Proj.)", hatch="*")
+
+    plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff, N_NoOII/(wNoOII/dz)/NoOII_eff], color=color1, linewidth=2.0)
+
     # NoZ:
     ibool = (cn==5) & iselect1
     N_NoZ = NoZ_eff*w[ibool].sum();
-    plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5,color=color1, \
+    plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5, color=color1, \
             edgecolor =color1, label=label1+" NoZ (Proj.)")
+
+    plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color1, linewidth=2.0)
+ 
 
 
     plt.xlim([0.5,1.4+wNoZ+0.1])
