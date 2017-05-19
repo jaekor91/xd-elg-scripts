@@ -71,16 +71,17 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("2. Compute XD projection based on fiducial set of parameters but with N_tot = 3000.")
+print("2. Compute XD projection based on fiducial set of parameters but with zlim = 22.9.")
 param_directory = "./"
 w_mag = 0.05/2.
 w_cc = 0.025/2.
 f_i = [1., 1., 0., 0.25, 0., 0.25, 0.]
-N_tot = 3000
+N_tot = 2400
+zlim = 22.9
 
 slices = None # np.arange(21.5, 24.0, wmag)
 start = time.time()
-grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
+grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=zlim, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=N_tot, f_i=f_i, \
                           reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
@@ -100,7 +101,7 @@ givar, rivar, zivar = grzivar
 gflux, rflux, zflux = grzflux
 
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
-                        glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
+                        glim=23.8, rlim=23.4, zlim=zlim, gr_ref=0.5,\
                        rz_ref=0.5, reg_r=1e-4/(w_cc**2 * w_mag), f_i=f_i,\
                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Completed.\n")
@@ -144,7 +145,7 @@ print("Completed.\n")
 ##############################################################################
 print("4. Plot n(z) for the selection.")
 dz = 0.05
-fname = "dNdz-XD-Ntot3000-DEEP2-Total.png"
+fname = "dNdz-XD-zlim22p9-DEEP2-Total.png"
 plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
     iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
     label1="FDR", label2="", label_total="DEEP2 Total")
@@ -154,8 +155,8 @@ print("Completed.\n")
 
 ##############################################################################
 print("5. Create many slices for a movie/stills.")
-bnd_fig_directory = "./bnd_fig_directory/XD-Ntot3000/"
-fname = "XD-Ntot3000"
+bnd_fig_directory = "./bnd_fig_directory/XD-zlim22p9/"
+fname = "XD-zlim22p9"
 
 print("5a. Creating stills")
 for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
@@ -172,7 +173,7 @@ for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
 print("Completed.\n")
 
 print("Command for creating a movie.:\n \
-    ffmpeg -r 6 -start_number 0 -i XD-Ntot3000-mag0-%d.png -vcodec mpeg4 -y XD-Ntot3000-movie.mp4")
+    ffmpeg -r 6 -start_number 0 -i XD-zlim22p9-mag0-%d.png -vcodec mpeg4 -y XD-zlim22p9-movie.mp4")
 
 
 ##############################################################################
@@ -193,8 +194,8 @@ print("Completed.\n")
 
 ##############################################################################
 print("7. Create many slices for a movie/stills.")
-bnd_fig_directory = "./bnd_fig_directory/XD-Ntot3000-fiducial-comparison/"
-fname = "XD-Ntot3000-fiducial-comparison"
+bnd_fig_directory = "./bnd_fig_directory/XD-zlim22p9-fiducial-comparison/"
+fname = "XD-zlim22p9-fiducial-comparison"
 
 print("7a. Creating stills")
 for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
@@ -211,4 +212,4 @@ for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
 print("Completed.\n")
 
 print("Command for creating a movie.:\n \
-    ffmpeg -r 6 -start_number 0 -i XD-Ntot3000-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-Ntot3000-fiducial-comparison-movie.mp4")
+    ffmpeg -r 6 -start_number 0 -i XD-zlim22p9-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-zlim22p9-fiducial-comparison-movie.mp4")
