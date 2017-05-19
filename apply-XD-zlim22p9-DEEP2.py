@@ -174,7 +174,6 @@ grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, gli
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
-print("Completed.\n")
 
 iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM_fiducial, param_directory, \
             glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
@@ -216,3 +215,15 @@ print("9. Create many slices for a movie/stills.")
 
 # print("Command for creating a movie.:\n \
 #     ffmpeg -r 6 -start_number 0 -i XD-zlim22p9-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-zlim22p9-fiducial-comparison-movie.mp4")
+
+
+##############################################################################
+print("10. Make dNdm plots for both grids.")
+# Total 
+fname = "dNdm-XD-zlim22p9-fiducial-dNdm-Total"
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1 ="zlim22p9", zlim2=22.9)
+
+# DESI
+fname = "dNdm-XD-zlim22p9-fiducial-dNdm-DESI"
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1 ="zlim22p9", zlim2=22.9)
+print("Completed.\n")
