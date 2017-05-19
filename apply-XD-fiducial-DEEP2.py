@@ -84,7 +84,7 @@ grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4,
                           reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
-print("Computed last FoM based: %.3f"%last_FoM)
+print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
 
 
