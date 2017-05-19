@@ -8,6 +8,7 @@ Python and package vesrions:
 		- Astropy: v1.1.1
 		- SciPy: v1.2.0
 		- Matplotlib: v1.5.1
+		- Numba: v0.26.0
 
 	C) Extreme deconvolution:
 		Package written by Jo Bovy and available via https://github.com/jobovy/extreme-deconvolution
