@@ -72,19 +72,22 @@ Reproducibility
 		- apply-XD-fiducial-DEEP2.py:
 			XD method applied with a fiducial set of parameters. Show the breakdown of classes and
 			the corresponding dNdz plot, breakdown based on projections, plot boundary images,
-			and create a movie.
+			and create a movie. Compare dNdz of fiducial and FDR.
 
 		- apply-XD-fNoZ50-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using fNoZ = 0.5 instead of fNoZ = 0.25.
-			Comparison to the fiducial case is shown through stills and a movie.
+			Comparison to the fiducial case is shown through stills and a movie as well as in
+			dNdz and dNdm plots
 
 		- apply-XD-N_total3000-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using N_total = 3000 instead of 2400.
-			Comparison to the fiducial case is shown through stills and a movie.
+			Comparison to the fiducial case is shown through stills and a movie as well as in
+			dNdz and dNdm plots
 
 		- apply-XD-zlim22p9-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using zlim = 22.9 instead of 22.4.
-			Comparison to the fiducial case is shown through stills and a movie.
+			Comparison to the fiducial case is shown through stills and a movie as well as in
+			dNdz and dNdm plots
 
 
 
