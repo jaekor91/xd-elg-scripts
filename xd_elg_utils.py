@@ -1580,3 +1580,5 @@ def apply_tycho(objgal, tychofn,galtype='LRG'):
     tychomask = (~veto(coord, center, radii)).astype('f4')
     objgal = rec.append_fields(objgal, ['TYCHOVETO'], data=[tychomask], dtypes=tychomask.dtype, usemask=False)
     return objgal
+
+

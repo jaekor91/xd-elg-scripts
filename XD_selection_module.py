@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
@@ -340,12 +341,60 @@ def generate_grid(w_cc, w_mag, minmag, maxmag):
     return grid    
 
 
-#    # Plot selectin boundaries if requested
-#     if slices is not None:
-# #         iselect = grid["select"]==1
-#         iselect = grid["Gold"]>0.01
-#         for i,m in enumerate(slices):
-#             if movie:
-#                 plot_slice(grid, m,fname,show, movie_tag=i)
-#             else:
-#                 plot_slice(grid, m,fname,show, movie_tag=None)     
+
+
+def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
+    """
+    Given the projected grid, magnitude m, and the directory address, create a figure of boundary
+    at the given slice.
+
+    movie_tag: Must be an integer. Used to index slices that together can turn into a movie.
+    """
+    # Cell size
+    cell_size=5.
+    
+    # Extract fields that are needed.
+    gr = grid["gr"][:]
+    rz = grid["rz"][:]
+    mag = grid["mag"][:]
+    iselect = grid["select"][:]==1
+
+    # Picking out the right cells.
+    mags = np.unique(grid["mag"][:])
+    m_cell = mags[closest_idx(mags,m)]# The nearest center value 
+#     print(mag.size,  (np.abs(mag-m_cell)<w_mag*0.6).sum())
+    imag = mag == m_cell
+    
+    # Plotting
+    # Accept region
+    ibool = iselect & imag # Only the selected cells with mag == m_cell            
+    plt.scatter(rz[ibool], gr[ibool], edgecolors="none", s=cell_size, c="green", alpha= 0.7)
+
+    # Boundaries
+    bnd_lw =2
+    # FDR boundary:
+    plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="red")
+    plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="red")
+    plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="red")
+    plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="red") 
+
+    # Decoration
+    # Figure ranges
+    plt.ylabel("$g-r$",fontsize=18)
+    plt.xlabel("$r-z$",fontsize=18)
+    plt.axis("equal")
+    plt.axis([-0.5, 2.0, -0.5, 1.5])    
+
+    plt.title("mag = %.3f" % m_cell, fontsize=15)
+
+    # Save 
+    if movie_tag is not None: # Then generate images with proper numbering for making a movie.
+        plt.savefig((bnd_fig_directory+fname+"-mag%d-%d.png"%(0*1000,movie_tag)), bbox_inches="tight", dpi=400)
+    else:
+        plt.savefig((bnd_fig_directory+fname+"-mag%d.png"%(m_cell*1000)), bbox_inches="tight", dpi=400)            
+    plt.close()
+
+    return
+
+def closest_idx(arr, val):
+    return np.argmin(np.abs(arr-val))
