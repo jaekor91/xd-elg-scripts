@@ -504,3 +504,51 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
                 break
 
     return iAND12, i1NOT2, i2NOT1
+
+
+def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
+                glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid."):
+    ibool = grid["select"][:]==1 # only interested in the selected cells.
+    gmag = grid["mag"][:][ibool]
+    rmag = gmag-grid["gr"][:][ibool]
+    zmag = rmag-grid["rz"][:][ibool]
+    if type == "DESI":
+        dNdm = grid["DESI"][:][ibool]
+    elif type == "Total":
+        dNdm = grid["Total"][:][ibool]
+
+    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g$ "+label2)
+    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r$ "+label2)
+    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z$ "+label2)  
+        
+    if grid2 is not None:
+        ibool = grid2["select"][:]==1 # only interested in the selected cells.
+        gmag = grid2["mag"][:][ibool]
+        rmag = gmag-grid2["gr"][:][ibool]
+        zmag = rmag-grid2["rz"][:][ibool]
+        if type == "DESI":
+            dNdm = grid2["DESI"][:][ibool]
+        elif type == "Total":
+            dNdm = grid2["Total"][:][ibool]
+    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label1)
+    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label1)
+    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z$ "+label1)
+
+    plt.axvline(glim,c="green", linestyle="--")
+    plt.axvline(rlim,c="red", linestyle="--")
+    plt.axvline(zlim,c="purple", linestyle="--")
+    if glim2 is not None:
+        plt.axvline(glim,c="green", linestyle="-.")
+    if rlim2 is not None:        
+        plt.axvline(rlim,c="red", linestyle="-.")
+    if zlim2 is not None:        
+        plt.axvline(zlim,c="purple", linestyle="-.")    
+    plt.xlabel("Magnitude")
+    plt.ylabel("Number density per 0.025 mag bin")
+    plt.legend(loc="upper left")
+    plt.xlim([20,24.3])
+    plt.ylim([0,70])      
+
+    plt.savefig(fname+".pdf", bbox_inches="tight", dpi=200)
+    # plt.show()
+    plt.close()
