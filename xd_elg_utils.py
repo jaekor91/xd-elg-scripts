@@ -26,7 +26,7 @@ deg2arcsec=3600
 
 
 
-def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
+def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
      label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5):
     """
