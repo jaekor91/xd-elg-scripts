@@ -84,7 +84,7 @@ return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "No
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+     class_eff = [1., 1., 0., 0.6, 0., 0.25, 0., 0.]
      ))
 print("Completed.\n")
 
