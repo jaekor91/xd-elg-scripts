@@ -88,11 +88,9 @@ print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
 
 
-
 ##############################################################################
 print("3. Calculate XD cut.")
 param_directory = "./" # Directory where the parameters are saved.
-# last_FoM = 0.502
 # Unpack variables
 g,r,z = grz
 givar, rivar, zivar = grzivar
@@ -112,7 +110,7 @@ print("Completed.\n")
 
 
 ##############################################################################
-print("3. Print FDR cut, XD cut, XD proj. results.")
+print("5. Print FDR cut, XD cut, XD proj. results.")
 print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline")
 
@@ -120,66 +118,50 @@ print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "N
 return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
-     return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
-     ))
+     return_format = return_format))
 
 # XD cut
 return_format = ["XD", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
-     return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
-     ))
+     return_format = return_format))
 
 # XD projection
 return_format = ["XD", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0.25, 0., 0., 0.]))
+print(class_breakdown_cut_grid(grid, return_format))
 
 print("Completed.\n")
 
 
 ##############################################################################
-print("4. Plot n(z) for the selection.")
-dz = 0.05
-fname = "dNdz-XD-fNoZ50-DEEP2-Total.png"
-plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
-    iselect2=None, plot_total=True, fname=fname, color1="black", color2="red", color_total="green",\
-    label1="FDR", label2="", label_total="DEEP2 Total")
+print("6. Create many slices for a movie/stills.")
+# bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50/"
+# fname = "XD-fNoZ50"
 
-print("Completed.\n")
+# print("5a. Creating stills")
+# for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
+#     print("Slice %.3f"%m)
+#     XD.plot_slice(grid, m, bnd_fig_directory, fname)
+# print("Completed.\n")
 
+# print("5b. Creating a movie")
+# dm = w_mag
+# for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+#     print("Index %d, Slice %.3f" % (i,m))
+#     XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)   
 
-##############################################################################
-print("5. Create many slices for a movie/stills.")
-bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50/"
-fname = "XD-fNoZ50"
+# print("Completed.\n")
 
-print("5a. Creating stills")
-for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-    print("Slice %.3f"%m)
-    XD.plot_slice(grid, m, bnd_fig_directory, fname)
-print("Completed.\n")
-
-print("5b. Creating a movie")
-dm = w_mag
-for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-    print("Index %d, Slice %.3f" % (i,m))
-    XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)   
-
-print("Completed.\n")
-
-print("Command for creating a movie.:\n \
-    ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-movie.mp4")
+# print("Command for creating a movie.:\n \
+#     ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-movie.mp4")
 
 
 ##############################################################################
-print("6. To compare, compute XD projection based on fiducial set of parameters.")
+print("7. To compare, compute XD projection based on fiducial set of parameters.")
 param_directory = "./"
 f_i = [1., 1., 0., 0.25, 0., 0.25, 0.]
 
-slices = None # np.arange(21.5, 24.0, wmag)
 start = time.time()
 grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
@@ -189,25 +171,41 @@ print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
 
+iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM_fiducial, param_directory, \
+            glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
+                       rz_ref=0.5, reg_r=1e-4/(w_cc**2 * w_mag), f_i=f_i,\
+                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+print("Completed.\n")
 
 ##############################################################################
-print("7. Create many slices for a movie/stills .")
-bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50-fiducial-comparison/"
-fname = "XD-fNoZ50-fiducial-comparison"
-
-print("7a. Creating stills")
-for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-    print("Slice %.3f"%m)
-    XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname)
-print("Completed.\n")
-
-print("7b. Creating a movie")
-dm = w_mag
-for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-    print("Index %d, Slice %.3f" % (i,m))
-    XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname, movie_tag=i)   
+print("8. Plot n(z) for the selection.")
+dz = 0.05
+fname = "dNdz-XD-fNoZ50-fiducial-DEEP2.png"
+plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05,\
+    iselect2=iXD_fiducial, plot_total=False, fname=fname, color1="blue", color2="black", color_total="green",\
+    label1="XD fNoZ50", label2="XD fid.", label_total="DEEP2 Total")
 
 print("Completed.\n")
 
-print("Command for creating a movie.:\n \
-    ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-fiducial-comparison-movie.mp4")
+
+##############################################################################
+print("9. Create many slices for a movie/stills .")
+# bnd_fig_directory = "./bnd_fig_directory/XD-fNoZ50-fiducial-comparison/"
+# fname = "XD-fNoZ50-fiducial-comparison"
+
+# print("9a. Creating stills")
+# for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
+#     print("Slice %.3f"%m)
+#     XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname)
+# print("Completed.\n")
+
+# print("9b. Creating a movie")
+# dm = w_mag
+# for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+#     print("Index %d, Slice %.3f" % (i,m))
+#     XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname, movie_tag=i)   
+
+# print("Completed.\n")
+
+# print("Command for creating a movie.:\n \
+#     ffmpeg -r 6 -start_number 0 -i XD-fNoZ50-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-fNoZ50-fiducial-comparison-movie.mp4")

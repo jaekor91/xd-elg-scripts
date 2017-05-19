@@ -3,7 +3,7 @@ import numpy as np
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
 
-def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0.25, 0., 0., 0.]):
+def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.0, 0.6, 0., 0.25, 0.]):
     """
     Given projection grid return the breakdown of object for each class. 
 
@@ -49,7 +49,7 @@ def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.25, 0.2
 def class_breakdown_cut(cn, weight, area,rwd="D", num_classes=8, \
      return_format= ["cut", "rwd" ,"type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched",
       "DESI", "Total", "Eff", "FoM"],\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+     class_eff = [1., 1., 0.0, 0.6, 0., 0.25, 0., 0.]
      ):
     """
     Given class number, weights, and areas, return the breakdown of object 

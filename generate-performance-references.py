@@ -84,7 +84,7 @@ return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "No
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format,\
-     class_eff = [1., 1., 0.25, 0.25, 0., 0., 0., 0.]
+     class_eff = [1., 1., 0., 0.6, 0., 0.25, 0., 0.]
      ))
 print("Completed.\n")
 
@@ -92,7 +92,7 @@ print("Completed.\n")
 ##############################################################################
 print("4. Plot n(z) for the selection.")
 dz = 0.05
-plot_dNdz_selection(cn, w, iFDR, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.25,\
+plot_dNdz_selection(cn, w, iFDR, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
 	iselect2=None, plot_total=True, fname="dNdz-FDR-DEEP2-Total.png", color1="black", color2="red", color_total="green",\
 	label1="FDR", label2="", label_total="DEEP2 Total")
 
