@@ -73,7 +73,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
         plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+ " NoOII (Proj.)", hatch="*")
     
-        plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff, N_NoOII/(wNoOII/dz)/NoOII_eff], color=color1, linewidth=2.0)
+        plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff, N_NoOII/(wNoOII/dz)/NoOII_eff], color=color2, linewidth=2.0)
 
 
         # NoZ:
@@ -82,7 +82,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
         plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+" NoZ (Proj.)")         
 
-        plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color1, linewidth=2.0)
+        plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color2, linewidth=2.0)
 
     # Selection 1.
     ibool = np.logical_or((cn==0),(cn==1)) & iselect1 # Total
