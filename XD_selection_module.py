@@ -669,7 +669,7 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
 
 
 def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
-                glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.",
+                glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.]):
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
@@ -681,10 +681,10 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
             dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
     elif type == "Total":
         dNdm = grid["Total"][:][ibool]
-    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label1)
-    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label1)
-    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z$ "+label1)
-        
+    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g $ "+label1)
+    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r $ "+label1)
+    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z $ "+label1)
+    
     if grid2 is not None:
         ibool = grid2["select"][:]==1 # only interested in the selected cells.
         gmag = grid2["mag"][:][ibool]
@@ -697,9 +697,32 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         elif type == "Total":
             dNdm = grid2["Total"][:][ibool]
 
-        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g$ "+label2)
-        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r$ "+label2)
-        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z$ "+label2)  
+        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g $ "+label2)
+        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r $ "+label2)
+        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z $ "+label2)
+
+    if label3 is not None:
+        ibool = grid["select_var"][:]==1 # only interested in the selected cells.
+        gmag = grid["mag"][:][ibool]
+        rmag = gmag-grid["gr"][:][ibool]
+        zmag = rmag-grid["rz"][:][ibool]
+        if type == "DESI":
+            dNdm = np.zeros_like(gmag)
+            for i in range(7):
+                dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
+        elif type == "Total":
+            dNdm = grid["Total"][:][ibool]
+#         plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label3, lw=lw)
+#         plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label3, lw=lw)
+#         plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z$ "+label3, lw=lw)        
+        ghist, edges = np.histogram(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm)
+        rhist, _ = np.histogram(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="red", label= "$r$ "+label3, lw=lw)
+        zhist, _ = np.histogram(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="purple",label="$z$ "+label3, lw=lw)        
+        centers = (edges[1:]+edges[:-1])/2.
+        pt_size=10
+        plt.scatter(centers, ghist, color="green", label="$g $ "+label3, marker="*",s=pt_size)
+        plt.scatter(centers, rhist, color="red", label="$r $ "+label3, marker="*",s=pt_size)
+        plt.scatter(centers, zhist, color="purple", label="$z $ "+label3, marker="*",s=pt_size)
 
     plt.axvline(glim,c="green", linestyle="--")
     plt.axvline(rlim,c="red", linestyle="--")
