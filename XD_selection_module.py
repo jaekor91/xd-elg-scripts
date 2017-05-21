@@ -719,7 +719,7 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         rhist, _ = np.histogram(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="red", label= "$r$ "+label3, lw=lw)
         zhist, _ = np.histogram(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="purple",label="$z$ "+label3, lw=lw)        
         centers = (edges[1:]+edges[:-1])/2.
-        pt_size=10
+        pt_size=5
         plt.scatter(centers, ghist, color="green", label="$g $ "+label3, marker="*",s=pt_size)
         plt.scatter(centers, rhist, color="red", label="$r $ "+label3, marker="*",s=pt_size)
         plt.scatter(centers, zhist, color="purple", label="$z $ "+label3, marker="*",s=pt_size)
