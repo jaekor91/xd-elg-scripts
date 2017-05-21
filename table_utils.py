@@ -3,7 +3,7 @@ import numpy as np
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
 
-def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.0, 0.6, 0., 0.25, 0.]):
+def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.0, 0.6, 0., 0.25, 0.], selection="select"):
     """
     Given projection grid return the breakdown of object for each class. 
 
@@ -15,7 +15,11 @@ def class_breakdown_cut_grid(grid, return_format, class_eff = [1., 1., 0.0, 0.6,
     class_eff: Short for class efficiency. Assign expected yield to Gold through DR3unmatched objects.
     """
     # Computing counts
-    iselect = grid["select"][:]==1
+    if selection is "select":
+        iselect = grid["select"][:]==1
+    elif selection is "select_var":
+        iselect = grid["select_var"][:]==1
+
 
     counts = np.zeros(7)
     for i in range(7):
