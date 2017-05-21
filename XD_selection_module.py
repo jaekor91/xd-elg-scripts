@@ -704,11 +704,11 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
     plt.axvline(glim,c="green", linestyle="--")
     plt.axvline(rlim,c="red", linestyle="--")
     plt.axvline(zlim,c="purple", linestyle="--")
-    if glim2 is not None:
+    if (glim2 is not None) & (np.abs(glim2-glim)>1e-6):
         plt.axvline(glim2,c="green", linestyle="-.")
-    if rlim2 is not None:        
+    if (rlim2 is not None) & (np.abs(glim2-glim)>1e-6):        
         plt.axvline(rlim2,c="red", linestyle="-.")
-    if zlim2 is not None:        
+    if (zlim2 is not None) & (np.abs(glim2-glim)>1e-6):        
         plt.axvline(zlim2,c="purple", linestyle="-.")    
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")
