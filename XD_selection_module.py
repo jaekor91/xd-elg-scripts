@@ -670,7 +670,8 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
 
 def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
                 glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
-                class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.]):
+                class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
+                class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.]):
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
     rmag = gmag-grid["gr"][:][ibool]
@@ -693,7 +694,7 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         if type == "DESI":
             dNdm = np.zeros_like(gmag)
             for i in range(7):
-                dNdm += class_eff[i]*grid2[cnames[i]][:][ibool]
+                dNdm += class_eff2[i]*grid2[cnames[i]][:][ibool]
         elif type == "Total":
             dNdm = grid2["Total"][:][ibool]
 
@@ -727,12 +728,15 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
     plt.axvline(glim,c="green", linestyle="--")
     plt.axvline(rlim,c="red", linestyle="--")
     plt.axvline(zlim,c="purple", linestyle="--")
-    if (glim2 is not None) & (np.abs(glim2-glim)>1e-6):
-        plt.axvline(glim2,c="green", linestyle="-.")
-    if (rlim2 is not None) & (np.abs(rlim2-rlim)>1e-6):
-        plt.axvline(rlim2,c="red", linestyle="-.")
-    if (zlim2 is not None) & (np.abs(zlim2-zlim)>1e-6):
-        plt.axvline(zlim2,c="purple", linestyle="-.")    
+    if (glim2 is not None):
+    	if (np.abs(glim2-glim)>1e-6):
+        	plt.axvline(glim2,c="green", linestyle="-.")
+    if (rlim2 is not None):
+    	if (np.abs(rlim2-rlim)>1e-6):
+        	plt.axvline(rlim2,c="red", linestyle="-.")
+    if (zlim2 is not None):
+    	if (np.abs(zlim2-zlim)>1e-6):
+        	plt.axvline(zlim2,c="purple", linestyle="-.")    
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")
     plt.legend(loc="upper left")
