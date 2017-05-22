@@ -36,4 +36,4 @@ source DR3-DEEP2f4-tractor-download.sh
 
 
 # Tycho-2 catalog used for stellar masking. 
-# Note: Available on the data repository above. Filename: tycho2.fits
+# Note: Available on the data repository. Filename: tycho2.fits
