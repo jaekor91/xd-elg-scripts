@@ -1,4 +1,4 @@
-# All files referred to here as well as under the Data repostiory section in REAME 
+# All files referred to here as well as under the Data repostiory section in README 
 # must be downloaded before the training scripts are run.
 
 # Download DEEP2 photometry files
