@@ -106,6 +106,8 @@ Example scripts for the user:
 ###################################################################################################
 Data repository:
 	The following data can be found on ...
+	The files A) through C) must be downloaded before running the scripts in the "Reproducbility"
+	section.
 
 	A) tycho2.fits
 		Used for stellar masking.
@@ -122,7 +124,7 @@ Data repository:
 
 	D) XD-parameters
 		A directory containing GMM and dNdm parameters for all relevant classes for making 
-		XD-projections can be found here.
+		XD-projections can be found here. They are the results obtained from running the scripts above.
 		URL: 
 
 
