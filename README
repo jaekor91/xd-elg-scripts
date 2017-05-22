@@ -97,9 +97,14 @@ Reproducibility
 
 
 ###################################################################################################
-Example scripts for the user:
-	The user can use the following scripts to 1) make projections based on the selection algorithm
-	using the parameters provided
+Example script for the user:
+	The user can use the following script to 1) make projections based on the selection algorithm
+	using the parameters provided (XD-parameters) and 2) apply the selection algorithm on DEEP2 
+	dataset. Note that since DEEP2 catalog may not be representative of the rest of DESI imaging
+	catalogs, the selection on data should be treated as a sanity check rather than a rigorous 
+	demonstration of the correctness of the algorithm.
+
+	A) 
 
 
 
@@ -130,8 +135,6 @@ Data repository:
 	E) DECaLS-DR3-DEEP2f**-glim24.fits
 		The final data products of running the scripts above. Required for perfomring validation.
 		URL:
-
-
 
 
 ###################################################################################################
