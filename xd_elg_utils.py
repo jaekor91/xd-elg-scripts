@@ -1224,6 +1224,21 @@ def load_star_mask(table):
 def load_oii(fits):
     return fits["OII_3727"][:]
 
+def new_oii_lim(N_new, N_old=2400):
+    """
+    Return the new OII low threshold given the updated fiber number in units of
+    1e-17 ergs/A/cm^2/s
+    """
+    return 8*np.sqrt(N_new/N_old)
+
+def frac_above_new_oii(oii, weight, new_oii_lim):
+    """
+    Given the oii and weights of the objects of interest and the new OII limit, return
+    the proportion of objects that meet the new criterion.
+    """
+    ibool = oii>new_oii_lim
+    return weight[ibool].sum()/weight.sum()    
+
 
 def load_grz(fits):
     # Colors: DECam model flux in ugrizY
