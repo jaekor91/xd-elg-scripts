@@ -125,7 +125,11 @@ Data repository:
 	D) XD-parameters
 		A directory containing GMM and dNdm parameters for all relevant classes for making 
 		XD-projections can be found here. They are the results obtained from running the scripts above.
-		URL: 
+		URL:
+
+	E) DECaLS-DR3-DEEP2f**-glim24.fits
+		The final data products of running the scripts above. Required for perfomring validation.
+		URL:
 
 
 
