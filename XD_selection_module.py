@@ -9,7 +9,7 @@ import numba as nb
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
 def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
-                       rz_ref=0.5,reg_r=1e-4/(0.025**2 * 0.05),f_i=[1., 1., 0., 0.25, 0., 0.25, 0.],\
+                       rz_ref=0.5,reg_r=5e-4/(0.025**2 * 0.05),f_i=[1., 1., 0., 0.25, 0., 0.25, 0.],\
                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
     """ Apply ELG XD selection. Default uses fiducial set of parameters.
 
@@ -231,7 +231,7 @@ def mag2flux(mag):
 
 def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
-                          reg_r=1e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
+                          reg_r=5e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
     """
     Summary: 
@@ -302,6 +302,168 @@ def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
             break               
     
     return grid, last_FoM    
+
+def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
+                         glim_var=23.8, rlim_var=23.4, zlim_var=22.4,\
+                          gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
+                          reg_r=5e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
+    """
+    Summary: 
+        - Set up a grid in the selection design region with the given grid parameters. 
+            The grid is a rec array and has the following columns:
+            gr, rz, mag, n_i (i in cnames), n_good, n_tot, FoM, select. The meaning of these values should be obvious.
+        - For each cell, compute n_i, n_good, n_tot, FoM using the input parameters (glim, rlim, zlim).
+        - Rank order the cells and indicate whether each cell is included in the selection or not.
+        - r is regularization parameter for FoM.
+        - After the selection is determined, re-compute the densities using glim_var, rlim_var, zlim_var
+
+    Parameters:
+        param_directory: Directory where model parameters are saved
+        glim, rlim, zlim: Assumed 5-sigma detection limiting magnitudes.
+        glim_var, rlim_var, zlim_var: "True" detection limits.
+        gr_ref, rz_ref: Number density conserving global error reference point.
+        reg_r: Regularization parameter. Empirically set to avoid pathologic 
+            behaviors of the selection boundary.
+        f_i: Various class weights for FoM.
+        gmin, gmax: Minimum and maximum g-magnitude range to consider.
+        K_i and dNdm_type: See generate_XD_model_dictionary() doc string.
+        w_mag: Width in magnitude direction. 
+        w_cc: Width in color-color grid.
+    """
+    
+    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type)
+
+    # Create the grid.
+    grid = generate_grid_var(w_cc, w_mag, minmag, maxmag)
+    
+    # cell volume
+    Vcell = w_cc**2 * w_mag
+    
+    # --- Finding selection based on the assumed depth --- #
+    # Extracting the cell centers.
+    gr = grid["gr"][:]
+    rz = grid["rz"][:]
+    mag = grid["mag"][:]
+    flux = mag2flux(mag)
+
+    # Compute the global error noise corresponding to each objects.
+    const = 2.5/(5*np.log(10)) 
+    gvar = (const * 10**(0.4*(mag-glim)))**2
+    rvar = (const * 10**(0.4*(mag-gr_ref-rlim)))**2
+    zvar = (const * 10**(0.4*(mag-gr_ref-rz_ref-zlim)))**2            
+    
+    # Compute the densities.
+    for i in range(7):
+        cname = cnames[i]
+        grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
+        grid["Total"][:] += grid[cname][:] # Computing the total
+        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+    
+    # Computing FoM
+    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    
+    # Rank order the cells according to FoM number.
+    grid.sort(order='FoM')
+    grid[:] = grid[::-1]
+    
+    # Selecting cells until the desired number N_tot is reached.
+    N = 0
+    last_FoM = 0
+    for i in range(mag.size):
+        if (N < N_tot):
+            N += grid["Total"][i]
+            grid["select"][i] = 1
+            last_FoM = grid["FoM"][i]
+        else:
+            break
+
+    # --- Recomputing the densities based on the true depths --- #
+    # Extracting the cell centers.
+    gr = grid["gr"][:]
+    rz = grid["rz"][:]
+    mag = grid["mag"][:]
+    flux = mag2flux(mag)
+
+    # Compute the global error noise corresponding to each cell.
+    const = 2.5/(5*np.log(10)) 
+    gvar = (const * 10**(0.4*(mag-glim_var)))**2
+    rvar = (const * 10**(0.4*(mag-gr_ref-rlim_var)))**2
+    zvar = (const * 10**(0.4*(mag-gr_ref-rz_ref-zlim_var)))**2            
+    
+    # Compute the densities.
+    grid["Total"][:] = 0
+    grid["DESI"][:] = 0
+    for i in range(7):
+        cname = cnames[i]
+        grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
+        grid["Total"][:] += grid[cname][:] # Computing the total
+        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+    
+    # Computing FoM
+    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    
+    # Rank order the cells according to FoM number.
+    grid.sort(order='FoM')
+    grid[:] = grid[::-1]
+    
+    # Selecting cells until the desired number N_tot is reached.
+    N = 0
+    last_FoM_var = 0
+    for i in range(mag.size):
+        if (N < N_tot):
+            N += grid["Total"][i]
+            grid["select_var"][i] = 1
+            last_FoM_var = grid["FoM"][i]
+        else:
+            break    
+    
+    return grid, last_FoM, last_FoM_var
+
+def generate_grid_var(w_cc, w_mag, minmag, maxmag):
+    """
+    The same as generate_grid() except one additinoal column
+    for selection boolean vector.
+    """
+    # Global params.
+    xmin1,xmax1 = (-1.0,0.20)
+    ymin1,ymax1 = (-.50,2.5)
+    xmin2,xmax2 = (0.2,1.2)
+    ymin2,ymax2 = (0.0,2.5)
+    zmin,zmax = (minmag,maxmag)
+
+    # +w*0.5 to center. Also note the convention [start, end)
+    x1 = np.arange(xmin1,xmax1 + w_cc*0.9, w_cc)  + w_cc*0.5
+    y1 = np.arange(ymin1,ymax1 + w_cc*0.9, w_cc ) + w_cc*0.5
+    z1 = np.arange(zmin,zmax + w_mag*0.9, w_mag) + w_mag*0.5
+    xv1, yv1,zv1 = np.meshgrid(x1, y1,z1)
+    nx1,ny1,nz1 = (x1.size, y1.size, z1.size)
+    xv1, yv1, zv1 = np.transpose(np.transpose(np.asarray([xv1,yv1,zv1])).reshape((nx1*ny1*nz1,3)))
+    x2 = np.arange(xmin2+ w_cc*0.9,xmax2 + w_cc*0.9, w_cc)  + w_cc*0.5
+    y2 = np.arange(ymin2+ w_cc*0.9,ymax2 + w_cc*0.9, w_cc ) + w_cc*0.5
+    z2 = np.arange(zmin,zmax + w_mag*0.9, w_mag) + w_mag*0.5
+    xv2, yv2,zv2 = np.meshgrid(x2, y2,z2)
+    nx2,ny2,nz2 = (x2.size, y2.size, z2.size)
+    xv2, yv2, zv2 = np.transpose(np.transpose(np.asarray([xv2,yv2,zv2])).reshape((nx2*ny2*nz2,3)))
+
+#         print("Total number of cells: %d " % (nx1*ny1*nz1+nx2*ny2*nz2))
+
+    xv =np.concatenate((xv1,xv2))
+    yv = np.concatenate((yv1,yv2))
+    zv = np.concatenate((zv1,zv2))
+
+    grid = np.rec.fromarrays((xv, yv, zv,\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size),np.zeros(xv.size),\
+       np.zeros(xv.size),np.zeros(xv.size,dtype=bool),np.zeros(xv.size,dtype=bool)), \
+      dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
+             ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
+             ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
+             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('FoM','f8'), ('select','i4'),('select_var','i4')]);
+
+    return grid    
 
 
 def generate_grid(w_cc, w_mag, minmag, maxmag):
@@ -507,7 +669,7 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
 
 
 def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
-                glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.",
+                glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.]):
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
@@ -519,10 +681,10 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
             dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
     elif type == "Total":
         dNdm = grid["Total"][:][ibool]
-    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label1)
-    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label1)
-    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z$ "+label1)
-        
+    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g $ "+label1)
+    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r $ "+label1)
+    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z $ "+label1)
+    
     if grid2 is not None:
         ibool = grid2["select"][:]==1 # only interested in the selected cells.
         gmag = grid2["mag"][:][ibool]
@@ -535,18 +697,41 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         elif type == "Total":
             dNdm = grid2["Total"][:][ibool]
 
-        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g$ "+label2)
-        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r$ "+label2)
-        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z$ "+label2)  
+        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g $ "+label2)
+        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r $ "+label2)
+        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z $ "+label2)
+
+    if label3 is not None:
+        ibool = grid["select_var"][:]==1 # only interested in the selected cells.
+        gmag = grid["mag"][:][ibool]
+        rmag = gmag-grid["gr"][:][ibool]
+        zmag = rmag-grid["rz"][:][ibool]
+        if type == "DESI":
+            dNdm = np.zeros_like(gmag)
+            for i in range(7):
+                dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
+        elif type == "Total":
+            dNdm = grid["Total"][:][ibool]
+#         plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label3, lw=lw)
+#         plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label3, lw=lw)
+#         plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z$ "+label3, lw=lw)        
+        ghist, edges = np.histogram(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm)
+        rhist, _ = np.histogram(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="red", label= "$r$ "+label3, lw=lw)
+        zhist, _ = np.histogram(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm) # color="purple",label="$z$ "+label3, lw=lw)        
+        centers = (edges[1:]+edges[:-1])/2.
+        pt_size=5
+        plt.scatter(centers, ghist, color="green", label="$g $ "+label3, marker="*",s=pt_size)
+        plt.scatter(centers, rhist, color="red", label="$r $ "+label3, marker="*",s=pt_size)
+        plt.scatter(centers, zhist, color="purple", label="$z $ "+label3, marker="*",s=pt_size)
 
     plt.axvline(glim,c="green", linestyle="--")
     plt.axvline(rlim,c="red", linestyle="--")
     plt.axvline(zlim,c="purple", linestyle="--")
-    if glim2 is not None:
+    if (glim2 is not None) & (np.abs(glim2-glim)>1e-6):
         plt.axvline(glim2,c="green", linestyle="-.")
-    if rlim2 is not None:        
+    if (rlim2 is not None) & (np.abs(rlim2-rlim)>1e-6):
         plt.axvline(rlim2,c="red", linestyle="-.")
-    if zlim2 is not None:        
+    if (zlim2 is not None) & (np.abs(zlim2-zlim)>1e-6):
         plt.axvline(zlim2,c="purple", linestyle="-.")    
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")

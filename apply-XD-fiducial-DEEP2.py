@@ -81,7 +81,7 @@ slices = None # np.arange(21.5, 24.0, wmag)
 start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
-                          reg_r=1e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
+                          reg_r=5e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
@@ -100,7 +100,7 @@ gflux, rflux, zflux = grzflux
 
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
 						glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
-                       rz_ref=0.5, reg_r=1e-4/(w_cc**2 * w_mag), f_i=f_i,\
+                       rz_ref=0.5, reg_r=5e-4/(w_cc**2 * w_mag), f_i=f_i,\
                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Completed.\n")
 
@@ -149,25 +149,25 @@ print("Completed.\n")
 
 ##############################################################################
 print("5. Create many slices for a movie/stills.")
-  # bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
-  # fname = "XD-fiducial"
+bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
+fname = "XD-fiducial"
 
-  # print("5a. Creating stills")
-  # for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-  # 	print("Slice %.3f"%m)
-  # 	XD.plot_slice(grid, m, bnd_fig_directory, fname)
-  # print("Completed.\n")
+print("5a. Creating stills")
+for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
+	print("Slice %.3f"%m)
+	XD.plot_slice(grid, m, bnd_fig_directory, fname)
+print("Completed.\n")
 
-  # print("5b. Creating a movie")
-  # dm = w_mag
-  # for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-  # 	print("Index %d, Slice %.3f" % (i,m))
-  # 	XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)	
+print("5b. Creating a movie")
+dm = w_mag
+for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+	print("Index %d, Slice %.3f" % (i,m))
+	XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)	
 
-  # print("Completed.\n")
+print("Completed.\n")
 
-  # print("Command for creating a movie.:\n \
-  # 	ffmpeg -r 6 -start_number 0 -i XD-fiducial-mag0-%d.png -vcodec mpeg4 -y XD-fiducial-movie.mp4")
+print("Command for creating a movie.:\n \
+	ffmpeg -r 6 -start_number 0 -i XD-fiducial-mag0-%d.png -vcodec mpeg4 -y XD-fiducial-movie.mp4")
 
 
 

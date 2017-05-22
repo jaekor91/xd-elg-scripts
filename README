@@ -78,18 +78,30 @@ Reproducibility
 		- apply-XD-fNoZ50-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using fNoZ = 0.5 instead of fNoZ = 0.25.
 			Comparison to the fiducial case is shown through stills and a movie as well as in
-			dNdz and dNdm plots
+			dNdz and dNdm plots.
 
 		- apply-XD-N_total3000-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using N_total = 3000 instead of 2400.
 			Comparison to the fiducial case is shown through stills and a movie as well as in
-			dNdz and dNdm plots
+			dNdz and dNdm plots.
+
+			Note: Need to incorporate changing efficiency as obs time becomes shorter with increasing
+			fiber numbers. In principle, you would have train the whole set from the beginning
+			with new class definition but for now we use a simple approximation that the overall 
+			yield can be determined by multiplying the number of selected good targets by the 
+			fraction of objects we expect to pass higher OII threshold.
 
 		- apply-XD-zlim22p9-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using zlim = 22.9 instead of 22.4.
 			Comparison to the fiducial case is shown through stills and a movie as well as in
-			dNdz and dNdm plots
+			dNdz and dNdm plots.
 
+		- apply-XD-mag-var.py:
+			Compute observed target densities based on the fiducial set of parameters but define
+			selection boundary using different depths (e.g., glim = 24.3 instead of glim = 23.8.).
+			Show results for changing limiting depths by pm 0.25 and pm 0.5 for each band.
+
+		Note: We would like to study how using individual particle depth affects the selection.
 
 
 ###################################################################################################
