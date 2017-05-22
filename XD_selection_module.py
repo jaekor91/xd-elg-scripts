@@ -281,10 +281,10 @@ def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -358,10 +358,10 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -393,15 +393,15 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
     
     # Compute the densities.
     grid["Total"][:] = 0
-    grid["DESI"][:] = 0
+    grid["FoM_num"][:] = 0
     for i in range(7):
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -460,7 +460,7 @@ def generate_grid_var(w_cc, w_mag, minmag, maxmag):
       dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
              ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
              ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
-             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('D2reject','f8'), ('FoM_num','f8'),('Total','f8'),\
              ('FoM','f8'), ('select','i4'),('select_var','i4')]);
 
     return grid    
@@ -502,7 +502,7 @@ def generate_grid(w_cc, w_mag, minmag, maxmag):
       dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
              ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
              ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
-             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('D2reject','f8'), ('FoM_num','f8'),('Total','f8'),\
              ('FoM','f8'), ('select','i4')]);
 
     return grid    
