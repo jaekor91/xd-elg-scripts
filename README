@@ -85,12 +85,6 @@ Reproducibility
 			Comparison to the fiducial case is shown through stills and a movie as well as in
 			dNdz and dNdm plots.
 
-			Note: Need to incorporate changing efficiency as obs time becomes shorter with increasing
-			fiber numbers. In principle, you would have train the whole set from the beginning
-			with new class definition but for now we use a simple approximation that the overall 
-			yield can be determined by multiplying the number of selected good targets by the 
-			fraction of objects we expect to pass higher OII threshold.
-
 		- apply-XD-zlim22p9-DEEP2.py:
 			The same as apply-XD-fiducial-DEEP2.py except using zlim = 22.9 instead of 22.4.
 			Comparison to the fiducial case is shown through stills and a movie as well as in

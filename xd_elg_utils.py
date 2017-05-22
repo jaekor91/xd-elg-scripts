@@ -26,7 +26,8 @@ deg2arcsec=3600
 
 
 
-def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
+def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
+    gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
      label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5):
     """
@@ -34,8 +35,9 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
     histogram. 
 
     dz: Histogram binwidth
-    **_eff: Gold and Silver are always equal to one. NoZ and NoOII are objects wtih no redshift
+    **_eff: Gold and Silver are NOT always equal to one. NoZ and NoOII are objects wtih no redshift
         in DEEP2 but are guessed to have efficiency of about 0.25.
+    **_eff2: The efficiencies for the second set.
     iselect2: If not None, used as another set of mask to plot dNdz histogram.
     plot_total: Plots total.
     fname: Saves in fname.
@@ -63,13 +65,20 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
 
 
     if iselect2 is not None:
+        # appropriately weighing the objects.
+        w_select2 = np.copy(w)
+        w_select2[cn==0] *= gold_eff2
+        w_select2[cn==1] *= silver_eff2
+        w_select2[cn==3] *= NoOII_eff2
+        w_select2[cn==5] *= NoZ_eff2
+
         ibool = np.logical_or((cn==0),(cn==1)) & iselect2
-        plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w[ibool]/area,\
+        plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select2[ibool]/area,\
                  histtype="step", color=color2, label=label2)
 
         # NoOII:
         ibool = (cn==3) & iselect2
-        N_NoOII = NoOII_eff*w[ibool].sum();
+        N_NoOII = w_select2[ibool].sum();
         plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+ " NoOII (Proj.)", hatch="*")
     
@@ -78,20 +87,27 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
 
         # NoZ:
         ibool = (cn==5) & iselect2
-        N_NoZ = NoZ_eff*w[ibool].sum();
+        N_NoZ = w_select2[ibool].sum();
         plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+" NoZ (Proj.)")         
 
         plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color2, linewidth=2.0)
 
     # Selection 1.
+    # appropriately weighing the objects.
+    w_select1 = np.copy(w)
+    w_select1[cn==0] *= gold_eff
+    w_select1[cn==1] *= silver_eff
+    w_select1[cn==3] *= NoOII_eff
+    w_select1[cn==5] *= NoZ_eff
+
     ibool = np.logical_or((cn==0),(cn==1)) & iselect1 # Total
-    plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w[ibool]/area,\
+    plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select1[ibool]/area,\
              histtype="step", color=color1, label=label1)
 
     # NoOII:
     ibool = (cn==3) & iselect1
-    N_NoOII = NoOII_eff*w[ibool].sum();
+    N_NoOII = w_select1[ibool].sum();
     plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color1, \
             edgecolor =color1, label=label1+" NoOII (Proj.)", hatch="*")
 
@@ -99,7 +115,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05,  gold_eff=1, silve
 
     # NoZ:
     ibool = (cn==5) & iselect1
-    N_NoZ = NoZ_eff*w[ibool].sum();
+    N_NoZ = w_select1[ibool].sum();
     plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5, color=color1, \
             edgecolor =color1, label=label1+" NoZ (Proj.)")
 
@@ -1220,6 +1236,24 @@ def load_grz_invar(fits):
 
 def load_star_mask(table):
     return table["TYCHOVETO"][:].astype(int).astype(bool)
+
+def load_oii(fits):
+    return fits["OII_3727"][:]
+
+def new_oii_lim(N_new, N_old=2400):
+    """
+    Return the new OII low threshold given the updated fiber number in units of
+    1e-17 ergs/A/cm^2/s
+    """
+    return 8*np.sqrt(N_new/N_old)
+
+def frac_above_new_oii(oii, weight, new_oii_lim):
+    """
+    Given the oii and weights of the objects of interest and the new OII limit, return
+    the proportion of objects that meet the new criterion.
+    """
+    ibool = oii>new_oii_lim
+    return weight[ibool].sum()/weight.sum()    
 
 
 def load_grz(fits):
