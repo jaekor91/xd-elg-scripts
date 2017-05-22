@@ -1221,6 +1221,9 @@ def load_grz_invar(fits):
 def load_star_mask(table):
     return table["TYCHOVETO"][:].astype(int).astype(bool)
 
+def load_oii(fits):
+    return fits["OII_3727"][:]
+
 
 def load_grz(fits):
     # Colors: DECam model flux in ugrizY
