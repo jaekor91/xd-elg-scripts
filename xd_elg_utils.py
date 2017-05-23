@@ -18,6 +18,13 @@ import matplotlib.pyplot as plt
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
 
+# Matplot ticks
+import matplotlib as mpl
+mpl.rcParams['xtick.major.size'] = 10
+mpl.rcParams['xtick.major.width'] = 1.5
+mpl.rcParams['ytick.major.size'] = 10
+mpl.rcParams['ytick.major.width'] = 1.5
+
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 

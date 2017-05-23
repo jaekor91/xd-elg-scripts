@@ -5,6 +5,12 @@ import os
 os.environ['NUMBA_NUM_THREADS'] = "1"
 import numba as nb
 
+# matplotlib ticks
+mpl.rcParams['xtick.major.size'] = 10
+mpl.rcParams['xtick.major.width'] = 1.5
+mpl.rcParams['ytick.major.size'] = 10
+mpl.rcParams['ytick.major.width'] = 1.5
+
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
