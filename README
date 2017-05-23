@@ -98,15 +98,12 @@ Reproducibility
 
 ###################################################################################################
 Example script for the user:
-	The user can use the following script to 1) make projections based on the selection algorithm
+	The user can use the script "XD-user.py" to 1) make projections based on the selection algorithm
 	using the parameters provided (XD-parameters) and 2) apply the selection algorithm on DEEP2 
 	dataset. Note that since DEEP2 catalog may not be representative of the rest of DESI imaging
 	catalogs, the selection on data should be treated as a sanity check rather than a rigorous 
 	demonstration of the correctness of the algorithm.
-
-	A) 
-
-
+	
 
 ###################################################################################################
 Data repository:
@@ -123,16 +120,20 @@ Data repository:
 		URL: 
 
 	C) deep2-f**-redz-oii.fits
-		DEEP2 redshift catalogs that contain OII 3727 and target weight information produced by
-		Jeff Newman.
+		DEEP2 redshift catalogs that contain OII 3727 and target weight information and produced by 
+		John Moustakas.
 		URL:
 
-	D) XD-parameters
+	D) color-selection.txt
+		This file contains information about which DEEP2 photometric objects were selected for
+		spectroscopic information in Field 2, 3, and 4.
+
+	E) XD-parameters
 		A directory containing GMM and dNdm parameters for all relevant classes for making 
 		XD-projections can be found here. They are the results obtained from running the scripts above.
 		URL:
 
-	E) DECaLS-DR3-DEEP2f**-glim24.fits
+	F) DECaLS-DR3-DEEP2f**-glim24.fits
 		The final data products of running the scripts above. Required for perfomring validation.
 		URL:
 
