@@ -748,8 +748,8 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")
     plt.legend(loc="upper left")
-    plt.xlim([20,24.3])
-    plt.ylim([0,70])      
+    plt.xlim([20,24.5])
+    plt.ylim([0,80])      
 
     plt.savefig(fname+".pdf", bbox_inches="tight", dpi=200)
     # plt.show()
