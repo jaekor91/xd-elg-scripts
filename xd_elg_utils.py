@@ -12,7 +12,6 @@ from os.path import isfile, join
 import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
-
 # import extreme_deconvolution as XD
 
 import confidence_contours as cc
@@ -279,7 +278,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     """
     See the output.
     """
-    bnd_lw =1
+    bnd_lw =1.5
     
     # Unpack the colors.
     xrz = ydata[:,0]; ygr = ydata[:,1]
@@ -299,7 +298,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     bw = 0.05
     # Number of components/linewidth
     K = Sxamp_init.size
-    elw = 1. # ellipse linewidth
+    elw = 1.5 # ellipse linewidth
     ea = 0.75 # ellipse transparency
     
     
@@ -703,7 +702,7 @@ def mag2flux(mag):
         
 
 
-def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol =1e-5, broken_tol=1e-2, fname=None):
+def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol =1e-5, broken_tol=1e-2, fname=None, lw=1.5):
     """
     Given the magnitudes and the corresponding weight, and the parameters for the histogram, 
     return the best fit parameters for a power law and a broken power law.
@@ -837,11 +836,11 @@ def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol
     xvec = np.arange(magmin, magmax, 1e-3)
     yvec = pow_law(best_params_pow, mag2flux(xvec))*np.float(bw)
     pow_str = pow_legend(best_params_pow)
-    plt.plot(xvec,yvec, c = "red", label = pow_str)
+    plt.plot(xvec,yvec, c = "red", label = pow_str, lw=lw)
     # broken  power law fit
     yvec = broken_pow_law(best_params_broken, mag2flux(xvec))*np.float(bw)
     broken_str = broken_legend(best_params_broken)
-    plt.plot(xvec,yvec, c = "blue", label=broken_str)
+    plt.plot(xvec,yvec, c = "blue", label=broken_str, lw=lw)
     # hist
     plt.bar(bin_edges[:-1], hist, width=bw, alpha=0.5, color="g")
     # deocration
