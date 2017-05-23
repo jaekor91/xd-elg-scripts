@@ -221,9 +221,9 @@ print("Command for creating a movie.:\n \
 print("10. Make dNdm plots for both grids.")
 # Total 
 fname = "dNdm-XD-zlim22p9-fiducial-dNdm-Total"
-XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1 ="zlim22p9", zlim2=22.9)
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1 ="zlim22p9", zlim2=22.9)
 
 # DESI
 fname = "dNdm-XD-zlim22p9-fiducial-dNdm-DESI"
-XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1 ="zlim22p9", zlim2=22.9)
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1 ="zlim22p9", zlim2=22.9)
 print("Completed.\n")

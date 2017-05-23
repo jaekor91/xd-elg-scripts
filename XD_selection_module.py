@@ -6,6 +6,7 @@ os.environ['NUMBA_NUM_THREADS'] = "1"
 import numba as nb
 
 # matplotlib ticks
+import matplotlib as mpl 
 mpl.rcParams['xtick.major.size'] = 10
 mpl.rcParams['xtick.major.width'] = 1.5
 mpl.rcParams['ytick.major.size'] = 10
@@ -674,19 +675,21 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
     return iAND12, i1NOT2, i2NOT1
 
 
-def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
+def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
                 glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
                 class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=1.5):
+
+    dNdm = None
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
     rmag = gmag-grid["gr"][:][ibool]
     zmag = rmag-grid["rz"][:][ibool]
-    if type == "DESI":
+    if plot_type == "DESI":
         dNdm = np.zeros_like(gmag)
         for i in range(7):
             dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
-    elif type == "Total":
+    elif plot_type == "Total":
         dNdm = grid["Total"][:][ibool]
     plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g $ "+label1, lw=lw)
     plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r $ "+label1, lw=lw)
@@ -697,11 +700,11 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         gmag = grid2["mag"][:][ibool]
         rmag = gmag-grid2["gr"][:][ibool]
         zmag = rmag-grid2["rz"][:][ibool]
-        if type == "DESI":
+        if plot_type == "DESI":
             dNdm = np.zeros_like(gmag)
             for i in range(7):
                 dNdm += class_eff2[i]*grid2[cnames[i]][:][ibool]
-        elif type == "Total":
+        elif plot_type == "Total":
             dNdm = grid2["Total"][:][ibool]
 
         plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g $ "+label2, lw=lw)
@@ -713,11 +716,11 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         gmag = grid["mag"][:][ibool]
         rmag = gmag-grid["gr"][:][ibool]
         zmag = rmag-grid["rz"][:][ibool]
-        if type == "DESI":
+        if plot_type == "DESI":
             dNdm = np.zeros_like(gmag)
             for i in range(7):
                 dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
-        elif type == "Total":
+        elif plot_type == "Total":
             dNdm = grid["Total"][:][ibool]
 #         plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label3, lw=lw)
 #         plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label3, lw=lw)

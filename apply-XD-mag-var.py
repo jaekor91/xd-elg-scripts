@@ -162,11 +162,11 @@ for dm in dm_list:
 		# Make dNdm plots.
 		# Total 
 		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-Total"%(glim_var*100,rlim_var*100,zlim_var*100)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
 
 		# DESI
 		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-DESI"%(glim_var*100,rlim_var*100,zlim_var*100)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
 
 
 
