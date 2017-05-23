@@ -129,14 +129,6 @@ DEEP2color_dec = np.asarray(DEEP2color["col3"])
 DEEP2color_BRI=np.asarray(DEEP2color["col5"])
 print("Completed.\n")
 
-print("selection-prob.fits: Catalog that provides selection weight information, OBJNO\n\
-		 and P_onmask. Provided by Jeff Newman.")
-DEEP2weight = fits.open("selection-prob.fits")
-DEEP2weight_OBJNO = DEEP2weight[1].data["OBJNO"]
-DEEP2weight_weight = DEEP2weight[1].data["P_ONMASK"]
-DEEP2weight.close()
-print("Completed.\n")
-
 
 print("deep2-f**-redz-oii.fits: DEEP2 redshift catalogs that John Moustakas provided.\n \
 	Extract OBJNO, RA, DEC, OII_3727, OII_3727_ERR, ZHELIO, ZHELIO_ERR, ZQUALITY.\n \
@@ -194,26 +186,6 @@ print("The number of overlapping objects are smaller because certain\n \
 print("Completed.\n")
 
 
-print("7b. Append probability information.")
-col_name_list = ["OBJNO_prob", "weight"]
-print("Columns added: " + ", ".join(col_name_list))
-new_col_list = [DEEP2weight_OBJNO, DEEP2weight_weight]
-# Field 2
-idx1, idx2 = match_objno(pcat2["OBJNO"], DEEP2weight_OBJNO)
-for i in range(len(new_col_list)):
-    pcat2 = pcat_append(pcat2, new_col_list[i], col_name_list[i], idx1, idx2)
-
-# Field 3
-idx1, idx2 = match_objno(pcat3["OBJNO"], DEEP2weight_OBJNO)
-for i in range(len(new_col_list)):
-    pcat3 = pcat_append(pcat3, new_col_list[i], col_name_list[i], idx1, idx2)    
-
-# Field 4
-idx1, idx2 = match_objno(pcat4["OBJNO"], DEEP2weight_OBJNO)
-for i in range(len(new_col_list)):
-    pcat4 = pcat_append(pcat4, new_col_list[i], col_name_list[i], idx1, idx2)
-print("Completed.\n")
-
 
 print("7c. Append color-selection information.")
 # List of new columns to be appended
@@ -246,7 +218,7 @@ print("Completed.\n")
 print("8. Compute the class number based on the information above and append to the table.")
 print("Recall: ")
 for cn in range(9):
-    print("cn%d: %s", (cn, cnames[cn]))
+    print("cn%d: %s"% (cn, cnames[cn]))
 
 col_name_list = ["cn"]
 # Field 2
