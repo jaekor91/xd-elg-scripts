@@ -125,10 +125,10 @@ print(class_breakdown_cut(cn[iXD_fiducial], w[iXD_fiducial], area,rwd="D", num_c
 # but make selection assuming fiducial depths.
 reg_r = 5e-4
 
-dm25 = 0.25
-dm50 = 0.50
+dm_var = 0.125
+dm_varX2 = dm_var*2
 
-dm_list = [-dm50, -dm25, dm25, dm50]
+dm_list = [-dm_varX2, -dm_var, dm_var, dm_varX2]
 
 for dm in dm_list:
 	for k in range(3):

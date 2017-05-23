@@ -74,8 +74,8 @@ plot_bnd_diff_movie = False
 # dNdm plots
 plot_dNdm = True # Plot XD1.
 plot_dNdm2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
-dNdm_fname = "dNdm-XD1-XD2-DESI"
-dNdm_plot_type = "DESI" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
+dNdm_fname = "dNdm-XD1-XD2-Total"
+dNdm_plot_type = "Total" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
 dNdm_label1 = "XD1"
 dNdm_label2 = "XD2"
 
