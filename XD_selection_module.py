@@ -671,7 +671,7 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
 def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
                 glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
-                class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=lw):
+                class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=1.5):
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
     rmag = gmag-grid["gr"][:][ibool]
