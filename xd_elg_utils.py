@@ -29,7 +29,7 @@ deg2arcsec=3600
 def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
     gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
-     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5):
+     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5, lw=1.5):
     """
     Given class number (cn), mask (iselect1), weights (w), redshifts, class efficiencies, plot the redshift
     histogram. 
@@ -50,7 +50,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     if plot_total:
         ibool = np.logical_or((cn==0),(cn==1)) 
         plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w[ibool]/area,\
-                 histtype="step", color=color_total, label=label_total)
+                 histtype="step", color=color_total, label=label_total, lw=lw)
 
         # NoOII:
         ibool = (cn==3) 
@@ -74,7 +74,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
         ibool = np.logical_or((cn==0),(cn==1)) & iselect2
         plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select2[ibool]/area,\
-                 histtype="step", color=color2, label=label2)
+                 histtype="step", color=color2, label=label2, lw=lw)
 
         # NoOII:
         ibool = (cn==3) & iselect2
@@ -103,7 +103,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
     ibool = np.logical_or((cn==0),(cn==1)) & iselect1 # Total
     plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select1[ibool]/area,\
-             histtype="step", color=color1, label=label1)
+             histtype="step", color=color1, label=label1, lw=lw)
 
     # NoOII:
     ibool = (cn==3) & iselect1
