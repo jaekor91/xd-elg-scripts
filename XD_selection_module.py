@@ -680,7 +680,6 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
                 class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=1.5):
 
-    dNdm = None
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
     rmag = gmag-grid["gr"][:][ibool]
