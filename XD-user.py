@@ -59,8 +59,8 @@ mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # dNdz plots
 dz = 0.05 # Redshift binwidth
-plot_dNdz = True
-plot_dNdz2 = True
+plot_dNdz = True # Plot XD1.
+plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdz_fname = "dNdz-XD1-XD2.png"
 dNdz_label1 = "XD1"
 dNdz_label2 = "XD2"
@@ -68,11 +68,16 @@ dNdz_label2 = "XD2"
 # XD1-XD2-boundary difference plots
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = True
-plot_bnd_diff_movie = True
+plot_bnd_diff = False
+plot_bnd_diff_movie = False
 
 # dNdm plots
-
+plot_dNdm = True # Plot XD1.
+plot_dNdm2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
+dNdm_fname = "dNdm-XD1-XD2-DESI"
+dNdm_plot_type = "DESI" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
+dNdm_label1 = "XD1"
+dNdm_label2 = "XD2"
 
 
 
@@ -449,8 +454,8 @@ if two_projections and plot_bnd_diff_movie:
 	if (np.abs(w_mag-w_mag2)<1e-6) and (np.abs(w_cc-w_cc2)<1e-6):
 		dm = w_mag
 		for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-		    print("Index %d, Slice %.3f" % (i,m))
-		    XD.plot_slice_compare(grid, grid2, m, diff_bnd_fig_directory, diff_bnd_fname, movie_tag=i)   
+			print("Index %d, Slice %.3f" % (i,m))
+			XD.plot_slice_compare(grid, grid2, m, diff_bnd_fig_directory, diff_bnd_fname, movie_tag=i)
 
 		print("Completed.\n")
 
@@ -462,14 +467,16 @@ if two_projections and plot_bnd_diff_movie:
 
 
 # ##############################################################################
-# print("10. Make dNdm plots for both grids.")
-# # Total 
-# fname = "dNdm-XD-Ntot3000-fiducial-dNdm-Total"
-# XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1 ="Ntot3000", \
-# 	class_eff =  [1.*DESI_frac, 1.*DESI_frac, 0.0, 0.6*DESI_frac, 0., 0.25*DESI_frac, 0.])
+print("Make dNdm plots.")
 
-# # DESI
-# fname = "dNdm-XD-Ntot3000-fiducial-dNdm-DESI"
-# XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1 ="Ntot3000", \
-# 	class_eff =  [1.*DESI_frac, 1.*DESI_frac, 0.0, 0.6*DESI_frac, 0., 0.25*DESI_frac, 0.])
-# print("Completed.\n")
+if plot_dNdm:
+	if two_projections and plot_dNdm2:
+		# For both
+		XD.plot_dNdm_XD(grid, grid2, fname=dNdm_fname, plot_type=dNdm_plot_type, label1 =dNdm_label1, label2 = dNdm_label2, \
+			class_eff =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.],\
+			class_eff2 =  [gold_eff2*DESI_frac2, silver_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0.])
+	else:
+		XD.plot_dNdm_XD(grid, fname=dNdm_fname, plot_type=dNdm_plot_type, label1 = dNdm_label1, \
+			class_eff =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.])
+	print("Completed.\n")
+
