@@ -24,7 +24,7 @@ Reproducibility
 	
 	A) Download scripts 
 		- xd-elg-download.sh:
-			Describes where and how all the relevant files can be obtained from the web.
+			Describes where and how certain relevant files can be obtained from the web.
 			For certain files, "wget <url>" commands are provided for convenience.
 			Download all the files before using "reproducibility" section below.
 
@@ -95,13 +95,48 @@ Reproducibility
 			selection boundary using different depths (e.g., glim = 24.3 instead of glim = 23.8.).
 			Show results for changing limiting depths by pm 0.25 and pm 0.5 for each band.
 
-		Note: We would like to study how using individual particle depth affects the selection.
-
 
 ###################################################################################################
-Explore XD method
-	The following set of scripts are provided so that the user can explore the XD ELG selection
-	algorithm. 
+Example script for the user:
+	The user can use the script "XD-user.py" to 1) make projections based on the selection algorithm
+	using the parameters provided (XD-parameters) and 2) apply the selection algorithm on DEEP2 
+	dataset. Note that since DEEP2 catalog may not be representative of the rest of DESI imaging
+	catalogs, the selection on data should be treated as a sanity check rather than a rigorous 
+	demonstration of the correctness of the algorithm.
+	
+
+###################################################################################################
+Data repository:
+	The following data can be found on ...
+	The files A) through C) must be downloaded before running the scripts in the "Reproducbility"
+	section.
+
+	A) tycho2.fits
+		Used for stellar masking.
+		URL:
+
+	B) deep2-f4-photo-newman.fits
+		Cleaned DEEP2 Field 4 photometric data obtained from Jeff Newman. 
+		URL: 
+
+	C) deep2-f**-redz-oii.fits
+		DEEP2 redshift catalogs that contain OII 3727 and target weight information and produced by 
+		John Moustakas.
+		URL:
+
+	D) color-selection.txt
+		This file contains information about which DEEP2 photometric objects were selected for
+		spectroscopic information in Field 2, 3, and 4.
+
+	E) XD-parameters
+		A directory containing GMM and dNdm parameters for all relevant classes for making 
+		XD-projections can be found here. They are the results obtained from running the scripts above.
+		URL:
+
+	F) DECaLS-DR3-DEEP2f**-glim24.fits
+		The final data products of running the scripts above. Required for perfomring validation.
+		URL:
+
 
 ###################################################################################################
 Utilities

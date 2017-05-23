@@ -108,7 +108,7 @@ iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, ziv
                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 
 # XD projection
-return_format = ["XD", "Proj.", str("%.2f"%glim), str("%.2f"%rlim), str("%.2f"%zlim),"Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+return_format = ["XD", "Proj.", str("%.3f"%glim), str("%.3f"%rlim), str("%.3f"%zlim),"Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM_fiducial),  "\\\\ \hline"]
 print(class_breakdown_cut_grid(grid_fiducial, return_format))
 
@@ -125,10 +125,10 @@ print(class_breakdown_cut(cn[iXD_fiducial], w[iXD_fiducial], area,rwd="D", num_c
 # but make selection assuming fiducial depths.
 reg_r = 5e-4
 
-dm25 = 0.25
-dm50 = 0.50
+dm_var = 0.125
+dm_varX2 = dm_var*2
 
-dm_list = [-dm50, -dm25, dm25, dm50]
+dm_list = [-dm_varX2, -dm_var, dm_var, dm_varX2]
 
 for dm in dm_list:
 	for k in range(3):
@@ -148,7 +148,7 @@ for dm in dm_list:
 									maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 
 		# XD projection - Selection based on "true" depth
-		return_format = ["XD", "Adap.", str("%.2f"%glim_var), str("%.2f"%rlim_var), str("%.2f"%zlim_var),"Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+		return_format = ["XD", "Adap.", str("%.3f"%glim_var), str("%.3f"%rlim_var), str("%.3f"%zlim_var),"Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
 		      "DESI", "Total", "Eff", str("%.3f"%last_FoM_var),  "\\\\ \hline"]
 		print(class_breakdown_cut_grid(grid, return_format, selection="select_var"))
 
@@ -161,12 +161,12 @@ for dm in dm_list:
 		##############################################################################
 		# Make dNdm plots.
 		# Total 
-		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-Total"%(glim_var*100,rlim_var*100,zlim_var*100)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-Total"%(glim_var*1000,rlim_var*1000,zlim_var*1000)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
 
 		# DESI
-		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-DESI"%(glim_var*100,rlim_var*100,zlim_var*100)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-DESI"%(glim_var*1000,rlim_var*1000,zlim_var*1000)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
 
 
 

@@ -5,6 +5,13 @@ import os
 os.environ['NUMBA_NUM_THREADS'] = "1"
 import numba as nb
 
+# matplotlib ticks
+import matplotlib as mpl 
+mpl.rcParams['xtick.major.size'] = 10
+mpl.rcParams['xtick.major.width'] = 1.5
+mpl.rcParams['ytick.major.size'] = 10
+mpl.rcParams['ytick.major.width'] = 1.5
+
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
 
@@ -281,10 +288,10 @@ def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -358,10 +365,10 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -393,15 +400,15 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
     
     # Compute the densities.
     grid["Total"][:] = 0
-    grid["DESI"][:] = 0
+    grid["FoM_num"][:] = 0
     for i in range(7):
         cname = cnames[i]
         grid[cname][:] = GMM_vectorized(rz, gr, params[i, "amp"], params[i, "mean"],params[i, "covar"], gvar, rvar, zvar) * dNdm(params[(i,"dNdm")], flux) * Vcell
         grid["Total"][:] += grid[cname][:] # Computing the total
-        grid["DESI"][:] += f_i[i]*grid[cname][:]# Computing DESI
+        grid["FoM_num"][:] += f_i[i]*grid[cname][:]# Computing FoM_num
     
     # Computing FoM
-    grid["FoM"][:] = grid["DESI"][:]/(grid["Total"][:]+reg_r+1e-12)
+    grid["FoM"][:] = grid["FoM_num"][:]/(grid["Total"][:]+reg_r+1e-12)
     
     # Rank order the cells according to FoM number.
     grid.sort(order='FoM')
@@ -460,7 +467,7 @@ def generate_grid_var(w_cc, w_mag, minmag, maxmag):
       dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
              ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
              ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
-             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('D2reject','f8'), ('FoM_num','f8'),('Total','f8'),\
              ('FoM','f8'), ('select','i4'),('select_var','i4')]);
 
     return grid    
@@ -502,7 +509,7 @@ def generate_grid(w_cc, w_mag, minmag, maxmag):
       dtype=[('gr','f8'),('rz','f8'), ('mag', 'f8'),\
              ('Gold','f8'),('Silver','f8'),('LowOII','f8'),\
              ('NoOII','f8'),('LowZ','f8'),('NoZ','f8'),\
-             ('D2reject','f8'), ('DESI','f8'),('Total','f8'),\
+             ('D2reject','f8'), ('FoM_num','f8'),('Total','f8'),\
              ('FoM','f8'), ('select','i4')]);
 
     return grid    
@@ -668,50 +675,51 @@ def find_floating_point_venn_diagram(x1, y1, x2, y2):
     return iAND12, i1NOT2, i2NOT1
 
 
-def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
+def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim=23.4, zlim=22.4,\
                 glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
-                class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.]):
+                class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=1.5):
+
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
     rmag = gmag-grid["gr"][:][ibool]
     zmag = rmag-grid["rz"][:][ibool]
-    if type == "DESI":
+    if plot_type == "DESI":
         dNdm = np.zeros_like(gmag)
         for i in range(7):
             dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
-    elif type == "Total":
+    elif plot_type == "Total":
         dNdm = grid["Total"][:][ibool]
-    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g $ "+label1)
-    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r $ "+label1)
-    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z $ "+label1)
+    plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g $ "+label1, lw=lw)
+    plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r $ "+label1, lw=lw)
+    plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="purple",label="$z $ "+label1, lw=lw)
     
     if grid2 is not None:
         ibool = grid2["select"][:]==1 # only interested in the selected cells.
         gmag = grid2["mag"][:][ibool]
         rmag = gmag-grid2["gr"][:][ibool]
         zmag = rmag-grid2["rz"][:][ibool]
-        if type == "DESI":
+        if plot_type == "DESI":
             dNdm = np.zeros_like(gmag)
             for i in range(7):
                 dNdm += class_eff2[i]*grid2[cnames[i]][:][ibool]
-        elif type == "Total":
+        elif plot_type == "Total":
             dNdm = grid2["Total"][:][ibool]
 
-        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g $ "+label2)
-        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r $ "+label2)
-        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z $ "+label2)
+        plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="green", alpha=0.25, histtype="stepfilled", label="$g $ "+label2, lw=lw)
+        plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="red", alpha=0.25, histtype="stepfilled", label="$r $ "+label2, lw=lw)
+        plt.hist(zmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,color="purple", alpha=0.25, histtype="stepfilled", label="$z $ "+label2, lw=lw)
 
     if label3 is not None:
         ibool = grid["select_var"][:]==1 # only interested in the selected cells.
         gmag = grid["mag"][:][ibool]
         rmag = gmag-grid["gr"][:][ibool]
         zmag = rmag-grid["rz"][:][ibool]
-        if type == "DESI":
+        if plot_type == "DESI":
             dNdm = np.zeros_like(gmag)
             for i in range(7):
                 dNdm += class_eff[i]*grid[cnames[i]][:][ibool]
-        elif type == "Total":
+        elif plot_type == "Total":
             dNdm = grid["Total"][:][ibool]
 #         plt.hist(gmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="green", label="$g$ "+label3, lw=lw)
 #         plt.hist(rmag, bins = np.arange(20, 24.5, 0.025), weights=dNdm,histtype="step",color="red", label= "$r$ "+label3, lw=lw)
@@ -725,23 +733,23 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, type="DESI", glim=23.8, rlim=23.4
         plt.scatter(centers, rhist, color="red", label="$r $ "+label3, marker="*",s=pt_size)
         plt.scatter(centers, zhist, color="purple", label="$z $ "+label3, marker="*",s=pt_size)
 
-    plt.axvline(glim,c="green", linestyle="--")
-    plt.axvline(rlim,c="red", linestyle="--")
-    plt.axvline(zlim,c="purple", linestyle="--")
+    plt.axvline(glim,c="green", linestyle="--", lw=lw*1.5)
+    plt.axvline(rlim,c="red", linestyle="--",  lw=lw*1.5)
+    plt.axvline(zlim,c="purple", linestyle="--",  lw=lw*1.5)
     if (glim2 is not None):
     	if (np.abs(glim2-glim)>1e-6):
-        	plt.axvline(glim2,c="green", linestyle="-.")
+        	plt.axvline(glim2,c="green", linestyle="-.", lw=lw*1.5)
     if (rlim2 is not None):
     	if (np.abs(rlim2-rlim)>1e-6):
-        	plt.axvline(rlim2,c="red", linestyle="-.")
+        	plt.axvline(rlim2,c="red", linestyle="-.", lw=lw*1.5)
     if (zlim2 is not None):
     	if (np.abs(zlim2-zlim)>1e-6):
-        	plt.axvline(zlim2,c="purple", linestyle="-.")    
+        	plt.axvline(zlim2,c="purple", linestyle="-.", lw=lw*1.5)    
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")
     plt.legend(loc="upper left")
-    plt.xlim([20,24.3])
-    plt.ylim([0,70])      
+    plt.xlim([20,24.5])
+    plt.ylim([0,80])      
 
     plt.savefig(fname+".pdf", bbox_inches="tight", dpi=200)
     # plt.show()

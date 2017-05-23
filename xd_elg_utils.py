@@ -12,11 +12,17 @@ from os.path import isfile, join
 import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
-
 # import extreme_deconvolution as XD
 
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
+
+# Matplot ticks
+import matplotlib as mpl
+mpl.rcParams['xtick.major.size'] = 10
+mpl.rcParams['xtick.major.width'] = 1.5
+mpl.rcParams['ytick.major.size'] = 10
+mpl.rcParams['ytick.major.width'] = 1.5
 
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
@@ -29,7 +35,7 @@ deg2arcsec=3600
 def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
     gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
-     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5):
+     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5, lw=1.5):
     """
     Given class number (cn), mask (iselect1), weights (w), redshifts, class efficiencies, plot the redshift
     histogram. 
@@ -50,7 +56,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     if plot_total:
         ibool = np.logical_or((cn==0),(cn==1)) 
         plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w[ibool]/area,\
-                 histtype="step", color=color_total, label=label_total)
+                 histtype="step", color=color_total, label=label_total, lw=lw)
 
         # NoOII:
         ibool = (cn==3) 
@@ -74,7 +80,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
         ibool = np.logical_or((cn==0),(cn==1)) & iselect2
         plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select2[ibool]/area,\
-                 histtype="step", color=color2, label=label2)
+                 histtype="step", color=color2, label=label2, lw=lw)
 
         # NoOII:
         ibool = (cn==3) & iselect2
@@ -82,7 +88,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
         plt.bar(left=0.7, height =N_NoOII/(wNoOII/dz), width=wNoOII, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+ " NoOII (Proj.)", hatch="*")
     
-        plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff, N_NoOII/(wNoOII/dz)/NoOII_eff], color=color2, linewidth=2.0)
+        plt.plot([0.7, 0.7+wNoOII], [N_NoOII/(wNoOII/dz)/NoOII_eff2, N_NoOII/(wNoOII/dz)/NoOII_eff2], color=color2, linewidth=2.0)
 
 
         # NoZ:
@@ -91,7 +97,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
         plt.bar(left=1.4, height =N_NoZ/(wNoZ/dz), width=wNoZ, bottom=0., alpha=0.5,color=color2, \
                 edgecolor =color2, label=label2+" NoZ (Proj.)")         
 
-        plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color2, linewidth=2.0)
+        plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff2, N_NoZ/(wNoZ/dz)/NoZ_eff2], color=color2, linewidth=2.0)
 
     # Selection 1.
     # appropriately weighing the objects.
@@ -103,7 +109,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
     ibool = np.logical_or((cn==0),(cn==1)) & iselect1 # Total
     plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w_select1[ibool]/area,\
-             histtype="step", color=color1, label=label1)
+             histtype="step", color=color1, label=label1, lw=lw)
 
     # NoOII:
     ibool = (cn==3) & iselect1
@@ -272,7 +278,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     """
     See the output.
     """
-    bnd_lw =1
+    bnd_lw =1.5
     
     # Unpack the colors.
     xrz = ydata[:,0]; ygr = ydata[:,1]
@@ -292,7 +298,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     bw = 0.05
     # Number of components/linewidth
     K = Sxamp_init.size
-    elw = 1. # ellipse linewidth
+    elw = 1.5 # ellipse linewidth
     ea = 0.75 # ellipse transparency
     
     
@@ -696,7 +702,7 @@ def mag2flux(mag):
         
 
 
-def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol =1e-5, broken_tol=1e-2, fname=None):
+def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol =1e-5, broken_tol=1e-2, fname=None, lw=1.5):
     """
     Given the magnitudes and the corresponding weight, and the parameters for the histogram, 
     return the best fit parameters for a power law and a broken power law.
@@ -830,11 +836,11 @@ def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol
     xvec = np.arange(magmin, magmax, 1e-3)
     yvec = pow_law(best_params_pow, mag2flux(xvec))*np.float(bw)
     pow_str = pow_legend(best_params_pow)
-    plt.plot(xvec,yvec, c = "red", label = pow_str)
+    plt.plot(xvec,yvec, c = "red", label = pow_str, lw=lw)
     # broken  power law fit
     yvec = broken_pow_law(best_params_broken, mag2flux(xvec))*np.float(bw)
     broken_str = broken_legend(best_params_broken)
-    plt.plot(xvec,yvec, c = "blue", label=broken_str)
+    plt.plot(xvec,yvec, c = "blue", label=broken_str, lw=lw)
     # hist
     plt.bar(bin_edges[:-1], hist, width=bw, alpha=0.5, color="g")
     # deocration

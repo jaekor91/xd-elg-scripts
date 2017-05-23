@@ -102,7 +102,7 @@ start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=N_tot, f_i=f_i, \
                           reg_r=5e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
-                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_plot_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
@@ -121,7 +121,7 @@ gflux, rflux, zflux = grzflux
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
                         glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
                        rz_ref=0.5, reg_r=5e-4/(w_cc**2 * w_mag), f_i=f_i,\
-                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_plot_type = [1, 1, 0, 1, 0, 0, 1])
 print("Completed.\n")
 
 
@@ -188,14 +188,14 @@ start = time.time()
 grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
                           reg_r=5e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
-                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_plot_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
 
 iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM_fiducial, param_directory, \
             glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
                        rz_ref=0.5, reg_r=5e-4/(w_cc**2 * w_mag), f_i=f_i,\
-                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
+                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_plot_type = [1, 1, 0, 1, 0, 0, 1])
 print("Completed.\n")
 
 ##############################################################################
@@ -236,11 +236,11 @@ print("9. Create many slices for a movie/stills.")
 print("10. Make dNdm plots for both grids.")
 # Total 
 fname = "dNdm-XD-Ntot3000-fiducial-dNdm-Total"
-XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="Total", label1 ="Ntot3000", \
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1 ="Ntot3000", \
 	class_eff =  [1.*frac_N3000, 1.*frac_N3000, 0.0, 0.6*frac_N3000, 0., 0.25*frac_N3000, 0.])
 
 # DESI
 fname = "dNdm-XD-Ntot3000-fiducial-dNdm-DESI"
-XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, type="DESI", label1 ="Ntot3000", \
+XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1 ="Ntot3000", \
 	class_eff =  [1.*frac_N3000, 1.*frac_N3000, 0.0, 0.6*frac_N3000, 0., 0.25*frac_N3000, 0.])
 print("Completed.\n")

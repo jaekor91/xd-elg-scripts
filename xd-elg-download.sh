@@ -1,5 +1,5 @@
-# All files referred to here must be downloaded before the training
-# scripts are run.
+# All files referred to here as well as under the Data repostiory section in README 
+# must be downloaded before the training scripts are run.
 
 # Download DEEP2 photometry files
 # Note 1: For Field 4, a combined and cleaned catalog was obtained from Jeff Newman.
@@ -33,7 +33,3 @@ wget http://portal.nersc.gov/project/cosmo/data/legacysurvey/dr3/survey-bricks-d
 source DR3-DEEP2f2-tractor-download.sh	
 source DR3-DEEP2f3-tractor-download.sh	
 source DR3-DEEP2f4-tractor-download.sh
-
-
-# Tycho-2 catalog used for stellar masking. 
-# Note: Available on the data repository above. Filename: tycho2.fits
