@@ -57,7 +57,6 @@ bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
 mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
-
 # dNdz plots
 dz = 0.05 # Redshift binwidth
 plot_dNdz = True
@@ -66,13 +65,13 @@ dNdz_fname = "dNdz-XD1-XD2.png"
 dNdz_label1 = "XD1"
 dNdz_label2 = "XD2"
 
+# XD1-XD2-boundary difference plots
+diff_bnd_fname = "XD1-XD2-diff"
+diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
+plot_bnd_diff = True
+plot_bnd_diff_movie = True
 
 # dNdm plots
-
-# dNdm movie
-
-# 
-
 
 
 
@@ -415,7 +414,7 @@ if plot_dNdz:
 	if two_projections and plot_dNdz2:
 		# For both
 		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
-			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="blue", color2="black", \
+			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
 			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
 			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
@@ -427,31 +426,39 @@ if plot_dNdz:
 			iselect2=None, plot_total=False, fname=dNdz_fname, color1="black", \
 			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
-		print("Completed.\n")		
+		print("Completed.\n")
+
+
+##############################################################################
+# Make comparison boundary plots.
+if  two_projections and plot_bnd_diff:
+	print("Plot figures that compare boundaries XD1 and XD2 (reference).")
+	if (np.abs(w_mag-w_mag2)<1e-6) and (np.abs(w_cc-w_cc2)<1e-6):
+		for m in mag_slices:
+		    print("Mag %.3f"%m)
+		    XD.plot_slice_compare(grid, grid2, m, diff_bnd_fig_directory, diff_bnd_fname)
+		print("Completed.\n")
+	else:		print("The grid dimensions must be the same for this comparison.")
 
 
 
-# ##############################################################################
-# print("9. Create many slices for a movie/stills.")
-# # bnd_fig_directory = "./bnd_fig_directory/XD-Ntot3000-fiducial-comparison/"
-# # fname = "XD-Ntot3000-fiducial-comparison"
+##############################################################################
+# Many comparison boundary plots for generating a movie.
+if two_projections and plot_bnd_diff_movie:
+	print("Generate a movie comparing boundaries XD1 and XD2 (reference).")
+	if (np.abs(w_mag-w_mag2)<1e-6) and (np.abs(w_cc-w_cc2)<1e-6):
+		dm = w_mag
+		for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+		    print("Index %d, Slice %.3f" % (i,m))
+		    XD.plot_slice_compare(grid, grid2, m, diff_bnd_fig_directory, diff_bnd_fname, movie_tag=i)   
 
-# # print("9a. Creating stills")
-# # for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-# #     print("Slice %.3f"%m)
-# #     XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname)
-# # print("Completed.\n")
+		print("Completed.\n")
 
-# # print("9b. Creating a movie")
-# # dm = w_mag
-# # for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-# #     print("Index %d, Slice %.3f" % (i,m))
-# #     XD.plot_slice_compare(grid, grid_fiducial, m, bnd_fig_directory, fname, movie_tag=i)   
+		print("Command for creating a movie.:\n \
+		    ffmpeg -r 6 -start_number 0 -i %s-mag0-%%d.png -vcodec mpeg4 -y %s-movie.mp4"%(diff_bnd_fname, diff_bnd_fname))
+	else:
+		print("The grid dimensions must be the same for this comparison.")
 
-# # print("Completed.\n")
-
-# # print("Command for creating a movie.:\n \
-# #     ffmpeg -r 6 -start_number 0 -i XD-Ntot3000-fiducial-comparison-mag0-%d.png -vcodec mpeg4 -y XD-Ntot3000-fiducial-comparison-movie.mp4")
 
 
 # ##############################################################################
