@@ -733,18 +733,18 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
         plt.scatter(centers, rhist, color="red", label="$r $ "+label3, marker="*",s=pt_size)
         plt.scatter(centers, zhist, color="purple", label="$z $ "+label3, marker="*",s=pt_size)
 
-    plt.axvline(glim,c="green", linestyle="--", lw=lw)
-    plt.axvline(rlim,c="red", linestyle="--",  lw=lw)
-    plt.axvline(zlim,c="purple", linestyle="--",  lw=lw)
+    plt.axvline(glim,c="green", linestyle="--", lw=lw*1.5)
+    plt.axvline(rlim,c="red", linestyle="--",  lw=lw*1.5)
+    plt.axvline(zlim,c="purple", linestyle="--",  lw=lw*1.5)
     if (glim2 is not None):
     	if (np.abs(glim2-glim)>1e-6):
-        	plt.axvline(glim2,c="green", linestyle="-.", lw=lw)
+        	plt.axvline(glim2,c="green", linestyle="-.", lw=lw*1.5)
     if (rlim2 is not None):
     	if (np.abs(rlim2-rlim)>1e-6):
-        	plt.axvline(rlim2,c="red", linestyle="-.", lw=lw)
+        	plt.axvline(rlim2,c="red", linestyle="-.", lw=lw*1.5)
     if (zlim2 is not None):
     	if (np.abs(zlim2-zlim)>1e-6):
-        	plt.axvline(zlim2,c="purple", linestyle="-.", lw=lw)    
+        	plt.axvline(zlim2,c="purple", linestyle="-.", lw=lw*1.5)    
     plt.xlabel("Magnitude")
     plt.ylabel("Number density per 0.025 mag bin")
     plt.legend(loc="upper left")
