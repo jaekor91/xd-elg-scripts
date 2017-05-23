@@ -30,22 +30,48 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # Note: This script can be used to make upto two projections based on two different
 # sets of parameters. When making comparisons, the projection based on the second
 # set is considered as a reference.
-# 
+
+
 ##############################################################################
 # --- 1 or 2 projections? --- #
 # If True, two projections based on two sets of parameters below are computed
 # and compared.
 two_projections = True
-# 
+
+
 ##############################################################################
 # --- Outputs --- #
+# XD1 for projection based on first set and XD2 corresponding to the second set
+
+# XD1: Boundary plots 
+plot_bnd = False
+plot_bnd_movie = False # Generate many slices for a movie.
+bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
+bnd_fname = "XD1-bnd"
+mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
+
+# XD2: Boundary plots
+plot_bnd2 = False
+plot_bnd_movie2 = False # Generate many slices for a movie.
+bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
+bnd_fname2 = "XD2-bnd"
+mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
+
+
+# dNdz plots
+dz = 0.05 # Redshift binwidth
+plot_dNdz = True
+plot_dNdz2 = True
+dNdz_fname = "dNdz-XD1-XD2.png"
+dNdz_label1 = "XD1"
+dNdz_label2 = "XD2"
+
+
 # dNdm plots
 
 # dNdm movie
 
 # 
-
-# dNdz plots
 
 
 
@@ -72,7 +98,7 @@ rlim=23.4
 zlim=22.4
 
 # Total number of fibers to be used.
-N_tot=2400
+N_tot=3000
 
 # Figure of Merit (FoM) weights. Recall FoM = (sum_j f_j * n_j ) / (sum_i n_i)
 # Note that this is different "class efficiency" which we define as
@@ -250,8 +276,6 @@ cn[cn<0] = 7
 print("Completed.\n")
 
 
-
-
 ##############################################################################
 print("Compute XD projection 1.")
 start = time.time()
@@ -275,13 +299,12 @@ if two_projections:
 	print("Completed.\n")	
 
 
-
-
 ##############################################################################
 # Unpack variables
 g,r,z = grz
 givar, rivar, zivar = grzivar
 gflux, rflux, zflux = grzflux
+
 print("Apply XD selection 1 to DEEP2-DECaLS data.")
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
                         glim=glim, rlim=rlim, zlim=zlim, gr_ref=gr_ref,\
@@ -291,7 +314,7 @@ print("Completed.\n")
 
 if two_projections:
 	print("Apply XD selection 2 to DEEP2-DECaLS data.")
-	iXD2, FoM2 = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory2, \
+	iXD2, FoM2 = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM2, param_directory2, \
 	                        glim=glim2, rlim=rlim2, zlim=zlim2, gr_ref=gr_ref2,\
 	                       rz_ref=rz_ref2, reg_r=reg_r2/(w_cc2**2 * w_mag2), f_i=f_i2,\
 	                       gmin = gmin2, gmax = gmax2, K_i = K_i2, dNdm_type = dNdm_type2)
@@ -331,67 +354,81 @@ if two_projections:
 	return_format = ["XD2", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
 	print(class_breakdown_cut(cn[iXD2], w[iXD2], area,rwd="D", num_classes=8, \
-	     return_format = return_format, class_eff = [gold_eff2*DESI_frac, gold_eff2*DESI_frac, 0.0, NoOII_eff2*DESI_frac, 0., NoZ_eff2*DESI_frac, 0., 0.]))
+	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
 
 	# XD projection
 	return_format = ["XD2", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
-	print(class_breakdown_cut_grid(grid2, return_format, class_eff = [gold_eff2*DESI_frac, gold_eff2*DESI_frac, 0.0, NoOII_eff2*DESI_frac, 0., NoZ_eff2*DESI_frac, 0.]))
+	print(class_breakdown_cut_grid(grid2, return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0.]))
 
 print("Completed.\n")
 
 
-# ##############################################################################
-# print("6. Create many slices for a movie/stills.")
-# # bnd_fig_directory = "./bnd_fig_directory/XD-Ntot3000/"
-# # fname = "XD-Ntot3000"
+##############################################################################
+# Make boundary plots.
+if plot_bnd:
+	print("XD1: Create plots of boundary at various magnitudes.")
+	for m in mag_slices:
+	    print("Mag %.3f"%m)
+	    XD.plot_slice(grid, m, bnd_fig_directory, bnd_fname)
+	print("Completed.\n")
 
-# # print("6a. Creating stills")
-# # for m in [22., 22.5, 23.0, 23.5, 23.75, 23.825]:
-# #     print("Slice %.3f"%m)
-# #     XD.plot_slice(grid, m, bnd_fig_directory, fname)
-# # print("Completed.\n")
-
-# # print("6b. Creating a movie")
-# # dm = w_mag
-# # for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
-# #     print("Index %d, Slice %.3f" % (i,m))
-# #     XD.plot_slice(grid, m, bnd_fig_directory, fname, movie_tag=i)   
-
-# # print("Completed.\n")
-
-# # print("Command for creating a movie.:\n \
-# #     ffmpeg -r 6 -start_number 0 -i XD-Ntot3000-mag0-%d.png -vcodec mpeg4 -y XD-Ntot3000-movie.mp4")
+if two_projections and plot_bnd2:
+	print("XD2: Create plots of boundary at various magnitudes.")
+	for m in mag_slices2:
+	    print("Mag %.3f"%m)
+	    XD.plot_slice(grid2, m, bnd_fig_directory2, bnd_fname2)
+	print("Completed.\n")
 
 
-# ##############################################################################
-# print("7. To compare, compute XD projection based on fiducial set of parameters.")
-# param_directory = "./"
-# f_i = [1., 1., 0., 0.25, 0., 0.25, 0.]
+##############################################################################
+# Many boundary plots for generating a movie.
+if plot_bnd_movie:
+	print("XD1: Create many plots of boundary at various magnitudes to generate a movie.")
+	dm = w_mag
+	for i,m in enumerate(np.arange(21.5,24+0.9*w_mag, w_mag)):
+	    print("Index %d, Slice %.3f" % (i,m))
+	    XD.plot_slice(grid, m, bnd_fig_directory, bnd_fname, movie_tag=i)   
 
-# start = time.time()
-# grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
-#                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=f_i, \
-#                           reg_r=5e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
-#                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
-# print("Time taken: %.2f seconds" % (time.time()-start))
-# print("Computed last FoM based on the grid: %.3f"%last_FoM)
+	print("Completed.\n")
 
-# iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM_fiducial, param_directory, \
-#             glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
-#                        rz_ref=0.5, reg_r=5e-4/(w_cc**2 * w_mag), f_i=f_i,\
-#                        gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
-# print("Completed.\n")
+	print("Command for creating a movie.:\n \
+	    ffmpeg -r 6 -start_number 0 -i %s-mag0-%%d.png -vcodec mpeg4 -y %s-movie.mp4"%(bnd_fname, bnd_fname))
 
-# ##############################################################################
-# print("8. Plot n(z) for the selection.")
-# dz = 0.05
-# fname = "dNdz-XD-Ntot3000-fiducial-DEEP2.png"
-# plot_dNdz_selection(cn, w, iXD, redz, area, dz=0.05,\
-#     iselect2=iXD_fiducial, plot_total=False, fname=fname, color1="blue", color2="black", color_total="green",\
-#     label1="XD Ntot3000", label2="XD fid.", gold_eff = DESI_frac, silver_eff = DESI_frac, NoOII_eff = DESI_frac*0.6, \
-#     NoZ_eff = DESI_frac*0.25)
-# print("Completed.\n")
+if two_projections and plot_bnd_movie2:
+	print("XD2: Create many plots of boundary at various magnitudes to generate a movie.")
+	dm = w_mag2
+	for i,m in enumerate(np.arange(21.5,24+0.9*w_mag2, w_mag2)):
+	    print("Index %d, Slice %.3f" % (i,m))
+	    XD.plot_slice(grid2, m, bnd_fig_directory2, bnd_fname2, movie_tag=i)   
+
+	print("Completed.\n")
+
+	print("Command for creating a movie.:\n \
+	    ffmpeg -r 6 -start_number 0 -i %s-mag0-%%d.png -vcodec mpeg4 -y %s-movie.mp4"%(bnd_fname2, bnd_fname2))		
+
+
+
+##############################################################################
+print("Plot n(z) for XD projections.")
+if plot_dNdz:
+	if two_projections and plot_dNdz2:
+		# For both
+		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
+			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="blue", color2="black", \
+			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
+			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
+		print("Completed.\n")
+	else:
+		# For single
+		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
+			iselect2=None, plot_total=False, fname=dNdz_fname, color1="black", \
+			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
+		print("Completed.\n")		
+
 
 
 # ##############################################################################
