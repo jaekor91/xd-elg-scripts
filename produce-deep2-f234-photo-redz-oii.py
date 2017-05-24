@@ -18,8 +18,9 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "","D2
 
 ##############################################################################
 print("1. Load and combine DEEP2 extended pcat files for Fields 2, 3, and 4, respectively.")
-print("File names for Fields 2 and 3: pcat_ext.**.fits")
-print("File name for Field 4: deep2-f4-photo-newman.fits")
+print("File names for Fields 2, 3 and 4: pcat_ext.**.fits")
+print("Special treatment to Field 4 data.")
+
 # fp = 21, 22
 pcat21 = fits.open(data_directory+"pcat_ext.21.fits")
 pcat22 = fits.open(data_directory+"pcat_ext.22.fits")
@@ -37,8 +38,21 @@ pcat32.close()
 pcat33.close()
 
 # field4
-print("Field 4. Expected warning.")
-pcat4= fits.open(data_directory+"deep2-f4-photo-newman.fits")[1].data
+# fp = 41, 42, 43
+pcat41 = fits.open(data_directory+"pcat_ext.41.fits")[1].data
+pcat42 = fits.open(data_directory+"pcat_ext.42.fits")[1].data
+pcat43 = fits.open(data_directory+"pcat_ext.43.fits")[1].data
+# Cross-match 43 and 41 to 42.
+
+idx41in42, _ = cross_match_catalogs(pcat41, pcat42)
+idx43in42, _ = cross_match_catalogs(pcat43, pcat42)
+
+ibool1 = np.ones(pcat41.shape[0], dtype=bool)
+ibool1[idx41in42] = False
+ibool3 = np.ones(pcat43.shape[0], dtype=bool)
+ibool3[idx43in42] = False
+
+pcat4 = np.hstack((pcat41[ibool1], pcat42, pcat43[ibool3]))
 
 print("Completed.\n")
 
@@ -68,7 +82,7 @@ idx = np.logical_or.reduce((window_mask(pcat3_good["RA_DEEP"], pcat3_good["DEC_D
 pcat3_trimmed = pcat3_good[idx]
 
 # Field 4
-idx = np.logical_or(window_mask(pcat4_good["RA"], pcat4_good["DEC"], "windowf.41.fits"), window_mask(pcat4_good["RA"], pcat4_good["DEC"], "windowf.42.fits"))
+idx = np.logical_or(window_mask(pcat4_good["RA_DEEP"], pcat4_good["DEC_DEEP"], "windowf.41.fits"), window_mask(pcat4_good["RA_DEEP"], pcat4_good["DEC_DEEP"], "windowf.42.fits"))
 pcat4_trimmed = np.copy(pcat4_good[idx])
 
 print("Completed.\n")
@@ -169,7 +183,7 @@ for i in range(len(new_col_list)):
 
 # Field 4
 del pcat4
-col_name_list = ["OBJNO_zcat", "RA_zcat", "DEC_zcat", "OII_3727","OII_3727_ERR", "RED_Z", "Z_ERR", "ZQUALITY", "TARG_WEIGHT"]
+col_name_list = ["OBJNO_zcat", "RA_zcat", "DEC_zcat", "OII_3727","OII_3727_ERR", "RED_Z", "Z_ERR", "ZQUALITY_JOHN", "TARG_WEIGHT"]
 pcat4 = fits.open("deep2-f4-photo-trimmed.fits")[1].data
 idx1, idx2 = match_objno(pcat4["OBJNO"], f4_objno)
 new_col_list = [f4_objno, f4_ra, f4_dec, f4_oii, f4_oii_err, f4_z, f4_z_err, f4_zquality, f4_weight]
