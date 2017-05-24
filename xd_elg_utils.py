@@ -35,7 +35,8 @@ deg2arcsec=3600
 def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
     gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
      iselect2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
-     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5, lw=1.5):
+     label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5, lw=1.5, \
+     label_np1="nP=1", color_np1="deepskyblue", plot_np1 = True):
     """
     Given class number (cn), mask (iselect1), weights (w), redshifts, class efficiencies, plot the redshift
     histogram. 
@@ -126,9 +127,13 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
             edgecolor =color1, label=label1+" NoZ (Proj.)")
 
     plt.plot([1.4, 1.4+wNoZ], [N_NoZ/(wNoZ/dz)/NoZ_eff, N_NoZ/(wNoZ/dz)/NoZ_eff], color=color1, linewidth=2.0)
+
+    # Plotting np=1 line
+    if plot_np1:
+        X,Y = np1_line(dz)
+        plt.plot(X,Y, color=color_np1, label=label_np1, lw=lw*1.5, ls="--")
+
  
-
-
     plt.xlim([0.5,1.4+wNoZ+0.1])
     plt.legend(loc="upper right", fontsize=15)  
     ymax=250
@@ -140,7 +145,44 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     plt.ylabel("dN/d(%.3fz) per sq. degs."%dz)
     plt.savefig(fname, bbox_inches="tight", dpi=400)
     # plt.show()
-    plt.close()    
+    plt.close()
+
+
+def np1_line(dz=0.5):
+    """
+    Given the binwidth dz, return np=1 line.
+    """
+    X, Y = np.asarray([[0.14538014092363039, 1.1627906976744384],
+    [0.17035196758073518, 2.906976744186011],
+    [0.20560848729069203, 5.8139534883720785],
+    [0.2731789775637742, 10.465116279069775],
+    [0.340752313629068, 15.697674418604663],
+    [0.4083256496943619, 20.930232558139494],
+    [0.4729621281972476, 26.16279069767444],
+    [0.5405354642625415, 31.395348837209326],
+    [0.6081088003278353, 36.62790697674416],
+    [0.6756821363931291, 41.860465116279045],
+    [0.7403214606882265, 47.67441860465118],
+    [0.8078919509613086, 52.32558139534882],
+    [0.8754624412343909, 56.97674418604652],
+    [0.9430357772996848, 62.209302325581405],
+    [1.0106034217805555, 66.27906976744185],
+    [1.0811107696160458, 70.93023255813955],
+    [1.1486784140969166, 75],
+    [1.2162432127855753, 78.48837209302326],
+    [1.2867448690366428, 81.97674418604649],
+    [1.3543096677253015, 85.46511627906978],
+    [1.4248084781841568, 88.37209302325581],
+    [1.4953072886430125, 91.27906976744185],
+    [1.5687401108720649, 93.6046511627907],
+    [1.6392389213309202, 96.51162790697674],
+    [1.7097320402053522, 98.2558139534884],
+    [1.7802280048719963, 100.58139534883719],
+    [1.8507211237464292, 102.32558139534885],
+    [1.9212113968286495, 103.48837209302326],
+    [1.9917045157030815, 105.23255813953489]]).T 
+
+    return X, Y*dz/0.1
 
 
 
