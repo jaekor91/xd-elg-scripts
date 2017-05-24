@@ -1266,6 +1266,38 @@ def load_radec(fits):
     dec= fits["dec"][:]
     return ra, dec
 
+def load_radec_ext(pcat):
+    ra = pcat["RA_DEEP"]
+    dec = pcat["DEC_DEEP"]    
+    return ra, dec
+
+def cross_match_catalogs(pcat, pcat_ref, tol=0.5):
+    """
+    Match pcat catalog to pcat_ref via ra and dec.
+    Incorporate astrometric correction if any.
+    """
+    # Load radec
+    ra, dec = load_radec_ext(pcat)
+    ra_ref, dec_ref = load_radec_ext(pcat_ref)
+    
+    # Create spherematch objects
+    c = SkyCoord(ra=ra*u.degree, dec=dec*u.degree)  
+    c_ref = SkyCoord(ra=ra_ref*u.degree, dec=dec_ref*u.degree)  
+    idx, idx_ref, d2d, d3d = c_ref.search_around_sky(c, 1*u.arcsec)
+    
+    # Find the median difference
+    ra_med_diff = np.median(ra_ref[idx_ref]-ra[idx])
+    dec_med_diff = np.median(dec_ref[idx_ref]-dec[idx])
+    
+    print("ra,dec discrepancy: %.3f, %.3f"%(ra_med_diff*3600, dec_med_diff*3600))
+    
+    # Finding matches again taking into account astrometric differnce.
+    c = SkyCoord(ra=(ra+ra_med_diff)*u.degree, dec=(dec+dec_med_diff)*u.degree)  
+    c_ref = SkyCoord(ra=ra_ref*u.degree, dec=dec_ref*u.degree)  
+    idx, idx_ref, d2d, d3d = c_ref.search_around_sky(c, 1*u.arcsec)    
+    
+    return idx, idx_ref    
+
 
 def load_brick_primary(fits):
     return fits['brick_primary'][:]
