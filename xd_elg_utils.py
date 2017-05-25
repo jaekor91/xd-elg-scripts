@@ -1235,6 +1235,28 @@ def combine_tractor(fits_directory):
                 
     return DR3
 
+def combine_tractor_nocut(fits_directory):
+    """
+    Given the file directory, find all Tractor fits files combine them and return as a rec-array.
+    """
+    onlyfiles = [f for f in listdir(fits_directory) if isfile(join(fits_directory, f))]
+    print("Number of files in %s %d" % (fits_directory, len(onlyfiles)-1))
+    
+    
+    DR3 = None
+    for i,e in enumerate(onlyfiles,start=1):
+        # If the file ends with "fits"
+        if e[-4:] == "fits":
+            print("Combining file %d. %s" % (i,e))
+            # If DR3 has been set with something.
+            tmp_table = fits.open(fits_directory+e)[1].data
+            if DR3 is not None:
+                DR3 = np.hstack((DR3, tmp_table))
+            else:
+                DR3 = tmp_table
+                
+    return DR3    
+
 def apply_mask(table):
     """
     Given a tractor catalog table, apply the standard mask. brick_primary and flux inverse variance. 
