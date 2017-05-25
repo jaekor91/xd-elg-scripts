@@ -67,8 +67,8 @@ print("ra, dec median differences in arcsec: %.3f, %.3f\n" %(ra_med_diff_f3*deg2
 
 print("Field 4")
 dr3f4_glim = dr3f4[grz4[0]<glim]
-idx1, idx2 = crossmatch_cat1_to_cat2(dr3f4_glim["RA"],dr3f4_glim["DEC"],deep2f4["RA"], deep2f4["DEC"], tol=1./3600.)
-ra_med_diff_f4, dec_med_diff_f4 = check_astrometry(dr3f4_glim["RA"][idx1],dr3f4_glim["DEC"][idx1],deep2f4["RA"][idx2], deep2f4["DEC"][idx2],pt_size=0.1)
+idx1, idx2 = crossmatch_cat1_to_cat2(dr3f4_glim["RA"],dr3f4_glim["DEC"],deep2f4["RA_DEEP"], deep2f4["DEC_DEEP"], tol=1./3600.)
+ra_med_diff_f4, dec_med_diff_f4 = check_astrometry(dr3f4_glim["RA"][idx1],dr3f4_glim["DEC"][idx1],deep2f4["RA_DEEP"][idx2], deep2f4["DEC_DEEP"][idx2],pt_size=0.1)
 print("# of matches %d"%idx1.size)
 print("ra, dec median differences in arcsec: %.3f, %.3f\n" %(ra_med_diff_f4*deg2arcsec, dec_med_diff_f4*deg2arcsec))
 
@@ -83,7 +83,7 @@ print("The following DEEP2 fields were appended to DECaLS: [('OBJNO', '>i4'), \n
 	 ('MAGB', '>f4'), ('MAGR', '>f4'), ('MAGI', '>f4'),\n\
 	 ('MAGBERR', '>f4'), ('MAGRERR', '>f4'), ('MAGIERR', '>f4'), ('BADFLAG', 'u1'),\n\
 	 ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'),\n\
-	 ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('weight', '>f8'), ('BRI_cut', '>f8'),\n\
+	 ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('BRI_cut', '>f8'),\n\
 	 ('cn', '>f8')]\n \
 	 Note that the appended column names are the same for Fields 2, 3, and 4.")
 
@@ -94,7 +94,7 @@ idx1, idx2 = crossmatch_cat1_to_cat2(dr3f2_glim["RA"]+ra_med_diff_f2,dr3f2_glim[
 f2_only_deep2 = deep2f2[np.setdiff1d(np.arange(deep2f2["RA_DEEP"].size,dtype=int),idx2)]
 save_fits(f2_only_deep2, "unmatched-deep2-f2-photo-redz-oii-glim24.fits")
 # Append DEEP2 info for matched DR3 objects.
-append_list = [('OBJNO', '>i4'), ('BESTB', '>f4'), ('BESTR', '>f4'), ('BESTI', '>f4'), ('BESTBERR', '>f4'), ('BESTRERR', '>f4'), ('BESTIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('weight', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
+append_list = [('OBJNO', '>i4'), ('BESTB', '>f4'), ('BESTR', '>f4'), ('BESTI', '>f4'), ('BESTBERR', '>f4'), ('BESTRERR', '>f4'), ('BESTIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
 dr3f2_glim_deep2 = None
 for e in append_list:
     if dr3f2_glim_deep2 is None:
@@ -116,7 +116,7 @@ idx1, idx2 = crossmatch_cat1_to_cat2(dr3f3_glim["RA"]+ra_med_diff_f3,dr3f3_glim[
 f3_only_deep2 = deep2f3[np.setdiff1d(np.arange(deep2f3["RA_DEEP"].size,dtype=int),idx2)]
 save_fits(f3_only_deep2, "unmatched-deep2-f3-photo-redz-oii-glim24.fits")
 # Append DEEP2 info for matched DR3 objects.
-append_list = [('OBJNO', '>i4'), ('BESTB', '>f4'), ('BESTR', '>f4'), ('BESTI', '>f4'), ('BESTBERR', '>f4'), ('BESTRERR', '>f4'), ('BESTIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('weight', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
+append_list = [('OBJNO', '>i4'), ('BESTB', '>f4'), ('BESTR', '>f4'), ('BESTI', '>f4'), ('BESTBERR', '>f4'), ('BESTRERR', '>f4'), ('BESTIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
 dr3f3_glim_deep2 = None
 for e in append_list:
     if dr3f3_glim_deep2 is None:
@@ -132,13 +132,13 @@ print("Completed.\n")
 
 
 print("Field 4")
-idx1, idx2 = crossmatch_cat1_to_cat2(dr3f4_glim["RA"]+ra_med_diff_f4,dr3f4_glim["DEC"]+dec_med_diff_f4,deep2f4["RA"], deep2f4["DEC"], tol=1./3600.)
+idx1, idx2 = crossmatch_cat1_to_cat2(dr3f4_glim["RA"]+ra_med_diff_f4,dr3f4_glim["DEC"]+dec_med_diff_f4,deep2f4["RA_DEEP"], deep2f4["DEC_DEEP"], tol=1./3600.)
 # check_astrometry(dr3f4_glim["RA"][idx1]+ra_med_diff_f4,dr3f4_glim["DEC"][idx1]+dec_med_diff_f4,deep2f4["RA"][idx2], deep2f4["DEC"][idx2],pt_size=0.1)
 # Save unmatched DEEP2
-f4_only_deep2 = deep2f4[np.setdiff1d(np.arange(deep2f4["RA"].size,dtype=int),idx2)]
+f4_only_deep2 = deep2f4[np.setdiff1d(np.arange(deep2f4["RA_DEEP"].size,dtype=int),idx2)]
 save_fits(f4_only_deep2, "unmatched-deep2-f4-photo-redz-oii-glim24.fits")
 # Append DEEP2 info for matched DR3 objects.
-append_list = [('OBJNO', '>i4'), ('MAGB', '>f4'), ('MAGR', '>f4'), ('MAGI', '>f4'), ('MAGBERR', '>f4'), ('MAGRERR', '>f4'), ('MAGIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('weight', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
+append_list = [('OBJNO', '>i4'), ('BESTB', '>f4'), ('BESTR', '>f4'), ('BESTI', '>f4'), ('BESTBERR', '>f4'), ('BESTRERR', '>f4'), ('BESTIERR', '>f4'), ('BADFLAG', 'u1'), ('OII_3727', '>f8'), ('OII_3727_ERR', '>f8'), ('RED_Z', '>f8'), ('Z_ERR', '>f8'), ('ZQUALITY', '>f8'), ('TARG_WEIGHT', '>f8'), ('BRI_cut', '>f8'), ('cn', '>f8')]
 dr3f4_glim_deep2 = None
 for e in append_list:
     if dr3f4_glim_deep2 is None:
