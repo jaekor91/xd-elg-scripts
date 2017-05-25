@@ -25,11 +25,12 @@ Reproducibility
 	A) Download scripts 
 		- xd-elg-download.sh:
 			Describes where and how certain relevant files can be obtained from the web.
-			For certain files, "wget <url>" commands are provided for convenience.
-			Download all the files before using "reproducibility" section below.
+			"wget <url>" commands are provided for convenience so the user can just type "source 
+			xd-elg-download.sh" to download the desired files. Download all the files before using 
+			"reproducibility" section below.
 
 		- DR3-DEEP2f**-tractor-download.sh:
-			Used to download tractor files as described in xd-elg-download.sh script.
+			Use these to download Tractor files as described in produce-DECaLS-DR3-Tractor-DEEP2f234.
 
 	B) Scripts for preparing and combining DEEP2 and DECaLS DR3 data:
 		- produce-deep2-f234-photo-redz-oii.py:
@@ -112,12 +113,8 @@ Data repository:
 	section.
 
 	A) tycho2.fits
-		Used for stellar masking.
+		Tycho-2 stellar catalog used for stellar masking.
 		URL:
-
-	B) deep2-f4-photo-newman.fits
-		Cleaned DEEP2 Field 4 photometric data obtained from Jeff Newman. 
-		URL: 
 
 	C) deep2-f**-redz-oii.fits
 		DEEP2 redshift catalogs that contain OII 3727 and target weight information and produced by 
