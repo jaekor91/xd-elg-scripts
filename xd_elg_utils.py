@@ -248,6 +248,61 @@ def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_siz
     # plt.show()
     plt.close()
 
+def plot_grzflux_class(grzflux, cn, weight, area, mask=None, pick=None,fname=None,pt_size=0.5, show_plot=False, \
+    xmin=0, xmax=100, ymin=0, ymax=100):
+    """
+    Given [gflux, rflux, zflux] list, cn, weight of objects in a catalog and a particular class number and area, 
+    plot the selected one in its color.
+    
+    fname convention:
+    
+    cc-(grz or grzperp)-(mag)(lim)-(cn)(cname)-(mask1)-(mask2)-...
+    """
+    global colors
+    global cnames
+    bnd_lw =2
+    
+    # Unpack the colors.
+    gflux,rflux,zflux=grzflux; xrz = zflux/rflux; ygr = rflux/gflux
+    if mask is not None:
+        xrz = xrz[mask]
+        ygr = ygr[mask]
+        cn = cn[mask]
+        weight = weight[mask]
+    
+    fig = plt.figure(figsize=(5,5))
+
+    if pick is None:
+        plt.scatter(xrz, ygr,c="black",s=pt_size, edgecolors="none")
+    else:
+        plt.scatter(xrz[cn==pick],ygr[cn==pick], c=colors[pick],s=pt_size*6, edgecolors="none", marker="s")
+        raw = np.sum(cn==pick)
+        if pick <6:
+            density = np.sum(weight[cn==pick])/area
+        else:
+            density = np.sum(cn==pick)/area
+        title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
+        plt.title(title_str,fontsize=15)
+
+    # # FDR boundary practice:
+    # plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="blue")
+    # plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="blue")
+    # Broad
+#     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    plt.xlabel("$r-z$ flux ratio",fontsize=15)
+    plt.ylabel("$g-r$ flux ratio",fontsize=15)
+    plt.axis("equal")
+    plt.axis([xmin, xmax, ymin, ymax])
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)
+    if show_plot:
+        plt.show()
+    plt.close()
+
 def plot_grz_class_all(grz, cn, weight, area, mask=None, fname=None, pt_size1=0.5, pt_size2=0.3):
     """
     Given [g,r,z] list, cn, weight of objects in a catalog and a particular class number and area, 
