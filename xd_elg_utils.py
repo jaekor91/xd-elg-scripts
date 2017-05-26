@@ -1385,11 +1385,6 @@ def load_shape(fits):
     r_exp = fits['SHAPEEXP_R'][:]
     return r_dev, r_exp
 
-def load_grz_invar(fits):
-    givar = fits['decam_flux_ivar'][:][:,1]
-    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
-    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
-    return givar, rivar, zivar
 
 def load_star_mask(table):
     return table["TYCHOVETO"][:].astype(int).astype(bool)
@@ -1412,14 +1407,6 @@ def frac_above_new_oii(oii, weight, new_oii_lim):
     ibool = oii>new_oii_lim
     return weight[ibool].sum()/weight.sum()    
 
-
-def load_grz(fits):
-    # Colors: DECam model flux in ugrizY
-    # mag = 22.5-2.5log10(f)
-    g = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]))
-    r = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]))
-    z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
-    return g, r, z    
 
 def load_fits_table(fname):
     """Given the file name, load  the first extension table."""
@@ -1483,17 +1470,30 @@ def load_grz_flux(fits):
     
     return g,r,z
 
+def load_grz_invar(fits):
+    givar = fits['decam_flux_ivar'][:][:,1]
+    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
+    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
+    return givar, rivar, zivar
+
+def load_grz(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    g = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]))
+    r = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]))
+    z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
+    return g, r, z
+
+  
+
+
 def load_redz(fits):
     """
     Return redshift
     """
     return fits["RED_Z"]
 
-def load_grz_invar(fits):
-    givar = fits['decam_flux_ivar'][:][:,1]
-    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
-    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
-    return givar, rivar, zivar    
+ 
 
 def reasonable_mask(table, decam_mask = "all"):
     """
@@ -1535,7 +1535,8 @@ def is_reasonable_color(grz):
     gr = g-r
     rz = r-z
     
-    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)    
+    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
+
 
 def is_grzflux_pos(grzflux):
     """
