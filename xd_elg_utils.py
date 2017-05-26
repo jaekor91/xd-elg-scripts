@@ -1471,7 +1471,7 @@ def load_grz_flux(fits):
     return g,r,z
 
 def load_grz_invar(fits):
-    givar = fits['decam_flux_ivar'][:][:,1]
+    givar = fits['DECAM_FLUX_IVAR'][:][:,1]
     rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
     zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
     return givar, rivar, zivar
@@ -1484,7 +1484,28 @@ def load_grz(fits):
     z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
     return g, r, z
 
-  
+
+def load_W1W2_flux(fits):
+    """
+    Return raw (un-dereddened) w1, w2 flux values.
+    """
+    w1flux = fits["WISE_FLUX"][:][:,1]
+    w2flux = fits["WISE_FLUX"][:][:,2]
+    return w1flux, w2flux
+
+def load_W1W2_fluxinvar(fits):
+    w1_ivar = fits["WISE_FLUX_IVAR"][:][:,1]
+    w2_ivar = fits["WISE_FLUX_IVAR"][:][:,2]
+    return w1_ivar, w2_ivar
+
+def load_W1W2(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    w1 = (22.5 - 2.5*np.log10(fits['WISE_FLUX'][:][:,1]/fits['WISE_MW_TRANSMISSION'][:][:,0]))
+    w2 = (22.5 - 2.5*np.log10(fits['WISE_FLUX'][:][:,2]/fits['WISE_MW_TRANSMISSION'][:][:,1]))
+    return w1, w2
+
+
 
 
 def load_redz(fits):
