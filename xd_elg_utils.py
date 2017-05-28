@@ -248,6 +248,117 @@ def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_siz
     # plt.show()
     plt.close()
 
+def plot_grzflux_class(grzflux, cn, weight, area, mask=None, pick=None,fname=None,pt_size=0.5, show_plot=False, \
+    xmin=0, xmax=100, ymin=0, ymax=100):
+    """
+    Given [gflux, rflux, zflux] list, cn, weight of objects in a catalog and a particular class number and area, 
+    plot the selected one in its color.
+    
+    fname convention:
+    
+    cc-(grz or grzperp)-(mag)(lim)-(cn)(cname)-(mask1)-(mask2)-...
+    """
+    global colors
+    global cnames
+    bnd_lw =2
+    
+    # Unpack the colors.
+    gflux,rflux,zflux=grzflux; xrz = zflux/rflux; ygr = rflux/gflux
+    if mask is not None:
+        xrz = xrz[mask]
+        ygr = ygr[mask]
+        cn = cn[mask]
+        weight = weight[mask]
+    
+    fig = plt.figure(figsize=(5,5))
+
+    if pick is None:
+        plt.scatter(xrz, ygr,c="black",s=pt_size, edgecolors="none")
+    else:
+        plt.scatter(xrz[cn==pick],ygr[cn==pick], c=colors[pick],s=pt_size*6, edgecolors="none", marker="s")
+        raw = np.sum(cn==pick)
+        if pick <6:
+            density = np.sum(weight[cn==pick])/area
+        else:
+            density = np.sum(cn==pick)/area
+        title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
+        plt.title(title_str,fontsize=15)
+
+    # # FDR boundary practice:
+    # plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="blue")
+    # plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="blue")
+    # Broad
+#     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    plt.xlabel("$r-z$ flux ratio",fontsize=15)
+    plt.ylabel("$g-r$ flux ratio",fontsize=15)
+    plt.axis("equal")
+    plt.axis([xmin, xmax, ymin, ymax])
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)
+    if show_plot:
+        plt.show()
+    plt.close()
+
+
+def plot_fluxratio_class(ratio1, ratio2, cn, weight, area, mask=None, pick=None,fname=None,pt_size=0.5, show_plot=False, \
+    xmin=0, xmax=100, ymin=0, ymax=100, xlabel="z-w1 flux", ylabel="g-r flux"):
+    """
+    Given [gflux, rflux, zflux] list, cn, weight of objects in a catalog and a particular class number and area, 
+    plot the selected one in its color.
+    
+    fname convention:
+    
+    cc-(grz or grzperp)-(mag)(lim)-(cn)(cname)-(mask1)-(mask2)-...
+    """
+    global colors
+    global cnames
+    bnd_lw =2
+    
+    # Unpack the colors.
+    if mask is not None:
+        ratio1 = ratio1[mask]
+        ratio2 = ratio2[mask]
+        cn = cn[mask]
+        weight = weight[mask]
+    
+    fig = plt.figure(figsize=(5,5))
+
+    if pick is None:
+        plt.scatter(ratio1, ratio2,c="black",s=pt_size, edgecolors="none")
+    else:
+        plt.scatter(ratio1[cn==pick],ratio2[cn==pick], c=colors[pick],s=pt_size*6, edgecolors="none", marker="s")
+        raw = np.sum(cn==pick)
+        if pick <6:
+            density = np.sum(weight[cn==pick])/area
+        else:
+            density = np.sum(cn==pick)/area
+        title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
+        plt.title(title_str,fontsize=15)
+
+    # # FDR boundary practice:
+    # plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([0.3, 0.745], [0.195, 0.706], 'k-', lw=bnd_lw, c="blue")
+    # plt.plot( [0.745, 1.6], [0.706, -0.32],'k-', lw=bnd_lw, c="blue")
+    # plt.plot([1.6, 1.6], [-0.32, -4],'k-', lw=bnd_lw, c="blue")
+    # Broad
+#     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
+    # Decoration
+    plt.xlabel(xlabel,fontsize=15)
+    plt.ylabel(ylabel,fontsize=15)
+    plt.axis("equal")
+    plt.axis([xmin, xmax, ymin, ymax])
+    if fname is not None:
+#         plt.savefig(fname+".pdf", bbox_inches="tight",dpi=200)
+        plt.savefig(fname+".png", bbox_inches="tight",dpi=200)
+    if show_plot:
+        plt.show()
+    plt.close()
+
+
 def plot_grz_class_all(grz, cn, weight, area, mask=None, fname=None, pt_size1=0.5, pt_size2=0.3):
     """
     Given [g,r,z] list, cn, weight of objects in a catalog and a particular class number and area, 
@@ -1330,11 +1441,6 @@ def load_shape(fits):
     r_exp = fits['SHAPEEXP_R'][:]
     return r_dev, r_exp
 
-def load_grz_invar(fits):
-    givar = fits['decam_flux_ivar'][:][:,1]
-    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
-    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
-    return givar, rivar, zivar
 
 def load_star_mask(table):
     return table["TYCHOVETO"][:].astype(int).astype(bool)
@@ -1357,14 +1463,6 @@ def frac_above_new_oii(oii, weight, new_oii_lim):
     ibool = oii>new_oii_lim
     return weight[ibool].sum()/weight.sum()    
 
-
-def load_grz(fits):
-    # Colors: DECam model flux in ugrizY
-    # mag = 22.5-2.5log10(f)
-    g = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]))
-    r = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]))
-    z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
-    return g, r, z    
 
 def load_fits_table(fname):
     """Given the file name, load  the first extension table."""
@@ -1428,17 +1526,51 @@ def load_grz_flux(fits):
     
     return g,r,z
 
+def load_grz_invar(fits):
+    givar = fits['DECAM_FLUX_IVAR'][:][:,1]
+    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
+    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
+    return givar, rivar, zivar
+
+def load_grz(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    g = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]))
+    r = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]))
+    z = (22.5 - 2.5*np.log10(fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]))
+    return g, r, z
+
+
+def load_W1W2_flux(fits):
+    """
+    Return raw (un-dereddened) w1, w2 flux values.
+    """
+    w1flux = fits["WISE_FLUX"][:][:,1]
+    w2flux = fits["WISE_FLUX"][:][:,2]
+    return w1flux, w2flux
+
+def load_W1W2_fluxinvar(fits):
+    w1_ivar = fits["WISE_FLUX_IVAR"][:][:,1]
+    w2_ivar = fits["WISE_FLUX_IVAR"][:][:,2]
+    return w1_ivar, w2_ivar
+
+def load_W1W2(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    w1 = (22.5 - 2.5*np.log10(fits['WISE_FLUX'][:][:,1]/fits['WISE_MW_TRANSMISSION'][:][:,0]))
+    w2 = (22.5 - 2.5*np.log10(fits['WISE_FLUX'][:][:,2]/fits['WISE_MW_TRANSMISSION'][:][:,1]))
+    return w1, w2
+
+
+
+
 def load_redz(fits):
     """
     Return redshift
     """
     return fits["RED_Z"]
 
-def load_grz_invar(fits):
-    givar = fits['decam_flux_ivar'][:][:,1]
-    rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
-    zivar = fits['DECAM_FLUX_IVAR'][:][:,4]
-    return givar, rivar, zivar    
+ 
 
 def reasonable_mask(table, decam_mask = "all"):
     """
@@ -1480,7 +1612,8 @@ def is_reasonable_color(grz):
     gr = g-r
     rz = r-z
     
-    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)    
+    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
+
 
 def is_grzflux_pos(grzflux):
     """
