@@ -1526,6 +1526,14 @@ def load_grz_flux(fits):
     
     return g,r,z
 
+def load_grz_flux_dereddened(fits):
+    # Colors: DECam model flux in ugrizY
+    # mag = 22.5-2.5log10(f)
+    g = fits['decam_flux'][:][:,1]/fits['decam_mw_transmission'][:][:,1]
+    r = fits['decam_flux'][:][:,2]/fits['decam_mw_transmission'][:][:,2]
+    z = fits['decam_flux'][:][:,4]/fits['decam_mw_transmission'][:][:,4]
+    return g, r, z    
+
 def load_grz_invar(fits):
     givar = fits['DECAM_FLUX_IVAR'][:][:,1]
     rivar = fits['DECAM_FLUX_IVAR'][:][:,2]
