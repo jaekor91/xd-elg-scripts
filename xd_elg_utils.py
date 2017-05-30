@@ -31,6 +31,108 @@ large_random_constant = -999119283571
 deg2arcsec=3600
 
 
+def return_file(fname):
+    with open (fname, "r") as myfile:
+        data=myfile.readlines()
+    return data
+
+def HMS2deg(ra=None, dec=None):
+    rs, ds = 1, 1
+    if dec is not None:
+        D, M, S = [float(i) for i in dec.split(":")]
+        if str(D)[0] == '-':
+            ds, D = -1, abs(D)
+        dec= D + (M/60) + (S/3600)
+
+    if ra is not None:
+        H, M, S = [float(i) for i in ra.split(":")]
+        if str(H)[0] == '-':
+            rs, H = -1, abs(H)
+        ra = (H*15) + (M/4) + (S/240)
+
+    if (ra is not None) and (dec is not None):
+        return ra, dec 
+    elif ra is not None: 
+        return ra
+    else:
+        return dec
+    
+def MMT_radec(field, MMT_data_directory="./MMT_data/"):
+    """
+    field is one of [0,1,2]:
+        - 0: 16hr observation 1
+        - 1: 16hr observation 2
+        - 2: 23hr observation
+    MMT_data_directory: Where the relevant header files are stored.
+    """
+    num_fibers = 300
+
+    if field==0:
+        # 16hr2_1
+        # Header file name
+        fname = MMT_data_directory+"config1FITS_Header.txt"
+        # Get info corresponding to the fibers
+        OnlyAPID = [line for line in return_file(fname) if line.startswith("APID")]
+        # Get the object type
+        APID_types = [line.split("= '")[1].split(" ")[0] for line in OnlyAPID]
+        # print(APID_types)
+        # Getting index of targets only
+        ibool1 = np.zeros(num_fibers,dtype=bool)
+        for i,e in enumerate(APID_types):
+            if e.startswith("5"):
+                ibool1[i] = True        
+        APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool1[i]]
+        # Extract ra,dec
+        ra_str = [APID_targets[i].split("'")[1].split(" ")[1] for i in range(len(APID_targets))]
+        dec_str = [APID_targets[i].split("'")[1].split(" ")[2] for i in range(len(APID_targets))]
+        ra = [HMS2deg(ra=ra_str[i]) for i in range(len(ra_str))]
+        dec = [HMS2deg(dec=dec_str[i]) for i in range(len(ra_str))]
+    elif field==1:
+        # 16hr2_2
+        # Header file name
+        fname = MMT_data_directory+"config2FITS_Header.txt"
+        # Get info corresponding to the fibers
+        OnlyAPID  = return_file(fname)[0].split("= '")[1:]
+        # Get the object type
+        APID_types = [line.split(" ")[0] for line in OnlyAPID]
+        # print(APID_types)
+        # Getting index of targets only
+        ibool2 = np.zeros(num_fibers,dtype=bool)
+        for i,e in enumerate(APID_types):
+            if e.startswith("5"):
+                ibool2[i] = True        
+        APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool2[i]]
+        # print(APID_targets[0])
+        # Extract ra,dec
+        ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
+        dec_str = [APID_targets[i].split(" ")[2] for i in range(len(APID_targets))]
+        ra = [HMS2deg(ra=ra_str[i]) for i in range(len(ra_str))]
+        dec = [HMS2deg(dec=dec_str[i]) for i in range(len(ra_str))]
+    elif field==2:
+        # 23hr
+        # Header file name
+        fname = MMT_data_directory+"23hrs_FITSheader.txt"
+        # Get info corresponding to the fibers
+        OnlyAPID  = return_file(fname)[0].split("= '")[1:]
+        # Get the object type
+        APID_types = [line.split(" ")[0] for line in OnlyAPID]
+        # print(APID_types)
+        # Getting index of targets only
+        ibool3 = np.zeros(num_fibers,dtype=bool)
+        for i,e in enumerate(APID_types):
+            if e.startswith("3"):
+                ibool3[i] = True        
+        APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool3[i]]
+        # print(APID_targets[0])
+        # Extract ra,dec
+        ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
+        dec_str = [APID_targets[i].split(" ")[2] for i in range(len(APID_targets))]
+        ra = [HMS2deg(ra=ra_str[i]) for i in range(len(ra_str))]
+        dec = [HMS2deg(dec=dec_str[i]) for i in range(len(ra_str))]
+    
+    return np.asarray(ra), np.asarray(dec)
+
+
 
 def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver_eff=1, NoZ_eff=0.25, NoOII_eff=0.6,\
     gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
