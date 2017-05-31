@@ -1745,6 +1745,27 @@ def pass_grz_SN(grzflux, grzivar, thres=2):
     gi, ri, zi = grzivar
     
     return ((gf*np.sqrt(gi))>thres)&((rf*np.sqrt(ri))>thres)&((zf*np.sqrt(zi))>thres)
+
+def grz_S2N(grzflux, grzinvar):
+    g,r,z = grzflux
+    gi,ri,zi = grzinvar
+    return g*np.sqrt(gi),r*np.sqrt(ri),z*np.sqrt(zi)
+
+def grz_flux_error(grzinvar):
+    """
+    Given the inverse variance return flux error.
+    """
+    gi,ri,zi = grzinvar
+    return np.sqrt(1/gi),np.sqrt(1/ri),np.sqrt(1/zi)
+
+def mag_depth_Xsigma(f_err, sigma=5):
+    """
+    Given flux error, return five sigma depth
+    """
+    return flux2mag(f_err*sigma)
+
+def flux2mag(flux):
+    return 22.5-2.5*np.log10(flux)    
     
 def pass_grz_decammask(grz_decammask):
     gm, rm, zm = grz_decammask
