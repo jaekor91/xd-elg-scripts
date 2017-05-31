@@ -80,7 +80,7 @@ def MMT_DECaLS_quality(fits, mask=None):
     if bp[0] == 0:
         bp = (bp==0)
     elif type(bp[0])==np.bool_:
-        bp = bp # Do nothing
+        bp = bp # Do nothing    
     else:
         bp = bp=="T"
     r_dev, r_exp = load_shape(fits)
