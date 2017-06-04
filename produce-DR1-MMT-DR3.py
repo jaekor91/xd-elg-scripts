@@ -16,7 +16,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 
 
 MMT_data_dir = "./MMT_data/"
-
+check_color = False # Only if you want to check DEEP2 rejection.
 
 
 ##############################################################################
@@ -52,33 +52,35 @@ print("Note: We do not deal with re-obs targets as there are very few of them.")
 
 ##############################################################################
 print("Check whether the targets are DEEP2 color rejected objects.")
-print("color-selection.txt: Catalog that provides DEEP2 BRI color selection information.\n \
-    Contains object ID, RA, dec, whether the object would have been targeted if in EGS. \n \
-    (1=yes, 0=no), and whether it would have been targeted in a non-EGS field.\n \
-    Provided by Jeff Newman")
-DEEP2color = ascii.read("color-selection.txt")
-DEEP2color_OBJNO = np.asarray(DEEP2color["col1"])
-DEEP2color_ra = np.asarray(DEEP2color["col2"])
-DEEP2color_dec = np.asarray(DEEP2color["col3"])
-# DEEP2color_EGS=np.asarray(DEEP2color["col4"])
-DEEP2color_BRI=np.asarray(DEEP2color["col5"])
-print("Completed.\n")
+if check_color:
+	print("color-selection.txt: Catalog that provides DEEP2 BRI color selection information.\n \
+	    Contains object ID, RA, dec, whether the object would have been targeted if in EGS. \n \
+	    (1=yes, 0=no), and whether it would have been targeted in a non-EGS field.\n \
+	    Provided by Jeff Newman")
+	DEEP2color = ascii.read("color-selection.txt")
+	DEEP2color_OBJNO = np.asarray(DEEP2color["col1"])
+	DEEP2color_ra = np.asarray(DEEP2color["col2"])
+	DEEP2color_dec = np.asarray(DEEP2color["col3"])
+	# DEEP2color_EGS=np.asarray(DEEP2color["col4"])
+	DEEP2color_BRI=np.asarray(DEEP2color["col5"])
+	print("Completed.\n")
 
-print("Match ra/dec and verify the BRI color selection")
-print("16hr")
-idx1, idx2 = crossmatch_cat1_to_cat2(ra16, dec16, DEEP2color_ra,DEEP2color_dec)
-print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-ireject = DEEP2color_BRI[idx2]==0
-print("# with color rejection %d"% ireject.sum())
-print("\n")
+	print("Match ra/dec and verify the BRI color selection")
+	print("16hr")
+	idx1, idx2 = crossmatch_cat1_to_cat2(ra16, dec16, DEEP2color_ra,DEEP2color_dec)
+	print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
+	ireject = DEEP2color_BRI[idx2]==0
+	print("# with color rejection %d"% ireject.sum())
+	print("\n")
 
-print("23hr obs")
-idx1, idx2 = crossmatch_cat1_to_cat2(ra23, dec23,  DEEP2color_ra,DEEP2color_dec)
-print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-ireject = DEEP2color_BRI[idx2]==0
-print("# with color rejection %d"% ireject.sum())
-print("\n")
-
+	print("23hr obs")
+	idx1, idx2 = crossmatch_cat1_to_cat2(ra23, dec23,  DEEP2color_ra,DEEP2color_dec)
+	print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
+	ireject = DEEP2color_BRI[idx2]==0
+	print("# with color rejection %d"% ireject.sum())
+	print("\n")
+else:
+	print("Color-check skipped.\n")
 
 
 ##############################################################################
@@ -88,6 +90,7 @@ ra1, dec1, fib1 = MMT_radec(0) # 16hr_1
 ra2, dec2, fib2 = MMT_radec(1) # 16hr_2
 ra3, dec3, fib3 = MMT_radec(2) # 16hr_3
 
+print(fib1)
 print("# of targets")
 print("16hr 1/2: %d, %d"%(ra1.size, ra2.size))
 print("23hr: %d"%(ra3.size))

@@ -118,6 +118,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("5"):
                 ibool1[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool1[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool1[i]]
         # Extract ra,dec
         ra_str = [APID_targets[i].split("'")[1].split(" ")[1] for i in range(len(APID_targets))]
         dec_str = [APID_targets[i].split("'")[1].split(" ")[2] for i in range(len(APID_targets))]
@@ -138,6 +139,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("5"):
                 ibool2[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool2[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool2[i]]
         # print(APID_targets[0])
         # Extract ra,dec
         ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
@@ -159,6 +161,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("3"):
                 ibool3[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool3[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool3[i]]        
         # print(APID_targets[0])
         # Extract ra,dec
         ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
@@ -166,7 +169,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
         ra = [HMS2deg(ra=ra_str[i]) for i in range(len(ra_str))]
         dec = [HMS2deg(dec=dec_str[i]) for i in range(len(ra_str))]
     
-    return np.asarray(ra), np.asarray(dec)
+    return np.asarray(ra), np.asarray(dec), np.asarray(fib)
 
 
 
