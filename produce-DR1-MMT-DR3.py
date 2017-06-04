@@ -191,14 +191,18 @@ col_name = []
 # Observed in 16hr_1
 observed_16 = np.zeros(numrows_16,dtype=np.int16)
 observed_16[idx2_16_1] = 1
-col_data.append(observed_16)
-col_name.append("OBSERVED_ONE")
+fib_16 = np.zeros(numrows_16,dtype=np.int16)
+fib_16[idx2_16_1] = fib1
+col_data+=[observed_16,fib_16]
+col_name+=["OBSERVED_ONE", "FIB_NUM_ONE"]
 
 # Observed in 16hr_2
 observed_16 = np.zeros(numrows_16,dtype=np.int16)
 observed_16[idx2_16_2] = 1
-col_data.append(observed_16)
-col_name.append("OBSERVED_TWO")
+fib_16 = np.zeros(numrows_16,dtype=np.int16)
+fib_16[idx2_16_2] = fib2
+col_data+=[observed_16,fib_16]
+col_name+=["OBSERVED_TWO", "FIB_NUM_TWO"]
 
 # Match DR1 with DR3
 matched_16 = np.zeros(numrows_16,dtype=np.int16)
@@ -207,7 +211,7 @@ matched_16[idx1]=1
 col_data.append(matched_16)
 col_name.append("DR3")
 
-col_type = ["i4","i4","i4"]
+col_type = ["i4"]*len(col_data)
 for i in range(len(col_data)):
     table_16 = fits_append(table_16, col_data[i], col_name[i], range(numrows_16), range(numrows_16), dtype="user", dtype_user=col_type[i])
 
@@ -263,8 +267,6 @@ tbhdu.writeto('DR1-MMT-DR3-16hr.fits', clobber=True)
 print("Completed.\n")
     
 ##############################################################################
-
-
 print("23hr field")
 table_23 = load_fits_table(MMT_data_dir+"MMTtargets-DEEP2-23hrs.fits")
 numrows_23 = table_23.shape[0]
@@ -275,8 +277,10 @@ col_name = []
 # Observed in 23hr_1
 observed_23 = np.zeros(numrows_23,dtype=np.int16)
 observed_23[idx2_23] = 1
-col_data.append(observed_23)
-col_name.append("OBSERVED")
+fib_23 = np.zeros(numrows_23,dtype=np.int16)
+fib_23[idx2_23] = fib3
+col_data+=[observed_23,fib_23]
+col_name+=["OBSERVED", "FIB_NUM"]
 
 # Match DR1 with DR3
 matched_23 = np.zeros(numrows_23,dtype=np.int16)
@@ -285,7 +289,7 @@ matched_23[idx1]=1
 col_data.append(matched_23)
 col_name.append("DR3")
 
-col_type = ["i4","i4"]
+col_type = ["i4"]*len(col_data)
 for i in range(len(col_data)):
     table_23 = fits_append(table_23, col_data[i], col_name[i], range(numrows_23), range(numrows_23), dtype="user", dtype_user=col_type[i])
 
