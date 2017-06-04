@@ -1,7 +1,7 @@
-# - Import DR1 catalogs. 
+# - Import DR1 catalogs.
+# - Check whether the original catalogs were compiled using the correct condition. 
 # - Match observed targets to DR1 catalogs
 # - Match DR3 to DR1 and append appropriate columns
-# - Check whether the original catalogs were compiled using the correct condition.
 
 # Load modules
 import numpy as np
@@ -50,20 +50,52 @@ print("\n")
 print("Note: We do not deal with re-obs targets as there are very few of them.")
 
 
-# ##############################################################################
-# print("Import observed target ra/dec and their fiber number.")
+##############################################################################
+print("Check whether the targets are DEEP2 color rejected objects.")
+print("color-selection.txt: Catalog that provides DEEP2 BRI color selection information.\n \
+    Contains object ID, RA, dec, whether the object would have been targeted if in EGS. \n \
+    (1=yes, 0=no), and whether it would have been targeted in a non-EGS field.\n \
+    Provided by Jeff Newman")
+DEEP2color = ascii.read("color-selection.txt")
+DEEP2color_OBJNO = np.asarray(DEEP2color["col1"])
+DEEP2color_ra = np.asarray(DEEP2color["col2"])
+DEEP2color_dec = np.asarray(DEEP2color["col3"])
+# DEEP2color_EGS=np.asarray(DEEP2color["col4"])
+DEEP2color_BRI=np.asarray(DEEP2color["col5"])
+print("Completed.\n")
 
-# ra1, dec1 = MMT_radec(0) # 16hr_1
-# ra2, dec2 = MMT_radec(1) # 16hr_2
-# ra3, dec3 = MMT_radec(2) # 16hr_3
+print("Match ra/dec and verify the BRI color selection")
+print("16hr")
+idx1, idx2 = crossmatch_cat1_to_cat2(ra16, dec16, DEEP2color_ra,DEEP2color_dec)
+print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
+ireject = DEEP2color_BRI[idx2]==0
+print("# with color rejection %d"% ireject.sum())
+print("\n")
 
-# print("# of targets")
-# print("16hr 1/2: %d, %d"%(ra1.size, ra2.size))
-# print("23hr: %d"%(ra3.size))
-# print("Total: %d"%(ra1.size+ra2.size+ra3.size))
+print("23hr obs")
+idx1, idx2 = crossmatch_cat1_to_cat2(ra23, dec23,  DEEP2color_ra,DEEP2color_dec)
+print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
+ireject = DEEP2color_BRI[idx2]==0
+print("# with color rejection %d"% ireject.sum())
+print("\n")
 
 
 
+##############################################################################
+print("2. Import observed target ra/dec and their fiber number.")
+
+ra1, dec1, fib1 = MMT_radec(0) # 16hr_1
+ra2, dec2, fib2 = MMT_radec(1) # 16hr_2
+ra3, dec3, fib3 = MMT_radec(2) # 16hr_3
+
+print("# of targets")
+print("16hr 1/2: %d, %d"%(ra1.size, ra2.size))
+print("23hr: %d"%(ra3.size))
+print("Total: %d"%(ra1.size+ra2.size+ra3.size))
+
+
+
+##############################################################################
 
 # print("16hr_1 to 16hr primary targets")
 # idx1_16_1, idx2_16_1 = crossmatch_cat1_to_cat2(ra1, dec1, ra16, dec16)
@@ -83,19 +115,6 @@ print("Note: We do not deal with re-obs targets as there are very few of them.")
 # print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_23.size))
 # print("\n")
 
-# # print("23hr obs to 23hr reobs targets")
-# # idx1, idx2 = crossmatch_cat1_to_cat2(ra3, dec3, ra23_reobs, dec23_reobs)
-# # print("# observed: %d"%ra3.size)
-# # print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-# # fits = load_fits_table(MMT_data_dir+"MMTtargets-DEEP2-23hrs-reobs.fits")
-# # iColor = MMT_study_color(grz23_reobs, 1, mask=idx1)
-# # iDECaLS_quality = MMT_DECaLS_quality(fits, mask=idx1)
-# # print("# of targets: %d" % iColor.size)
-# # print("# color violation: ",-(iColor.sum()-iColor.size))
-# # print("# decals quality violation", -(iDECaLS_quality.sum()-iDECaLS_quality.size))
-
-
-
 
 # pt_size=15
 # fig = plt.figure(figsize=(7,7))
@@ -111,57 +130,7 @@ print("Note: We do not deal with re-obs targets as there are very few of them.")
 
 
 
-# print("6. Load other catalogs.")
-# print("color-selection.txt: Catalog that provides DEEP2 BRI color selection information.\n \
-#     Contains object ID, RA, dec, whether the object would have been targeted if in EGS. \n \
-#     (1=yes, 0=no), and whether it would have been targeted in a non-EGS field.\n \
-#     Provided by Jeff Newman")
-# DEEP2color = ascii.read("color-selection.txt")
-# DEEP2color_OBJNO = np.asarray(DEEP2color["col1"])
-# DEEP2color_ra = np.asarray(DEEP2color["col2"])
-# DEEP2color_dec = np.asarray(DEEP2color["col3"])
-# # DEEP2color_EGS=np.asarray(DEEP2color["col4"])
-# DEEP2color_BRI=np.asarray(DEEP2color["col5"])
-# print("Completed.\n")
 
-
-
-
-# print("Match ra/dec and verify the BRI color selection")
-# print("16hr_1")
-# idx1, idx2 = crossmatch_cat1_to_cat2(ra1, dec1, DEEP2color_ra,DEEP2color_dec)
-# print("# observed: %d"%ra1.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-# ireject = DEEP2color_BRI[idx2]==0
-# print("# with color rejection %d"% ireject.sum())
-# print("\n")
-
-# print("16hr_2")
-# idx1, idx2 = crossmatch_cat1_to_cat2(ra2, dec2,  DEEP2color_ra,DEEP2color_dec)
-# print("# observed: %d"%ra2.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-# ireject = DEEP2color_BRI[idx2]==0
-# print("# with color rejection %d"% ireject.sum())
-# print("\n")
-
-# print("23hr obs")
-# idx1, idx2 = crossmatch_cat1_to_cat2(ra3, dec3,  DEEP2color_ra,DEEP2color_dec)
-# print("# observed: %d"%ra3.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-# ireject = DEEP2color_BRI[idx2]==0
-# print("# with color rejection %d"% ireject.sum())
-# print("\n")
-
-# # print("23hr obs to 23hr reobs targets")
-# # idx1, idx2 = crossmatch_cat1_to_cat2(ra3, dec3, ra23_reobs, dec23_reobs)
-# # print("# observed: %d"%ra3.size)
-# # print("# of unique objects matched in the original catalog: %d"% np.unique(idx1.size))
-# # fits = load_fits_table(MMT_data_dir+"MMTtargets-DEEP2-23hrs-reobs.fits")
-# # iColor = MMT_study_color(grz23_reobs, 1, mask=idx1)
-# # iDECaLS_quality = MMT_DECaLS_quality(fits, mask=idx1)
-# # print("# of targets: %d" % iColor.size)
-# # print("# color violation: ",-(iColor.sum()-iColor.size))
-# # print("# decals quality violation", -(iDECaLS_quality.sum()-iDECaLS_quality.size))
 
 
 
