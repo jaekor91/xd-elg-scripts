@@ -90,94 +90,86 @@ ra1, dec1, fib1 = MMT_radec(0) # 16hr_1
 ra2, dec2, fib2 = MMT_radec(1) # 16hr_2
 ra3, dec3, fib3 = MMT_radec(2) # 16hr_3
 
-print(fib1)
 print("# of targets")
 print("16hr 1/2: %d, %d"%(ra1.size, ra2.size))
 print("23hr: %d"%(ra3.size))
 print("Total: %d"%(ra1.size+ra2.size+ra3.size))
 
+##############################################################################
+print("Match observed target to DR1.")
+
+print("# Matched in 16hr_1")
+idx1_16_1, idx2_16_1 = crossmatch_cat1_to_cat2(ra1, dec1, ra16, dec16)
+print("# observed: %d"%ra1.size)
+print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_16_1.size))
+print("\n")
+
+print("# Matched in 16hr_2")
+idx1_16_2, idx2_16_2 = crossmatch_cat1_to_cat2(ra2, dec2, ra16, dec16)
+print("# observed: %d"%ra2.size)
+print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_16_2.size))
+print("\n")
+
+print("# Matched in 23hr")
+idx1_23, idx2_23 = crossmatch_cat1_to_cat2(ra3, dec3, ra23, dec23)
+print("# observed: %d"%ra3.size)
+print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_23.size))
+print("\n")
+num_primary_23 = idx1_23.size
+
+print("To account for the unmatched objects in 23hr field, we plot ra/dec.\n\
+See radec-MMT-23hr-targets.png")
+pt_size=15
+fig = plt.figure(figsize=(7,7))
+plt.scatter(ra3[idx1_23], dec3[idx1_23], edgecolors="none", s=pt_size, label="Matched")
+idx1_complement = np.setdiff1d(range(ra3.size),idx1_23)
+plt.scatter(ra3[idx1_complement], dec3[idx1_complement], edgecolors="none",c="red",s=pt_size, label="Obs. unmatched")
+iraLT352 =ra23<352.3
+plt.scatter(ra23[iraLT352], dec23[iraLT352], edgecolors="none",c="black", s=pt_size, label="Originally proposed")
+plt.axis("equal")
+plt.legend(loc="lower right")
+plt.savefig("radec-MMT-23hr-targets.png", dpi=400, bbox_inches="tight")
+plt.close()
+
+
+
+
 
 
 ##############################################################################
+print("3. Import DR3 catalogs and match DR1 to these catalogs.")
+# Field 2
+DR3_16 = load_fits_table("DECaLS-DR3-Tractor-DEEP2f2-untrimmed.fits")
+ra_DR3_16, dec_DR3_16 = load_radec(DR3_16)
 
-# print("16hr_1 to 16hr primary targets")
-# idx1_16_1, idx2_16_1 = crossmatch_cat1_to_cat2(ra1, dec1, ra16, dec16)
-# print("# observed: %d"%ra1.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_16_1.size))
-# print("\n")
-
-# print("16hr_2 to 16hr primary targets")
-# idx1_16_2, idx2_16_2 = crossmatch_cat1_to_cat2(ra2, dec2, ra16, dec16)
-# print("# observed: %d"%ra2.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_16_2.size))
-# print("\n")
-
-# print("23hr obs to 23hr primary targets")
-# idx1_23, idx2_23 = crossmatch_cat1_to_cat2(ra3, dec3, ra23, dec23)
-# print("# observed: %d"%ra3.size)
-# print("# of unique objects matched in the original catalog: %d"% np.unique(idx1_23.size))
-# print("\n")
+# Field 3
+DR3_23 = load_fits_table("DECaLS-DR3-Tractor-DEEP2f3-untrimmed.fits")
+ra_DR3_23, dec_DR3_23 = load_radec(DR3_23)
 
 
-# pt_size=15
-# fig = plt.figure(figsize=(7,7))
-# plt.scatter(ra3[idx1_23], dec3[idx1_23], edgecolors="none", s=pt_size, label="Matched")
-# idx1_complement = np.setdiff1d(range(ra3.size),idx1_23)
-# plt.scatter(ra3[idx1_complement], dec3[idx1_complement], edgecolors="none",c="red",s=pt_size, label="Obs. unmatched")
-# iraLT352 =ra23<352.3
-# plt.scatter(ra23[iraLT352], dec23[iraLT352], edgecolors="none",c="black", s=pt_size, label="Originally proposed")
-# plt.axis("equal")
-# plt.legend(loc="lower right")
-# plt.show()
-# plt.close()
+print("16hr_1 to DR3 16hr")
+idx1_16_1_DR3, idx2_16_1_DR3 = crossmatch_cat1_to_cat2(ra1, dec1, ra_DR3_16, dec_DR3_16)
+print("# observed: %d"%ra1.size)
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_1_DR3.size))
+print("\n")
+
+print("16hr_2 to DR3 16hr")
+idx1_16_2_DR3, idx2_16_2_DR3 = crossmatch_cat1_to_cat2(ra2, dec2, ra_DR3_16, dec_DR3_16)
+print("# observed: %d"%ra2.size)
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_2_DR3.size))
+print("\n")
+
+print("23hr obs to DR3 23hr")
+idx1_23_DR3, idx2_23_DR3 = crossmatch_cat1_to_cat2(ra3, dec3, ra_DR3_23, dec_DR3_23)
+num_primary_23 = 135
+print("# observed: %d"%num_primary_23)
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_23_DR3.size))
+print("\n")
+
+print("Completed.\n")
 
 
-
-
-
-
-
-
-
-
-
-# # Field 2
-# DR3_16 = load_fits_table("DECaLS-DR3-Tractor-DEEP2f2-untrimmed.fits")
-# ra_DR3_16, dec_DR3_16 = load_radec(DR3_16)
-
-# # Field 3
-# DR3_23 = load_fits_table("DECaLS-DR3-Tractor-DEEP2f3-untrimmed.fits")
-# ra_DR3_23, dec_DR3_23 = load_radec(DR3_23)
-
-# print("Completed.\n")
-
-
-
-
-
-
-
-
-# print("16hr_1 to DR3 16hr")
-# idx1_16_1_DR3, idx2_16_1_DR3 = crossmatch_cat1_to_cat2(ra1, dec1, ra_DR3_16, dec_DR3_16)
-# print("# observed: %d"%ra1.size)
-# print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_1_DR3.size))
-# print("\n")
-
-# print("16hr_2 to DR3 16hr")
-# idx1_16_2_DR3, idx2_16_2_DR3 = crossmatch_cat1_to_cat2(ra2, dec2, ra_DR3_16, dec_DR3_16)
-# print("# observed: %d"%ra2.size)
-# print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_2_DR3.size))
-# print("\n")
-
-# print("23hr obs to DR3 23hr")
-# idx1_23_DR3, idx2_23_DR3 = crossmatch_cat1_to_cat2(ra3, dec3, ra_DR3_23, dec_DR3_23)
-# num_primary_23 = 135
-# print("# observed: %d"%num_primary_23)
-# print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_23_DR3.size))
-# print("\n")
-
-
+##############################################################################
 
 
 
