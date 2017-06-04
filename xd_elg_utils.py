@@ -1631,17 +1631,25 @@ def save_fits_join(data1,data2, fname):
 def load_weight(fits):
     return fits["TARG_WEIGHT"]    
 
-def fits_append(table, new_col, col_name, idx1, idx2):
+def fits_append(table, new_col, col_name, idx1, idx2, dtype="default", dtype_user=None):
     """
     Given fits table and field column/name pair,
     append the new field to the table using the idx1 and idx2 that correspond to 
     fits table and new column indices.
+
+    If dtype =="default", then the default of float variable type is used.
+    If dtype =="user", then user provided data type is used.
     """
     global large_random_constant
     new_col_sorted = np.ones(table.shape[0])*large_random_constant
     new_col_sorted[idx1] = new_col[idx2]
     
-    new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
+    if dtype=="default":
+        new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
+    else:
+        new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=dtype_user, usemask=False, asrecarray=True)
+
+
     return new_table
 
 def load_fits_table(fname):
