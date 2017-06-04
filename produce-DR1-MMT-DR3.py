@@ -191,7 +191,7 @@ col_name = []
 # Observed in 16hr_1
 observed_16 = np.zeros(numrows_16,dtype=np.int16)
 observed_16[idx2_16_1] = 1
-fib_16 = np.zeros(numrows_16,dtype=np.int16)
+fib_16 = np.ones(numrows_16,dtype=np.int16)*-1
 fib_16[idx2_16_1] = fib1
 col_data+=[observed_16,fib_16]
 col_name+=["OBSERVED_ONE", "FIB_NUM_ONE"]
@@ -199,7 +199,7 @@ col_name+=["OBSERVED_ONE", "FIB_NUM_ONE"]
 # Observed in 16hr_2
 observed_16 = np.zeros(numrows_16,dtype=np.int16)
 observed_16[idx2_16_2] = 1
-fib_16 = np.zeros(numrows_16,dtype=np.int16)
+fib_16 = np.ones(numrows_16,dtype=np.int16)*-1
 fib_16[idx2_16_2] = fib2
 col_data+=[observed_16,fib_16]
 col_name+=["OBSERVED_TWO", "FIB_NUM_TWO"]
@@ -277,7 +277,7 @@ col_name = []
 # Observed in 23hr_1
 observed_23 = np.zeros(numrows_23,dtype=np.int16)
 observed_23[idx2_23] = 1
-fib_23 = np.zeros(numrows_23,dtype=np.int16)
+fib_23 = np.ones(numrows_23,dtype=np.int16)*-1
 fib_23[idx2_23] = fib3
 col_data+=[observed_23,fib_23]
 col_name+=["OBSERVED", "FIB_NUM"]
