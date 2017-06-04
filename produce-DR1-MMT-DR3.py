@@ -156,20 +156,20 @@ print("Match observed objects to DR3 catalogs directly.")
 print("16hr_1 to DR3 16hr")
 idx1_16_1_DR3, idx2_16_1_DR3 = crossmatch_cat1_to_cat2(ra1, dec1, ra_DR3_16, dec_DR3_16)
 print("# observed: %d"%ra1.size)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_1_DR3.size))
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_1_DR3).size)
 print("\n")
 
 print("16hr_2 to DR3 16hr")
 idx1_16_2_DR3, idx2_16_2_DR3 = crossmatch_cat1_to_cat2(ra2, dec2, ra_DR3_16, dec_DR3_16)
 print("# observed: %d"%ra2.size)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_2_DR3.size))
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_2_DR3).size)
 print("\n")
 
 print("23hr obs to DR3 23hr")
 idx1_23_DR3, idx2_23_DR3 = crossmatch_cat1_to_cat2(ra3, dec3, ra_DR3_23, dec_DR3_23)
 num_primary_23 = 135
 print("# observed: %d"%num_primary_23)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_23_DR3.size))
+print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_23_DR3).size)
 print("\n")
 
 print("Completed.\n")
@@ -260,8 +260,6 @@ cols = FITS.ColDefs(table_16)
 tbhdu = FITS.BinTableHDU.from_columns(cols)
 tbhdu.writeto('DR1-MMT-DR3-16hr.fits', clobber=True)
 
-num_16_1_in_DR3 = 
-
 print("Completed.\n")
     
 ##############################################################################
@@ -343,24 +341,25 @@ print("Completed.\n")
 
 
 ##############################################################################
-
+num_16_1_in_DR3 = (table_16["DR3"][table_16["OBSERVED_ONE"]==1]).sum()
+num_16_2_in_DR3 = (table_16["DR3"][table_16["OBSERVED_TWO"]==1]).sum()
+num_23_in_DR3 = (table_23["DR3"][table_23["OBSERVED"]==1]).sum()
 
 print("Matches.")
 print("16hr_1 to DR3 16hr")
-idx1_16_1_DR3, idx2_16_1_DR3 = crossmatch_cat1_to_cat2(ra1, dec1, ra_DR3_16, dec_DR3_16)
 print("# observed: %d"%ra1.size)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_1_DR3.size))
+print("# directly matched in DR3: %d"% idx1_16_1_DR3.size)
+print("# matched DR3: %d"% num_16_1_in_DR3)
 print("\n")
 
 print("16hr_2 to DR3 16hr")
-idx1_16_2_DR3, idx2_16_2_DR3 = crossmatch_cat1_to_cat2(ra2, dec2, ra_DR3_16, dec_DR3_16)
 print("# observed: %d"%ra2.size)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_16_2_DR3.size))
+print("# directly matched in DR3: %d"% idx1_16_2_DR3.size)
+print("# matched DR3: %d"% num_16_2_in_DR3)
 print("\n")
 
 print("23hr obs to DR3 23hr")
-idx1_23_DR3, idx2_23_DR3 = crossmatch_cat1_to_cat2(ra3, dec3, ra_DR3_23, dec_DR3_23)
-num_primary_23 = 135
 print("# observed: %d"%num_primary_23)
-print("# of unique objects matched in the DR3 catalog: %d"% np.unique(idx1_23_DR3.size))
+print("# directly matched in DR3: %d"% idx1_23_DR3.size)
+print("# matched DR3: %d"% num_23_in_DR3)
 print("\n")
