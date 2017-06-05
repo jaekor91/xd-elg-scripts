@@ -273,7 +273,7 @@ def plot_S2N_augmented(x, S2N, mask=None, xmin=4500, xmax=8500, s=10,threshold=5
     plt.title(title,fontsize=ft_size)
     plt.axhline(y=threshold, ls="--",lw=2)
     plt.xlim([xmin, xmax])
-    plt.ylim([np.min(S2N_masked)*1.2,np.max(S2N_masked)*1.2])
+    plt.ylim([max(np.min(S2N_masked)*1.2,-7),np.max(S2N_masked)*1.2])
     plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
     plt.ylabel(r"S/N", fontsize=ft_size)
     plt.show()
