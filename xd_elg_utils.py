@@ -163,7 +163,7 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     # portion.
     if mask is not None:
         d[mask]=0
-        divar[mask]=0    
+        divar[mask]=0
     
     # varA: Running sum of (ivar*v^2) excluding masked pixels
     varA = np.convolve(divar, v**2, mode="same")
@@ -172,11 +172,20 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     A_numerator = np.convolve(d*divar, v, mode="same")
     A = A_numerator/varA
     
-    # Chi sq.
-    chi = -2*A_numerator*A+varA*(A**2)
-    
     # SN
     S2N = A/np.sqrt(varA)
+    
+    # Compute reduced chi. sq.
+    # To do, compute the number of samples used.
+    # Filter
+    v_N = np.ones(int(filter_size))    
+    N_sample = np.ones(d.size)
+    if mask is not None:
+        N_sample[mask]=0
+    N_sample = np.convolve(N_sample, v_N, mode="same")    
+
+    # Chi sq. # -1 since we are only estimating one parameter.
+    chi = (-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
     
     return A, varA, chi, S2N
 
