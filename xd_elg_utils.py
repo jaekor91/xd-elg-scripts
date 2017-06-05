@@ -137,7 +137,68 @@ def box_car_avg(d,window_pixel_size=50,mask=None):
     # Taking average
     d_boxed /= N_sample
     
-    return d_boxed    
+    return d_boxed
+
+def process_spec(d,divar,width_guess, x_mean, mask=None):
+    """
+    Given the data vector d and its corresopnding inverse
+    variance and pix_sigma width for the filter
+    compute, integrated flux A, var(A), and chi sq.
+    Also, return S2N. width_guess is in Angstrom.
+    """
+    # Filter
+    pix_sigma = width_guess/x_mean # Peak width in terms of pixels
+    filter_size = np.ceil(pix_sigma*4*2) # How large the filter has to be to encompass 4-sig
+    # If filter size is odd, add one.
+    if filter_size%2==0:
+        filter_size+=1
+
+    # Centered around the filter, create a gaussian.
+    v_center = int(filter_size/2)
+    v = np.abs(np.arange(int(filter_size))-v_center)
+    v = np.exp(-v**2/pix_sigma**2)/(pix_sigma*np.sqrt(2*np.pi))
+    # Note: v = G(A=1)
+    
+    # If mask is used, then block out the appropriate
+    # portion.
+    if mask is not None:
+        d[mask]=0
+        divar[mask]=0    
+    
+    # varA: Running sum of (ivar*v^2) excluding masked pixels
+    varA = np.convolve(divar, v**2, mode="same")
+    
+    # A_numerator: Running sum of (d*v*ivar)
+    A_numerator = np.convolve(d*divar, v, mode="same")
+    A = A_numerator/varA
+    
+    # Chi sq.
+    chi = -2*A_numerator+varA
+    
+    # SN
+    S2N = A/np.sqrt(varA)
+    
+    return A, varA, chi, S2N
+
+
+def plot_S2N(x, S2N, mask=mask, xmin=4500, xmax=8500, s=1):
+    """
+    Plot a spectrum given x,d.
+    """
+    if mask is not None:
+        S2N[mask] = 0
+    ibool = (x>xmin)&(x<xmax)        
+    
+    fig = plt.figure(figsize=(10,5))
+    plt.scatter(x[ibool],S2N[ibool],s=2, c="black")
+        
+    ft_size = 15
+    
+    plt.xlim([xmin, xmax])
+    plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    plt.ylabel(r"S/N", fontsize=ft_size)
+    plt.show()
+    plt.close()    
 
 def MMT_radec(field, MMT_data_directory="./MMT_data/"):
     """
