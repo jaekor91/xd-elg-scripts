@@ -115,6 +115,30 @@ def load_MMT_specdata(fname, fib_idx=None):
         AND_mask = AND_mask[fib_idx,:]
     return x, d, divar, AND_mask
 
+def box_car_avg(d,window_pixel_size=50,mask=None):
+    """
+    Take a running average of window_piexl_size pixels.
+    Exclude masked pixels from averaging.
+    """
+    # Filter
+    v = np.ones(window_pixel_size)
+    
+    # Array that tells how many pixels were used
+    N_sample = np.ones(d.size)
+    if mask is not None:
+        N_sample[mask]=0
+    N_sample = np.convolve(N_sample, v,mode="same")
+    
+    # Running sum of the data excluding masked pixels
+    if mask is not None:
+        d[mask]=0
+    d_boxed = np.convolve(d, v,mode="same")
+    
+    # Taking average
+    d_boxed /= N_sample
+    
+    return d_boxed    
+
 def MMT_radec(field, MMT_data_directory="./MMT_data/"):
     """
     field is one of [0,1,2]:
