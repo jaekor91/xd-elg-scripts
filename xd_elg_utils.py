@@ -238,11 +238,13 @@ def plot_S2N(x, S2N, mask=None, xmin=4500, xmax=8500, s=1):
     ibool = (x>xmin)&(x<xmax)        
     
     fig = plt.figure(figsize=(10,5))
-    plt.scatter(x[ibool],S2N[ibool],s=s, c="black")
+    S2N_masked = S2N[ibool]
+    plt.scatter(x[ibool],S2N_masked,s=s, c="black")
         
     ft_size = 15
     
     plt.xlim([xmin, xmax])
+    plt.ylim([np.min(S2N_masked)*1.2,np.max(S2N_masked)*1.2])
     plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
     plt.ylabel(r"S/N", fontsize=ft_size)
     plt.show()
