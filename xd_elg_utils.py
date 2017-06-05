@@ -181,7 +181,32 @@ def process_spec(d,divar,width_guess, x_mean, mask=None):
     return A, varA, chi, S2N
 
 
-def plot_S2N(x, S2N, mask=mask, xmin=4500, xmax=8500, s=1):
+def plot_spectrum(x,d,x2=None,d2=None, xmin=4000, xmax=8700, lw=0.25, lw2=1, mask=None, mask2=None):
+    """
+    Plot a spectrum given x,d.
+    """
+    if mask is not None:
+        d[mask] = 0
+    ibool = (x>xmin)&(x<xmax)        
+    
+    fig = plt.figure(figsize=(10,5))
+    plt.plot(x[ibool],d[ibool],lw=lw, c="black")
+    
+    if (x2 is not None) and (d2 is not None):
+        ibool = (x2>xmin)&(x2<xmax)
+        if mask2 is not None:
+            d2[mask2]=0
+        plt.plot(x2[ibool],d2[ibool],lw=lw2, c="red")
+        
+    ft_size = 15
+    
+    plt.xlim([xmin, xmax])
+    plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    plt.ylabel(r"Flux ($10^{-17}$ ergs/cm^2/s/$\AA$)", fontsize=ft_size)
+    plt.show()
+    plt.close()
+
+def plot_S2N(x, S2N, mask=None, xmin=4500, xmax=8500, s=1):
     """
     Plot a spectrum given x,d.
     """
