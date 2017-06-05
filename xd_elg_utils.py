@@ -139,6 +139,8 @@ def box_car_avg(d,window_pixel_size=50,mask=None):
     
     return d_boxed
 
+
+
 def process_spec(d, divar, width_guess, x_mean, mask=None):
     """
     Given the data vector d and its corresopnding inverse
@@ -185,7 +187,7 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     N_sample = np.convolve(N_sample, v_N, mode="same")    
 
     # Chi sq. # -1 since we are only estimating one parameter.
-    chi = (-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
+    chi = =(-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
     
     return A, varA, chi, S2N
 
@@ -261,33 +263,7 @@ def plot_S2N(x, S2N, mask=None, xmin=4500, xmax=8500, s=1):
     plt.close()    
 
 
-def plot_S2N_augmented(x, S2N, mask=None, xmin=4500, xmax=8500, s=10,threshold=5,title=""):
-    """
-    Plot a spectrum given x,d.
-    """
-    if mask is not None:
-        S2N[mask] = 0
-            
-    fig = plt.figure(figsize=(10,5))
-    
-    ibool = (x>xmin)&(x<xmax)    
-    S2N_masked = S2N[ibool]
-    x_masked =x[ibool]
-    
-    # Greater than 5-sigma
-    ithres = np.logical_or((S2N_masked>threshold),(S2N_masked<-threshold))
-    plt.scatter(x_masked,S2N_masked,s=s, c="black",edgecolor="none")    
-    plt.scatter(x_masked[ithres],S2N_masked[ithres],s=s, c="red",edgecolor="none")
 
-    ft_size = 15
-    plt.title(title,fontsize=ft_size)
-    plt.axhline(y=threshold, ls="--",lw=2)
-    plt.xlim([xmin, xmax])
-    plt.ylim([max(np.min(S2N_masked)*1.2,-7),np.max(S2N_masked)*1.2])
-    plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
-    plt.ylabel(r"S/N", fontsize=ft_size)
-    plt.show()
-    plt.close()
     
 def MMT_radec(field, MMT_data_directory="./MMT_data/"):
     """
