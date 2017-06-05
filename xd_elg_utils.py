@@ -139,7 +139,7 @@ def box_car_avg(d,window_pixel_size=50,mask=None):
     
     return d_boxed
 
-def process_spec(d,divar,width_guess, x_mean, mask=None):
+def process_spec(d, divar, width_guess, x_mean, mask=None):
     """
     Given the data vector d and its corresopnding inverse
     variance and pix_sigma width for the filter
@@ -155,8 +155,8 @@ def process_spec(d,divar,width_guess, x_mean, mask=None):
 
     # Centered around the filter, create a gaussian.
     v_center = int(filter_size/2)
-    v = np.abs(np.arange(int(filter_size))-v_center)
-    v = np.exp(-v**2/pix_sigma**2)/(pix_sigma*np.sqrt(2*np.pi))
+    v = np.arange(int(filter_size))-v_center
+    v = np.exp(-(v**2)/(2*(pix_sigma**2)))/(pix_sigma*np.sqrt(2*np.pi))
     # Note: v = G(A=1)
     
     # If mask is used, then block out the appropriate
@@ -173,12 +173,13 @@ def process_spec(d,divar,width_guess, x_mean, mask=None):
     A = A_numerator/varA
     
     # Chi sq.
-    chi = -2*A_numerator+varA
+    chi = -2*A_numerator*A+varA*(A**2)
     
     # SN
     S2N = A/np.sqrt(varA)
     
     return A, varA, chi, S2N
+
 
 
 def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
