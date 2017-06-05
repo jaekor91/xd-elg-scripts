@@ -181,6 +181,29 @@ def process_spec(d,divar,width_guess, x_mean, mask=None):
     return A, varA, chi, S2N
 
 
+def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
+    """
+    The same as process_spec(), except returns A, varA, chi, S2N values for
+    best chi.
+    
+    width guesses is either a list or numpy array. 
+    """
+    width_guesses = np.asarray(width_guesses)
+    
+    # First
+    A, varA, chi, S2N = process_spec(d, divar, width_guesses[0], x_mean, mask=mask)    
+    for i in range(1,width_guesses.size):
+        A_tmp, varA_tmp, chi_tmp, S2N_tmp = process_spec(d, divar, width_guesses[i], x_mean, mask=mask)
+        # Swith values if chi squar is lower
+        ibool = (chi_tmp<chi) #& ~np.isnan(chi_tmp)
+        A[ibool] = A_tmp[ibool]
+        varA[ibool] = varA_tmp[ibool]
+        chi[ibool] = chi_tmp[ibool]
+        S2N[ibool] = S2N_tmp[ibool]
+        
+    return  A, varA, chi, S2N    
+
+
 def plot_spectrum(x,d,x2=None,d2=None, xmin=4000, xmax=8700, lw=0.25, lw2=1, mask=None, mask2=None):
     """
     Plot a spectrum given x,d.
@@ -215,7 +238,7 @@ def plot_S2N(x, S2N, mask=None, xmin=4500, xmax=8500, s=1):
     ibool = (x>xmin)&(x<xmax)        
     
     fig = plt.figure(figsize=(10,5))
-    plt.scatter(x[ibool],S2N[ibool],s=2, c="black")
+    plt.scatter(x[ibool],S2N[ibool],s=s, c="black")
         
     ft_size = 15
     
