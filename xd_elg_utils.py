@@ -93,6 +93,19 @@ def MMT_DECaLS_quality(fits, mask=None):
         
     return (gany==0)&(rany==0)&(zany==0)&(givar>0)&(rivar>0)&(zivar>0)&(bp)&(r_dev<1.5)&(r_exp<1.5)
 
+def load_MMT_specdata(fname):
+    """
+    Given spHect* file address, return wavelength (x),
+    flux value (d), inverse variance (divar), and
+    AND_mask.
+    """
+    table_spec = fits.open(fname)
+    x = table_spec[0].data
+    d = table_spec[1].data
+    divar = table_spec[2].data # Inverse variance
+    AND_mask = table_spec[3].data
+    return x, d, divar, AND_mask
+
 def MMT_radec(field, MMT_data_directory="./MMT_data/"):
     """
     field is one of [0,1,2]:
