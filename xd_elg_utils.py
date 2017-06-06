@@ -187,7 +187,7 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     N_sample = np.convolve(N_sample, v_N, mode="same")    
 
     # Chi sq. # -1 since we are only estimating one parameter.
-    chi = =(-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
+    chi = -(-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
     
     return A, varA, chi, S2N
 
