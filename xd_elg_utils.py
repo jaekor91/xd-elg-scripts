@@ -244,7 +244,7 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
     ax0.set_title(plot_title)
     ax0.plot(x_masked,d_masked,lw=0.5, c="black")
     ax0.set_xlim([xmin, xmax])
-    ax0.set_ylim([np.min(d_masked)*1.1,np.max(d_masked)*1.1])
+    ax0.set_ylim([max(np.min(d_masked)*1.1,-2),np.max(d_masked)*1.1])
     ax0.set_ylabel(r"Original Flux", fontsize=ft_size)
     
     isig5 = (S2N_masked>threshold)
