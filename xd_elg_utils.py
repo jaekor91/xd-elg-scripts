@@ -191,6 +191,31 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     
     return A, varA, chi, S2N
 
+def median_filter(data, mask=None, window_pixel_size=50):
+    """
+    Given the data array and window size, compute median
+    without mask.
+    """
+    array_length = data.size
+    
+    if window_pixel_size%2==0:
+        window_pixel_size+=1
+        
+    if mask is None:
+        mask = np.ones(array_length)
+        
+    pass_mask = np.logical_not(mask)
+
+    ans = np.zeros(array_length)
+    for i in range(array_length):
+        idx_l = max(0, i-int(window_pixel_size/2))
+        idx_h = min(array_length, i+int(window_pixel_size/2))+1
+#         print(idx_l, idx_h)
+        tmp = data[idx_l:idx_h][pass_mask[idx_l:idx_h]]
+#         print(tmp.size)
+        ans[i] = np.median(tmp)
+    return ans    
+
 def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
              plot_show=True, plot_save=False, save_dir=None, plot_title=""):
     """
