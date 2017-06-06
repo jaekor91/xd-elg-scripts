@@ -270,10 +270,10 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
     z_peak_list = []
     s2n_peak_list = []
     oii_flux_list = []
-    for i in range(len(starts)):
+    for i in range(len(ends)):
         start = starts[i]
         end = ends[i]
-        if start==(end-1):
+        if (start==(end-1)) or (start==end):
             val = S2N_masked[start]
         else:
             val = np.max(S2N_masked[start:end])
