@@ -191,7 +191,66 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     
     return A, varA, chi, S2N
 
+def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
+             plot_show=True, plot_save=False, save_dir=None, plot_title=""):
+    """
+    Plot a spectrum given x,d.
+    """
+    if mask is not None:
+        S2N[mask] = 0
+        A[mask] = 0
+        chi[mask] = 0
 
+    # Limit plot range
+    ibool = (x>xmin)&(x<xmax)
+    x_masked = x[ibool]
+    S2N_masked = S2N[ibool]
+    chi_masked = chi[ibool]
+    A_masked = A[ibool]
+    if mask_caution is not None:
+        mask_caution = mask_caution[ibool]
+
+    # Create a figure where x-axis is shared
+    ft_size = 15        
+    fig, (ax1,ax2,ax3) = plt.subplots(3,figsize=(10,10),sharex=True)
+    
+    isig5 = (S2N_masked>threshold)
+    ax1.set_title(plot_title)
+    ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
+    ax1.scatter(x_masked[isig5],A_masked[isig5],s=5*s, c="red", edgecolor="none")    
+    if mask_caution is not None:
+        ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=5*s, c="blue", edgecolor="none")
+    ax1.set_xlim([xmin, xmax])
+    ax1.set_ylim([max(-3,np.min(A_masked)),np.max(A_masked)*1.1])
+#     ax1.set_xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
+    
+    ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
+    ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=5*s, c="red", edgecolor="none")        
+    ax2.axhline(y=5, ls="--", lw=2, c="blue")
+    if mask_caution is not None:
+        ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
+    ax2.set_xlim([xmin, xmax])
+    ax2.set_ylim([max(-3,np.min(S2N_masked)),np.max(S2N_masked)*1.1])
+#     ax2.set_xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    ax2.set_ylabel(r"S/N", fontsize=ft_size)
+    
+    ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
+    ax3.scatter(x_masked[isig5],chi_masked[isig5],s=5*s, c="red", edgecolor="none")        
+    if mask_caution is not None:
+        ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
+    ax3.set_xlim([xmin, xmax])
+    ax2.set_ylim([max(-0.5,np.min(chi_masked)),np.max(chi_masked)*1.1])    
+    ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
+    ax3.set_ylabel("$\chi^2$", fontsize=ft_size)    
+    
+    fig.subplots_adjust(hspace=0.05)
+    if plot_save:
+        plt.savefig(save_dir+title_str, bbox_inches="tight", dpi=200)
+    if plot_show:
+        plt.show()
+    plt.close() 
+    
 
 def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
     """
