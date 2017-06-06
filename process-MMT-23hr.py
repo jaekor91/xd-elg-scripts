@@ -48,40 +48,6 @@ print("Mean/std: %.3f/%.3f"%(x_median,x_std))
 
 
 
-idx_example = 154 # Spec number 155
-x_example, d_example, AND_mask_example, divar_example = x[idx_example], d[idx_example], AND_mask[idx_example], divar[idx_example]
-
-# AND_mask condition 
-mask = AND_mask_example>0
-
-## Take boxed car average
-# d_example_boxed = box_car_avg(d_example,mask=mask,window_pixel_size=pix_window_size)
-# d_example_boxed_subtracted = d_example - d_example_boxed
-
-## Savgol approach
-# polyorder=3
-# d_savgol = savgol_filter(d_example, pix_window_size, polyorder, mode='constant')
-# plot_spectrum(x_example,d_example, x_example, d_savgol, mask=mask)
-
-# Median approach
-d_median = median_filter(d_example, mask=mask, window_pixel_size=pix_window_size)
-# plot_spectrum(x_example,d_example, x_example, d_median, mask=mask)
-
-# Plot spec after median subtraction
-d_example_median_subtracted = d_example-d_median
-# plot_spectrum(x_example,d_example_median_subtracted, mask=mask)
-
-# Given the boxed spectrum, compute A, varA, and chi sq
-print("Single guess")
-width_guess = 3
-A, varA, chi, S2N = process_spec(d_example_median_subtracted, divar_example, width_guess, x_median, mask=mask)
-plot_fit(x_example, d_example, A, S2N, chi, mask=mask, mask_caution=None, xmin=4500, \
-         xmax=8250, s=20, plot_show=True, plot_save=False, plot_title="")
-
-# print("Multiple guesses, pick best")
-# A, varA, chi, S2N = process_spec_best(d_example_median_subtracted, divar_example, width_guesses, x_median, mask=mask)
-# plot_fit(x_example, d_example,A, S2N, chi, mask=mask, mask_caution=None, xmin=4500, \
-#          xmax=8250, s=10, plot_show=True, plot_save=False, plot_title="")
 
 
 
