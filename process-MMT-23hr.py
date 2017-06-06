@@ -23,19 +23,17 @@ width_guesses = np.arange(0.5,10,0.1)
 xmax = 8250
 xmin = 4500
 ##############################################################################
-
 # Load targets
 print("Load target photo info.")
 table = load_fits_table(photo_data_fname) 
 fib_idx_observed = table["FIB_NUM"][table["OBSERVED"]==1]-1 # -1 for zero indexing    
 
-
-
 # Load spectra
 print("Load MMT spec data from spHect-file. Only our targets.")
-x, d, divar, AND_mask = load_MMT_specdata(spec_data_fname)#, fib_idx_observed)
+x, d, divar, AND_mask = load_MMT_specdata(spec_data_fname, fib_idx_observed)
 
 
+##############################################################################
 # Inspect x spacing
 del_x = (x[:,1:]-x[:,:-1]).flatten()
 # plt.hist(del_x,np.arange(0.5,1.5,0.001),histtype="step")
@@ -44,22 +42,12 @@ del_x = (x[:,1:]-x[:,:-1]).flatten()
 print("Grid spacing stats:")
 x_median = np.median(del_x)
 x_std =  np.std(del_x)
-print("Mean/std: %.3f/%.3f"%(x_median,x_std))
+print("Median/std: %.3f/%.3f"%(x_median,x_std))
 
 
-
-
-
-
-
-# Load spectra
-print("Load MMT spec data from spHect-file. Only our targets.")
-x, d, divar, AND_mask = load_MMT_specdata(spec_data_fname, fib_idx_observed)
-
-
-
-
-# Pre-allocate memory for A, S2N
+##############################################################################
+print("Process spectra.")
+print("Total number %d"%A_array.shape[0])
 A_array = np.zeros_like(x)
 S2N_array = np.zeros_like(x)
 AND_array = np.zeros(x.shape, dtype=bool)
@@ -88,9 +76,8 @@ for i in range(A_array.shape[0]):
     A_array[i,:], _, Chi_array[i,:], S2N_array[i,:] = process_spec(d_median_subtracted, divar_tmp, 3, x_median , mask=mask)    
 
 
-
-
-# Find where high S2N recurs frequently
+##############################################################################
+print("Find where high S2N occurs frequently so they can be marked later.")
 S2N_flat = S2N_array.flatten()
 mask = AND_array.flatten() & (S2N_flat>threshold)
 x_flat = x.flatten()[mask]
@@ -99,17 +86,18 @@ dx = 5
 hist, bin_edges = np.histogram(x_flat, bins=np.arange(xmin, xmax, dx))
 bin_centers = (bin_edges[:-1]+bin_edges[1:])/2.
 
-print((hist>1).sum()/((xmax-xmin)/dx))
+print("Fraction of the grid that will be marked suspicious: %.3f"%((hist>1).sum()/((xmax-xmin)/dx)))
 
 x_bad = bin_centers[hist>1]
-fig = plt.figure(figsize=(15,5))
-plt.scatter(bin_centers, hist, edgecolor="none", color="blue",s=5)
-plt.xlim([xmin, xmax])
-plt.show()
-plt.close()
+# fig = plt.figure(figsize=(15,5))
+# plt.scatter(bin_centers, hist, edgecolor="none", color="blue",s=5)
+# plt.xlim([xmin, xmax])
+# plt.show()
+# plt.close()
 
 
-
+##############################################################################
+print("Producing inspection panels")
 for i in range(x.shape[0]):
 #     if (i%10)==0:
 #         print(i)
