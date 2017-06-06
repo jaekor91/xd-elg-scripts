@@ -347,7 +347,7 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
 
         fig.subplots_adjust(hspace=0.05)
         if plot_save:
-            plt.savefig(save_dir+plot_title+title_str+".png", bbox_inches="tight", dpi=200)
+            plt.savefig(save_dir+title_str+".png", bbox_inches="tight", dpi=200)
         if plot_show:
             plt.show()
         plt.close() 
