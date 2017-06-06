@@ -221,8 +221,7 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
     if mask_caution is not None:
         ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=5*s, c="blue", edgecolor="none")
     ax1.set_xlim([xmin, xmax])
-    ax1.set_ylim([max(-3,np.min(A_masked)),np.max(A_masked)*1.1])
-#     ax1.set_xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    ax1.set_ylim([-2,np.max(A_masked)*1.1])
     ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
     
     ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
@@ -231,8 +230,7 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
     if mask_caution is not None:
         ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
     ax2.set_xlim([xmin, xmax])
-    ax2.set_ylim([max(-3,np.min(S2N_masked)),np.max(S2N_masked)*1.1])
-#     ax2.set_xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    ax2.set_ylim([-1,np.max(S2N_masked)*1.1])
     ax2.set_ylabel(r"S/N", fontsize=ft_size)
     
     ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
@@ -240,7 +238,7 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
     if mask_caution is not None:
         ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
     ax3.set_xlim([xmin, xmax])
-    ax2.set_ylim([max(-0.5,np.min(chi_masked)),np.max(chi_masked)*1.1])    
+    ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
     ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
     ax3.set_ylabel("$\chi^2$", fontsize=ft_size)    
     
@@ -251,6 +249,7 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
         plt.show()
     plt.close() 
     
+
 
 def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
     """
@@ -265,8 +264,8 @@ def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
     A, varA, chi, S2N = process_spec(d, divar, width_guesses[0], x_mean, mask=mask)    
     for i in range(1,width_guesses.size):
         A_tmp, varA_tmp, chi_tmp, S2N_tmp = process_spec(d, divar, width_guesses[i], x_mean, mask=mask)
-        # Swith values if chi squar is lower
-        ibool = (chi_tmp<chi) #& ~np.isnan(chi_tmp)
+        # Swith values if chi squar is higher. Note the we defined chi sq.
+        ibool = (chi_tmp>chi) #& ~np.isnan(chi_tmp) 
         A[ibool] = A_tmp[ibool]
         varA[ibool] = varA_tmp[ibool]
         chi[ibool] = chi_tmp[ibool]
