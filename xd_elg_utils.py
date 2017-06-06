@@ -249,30 +249,30 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
     
     isig5 = (S2N_masked>threshold)
     ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
-    ax1.scatter(x_masked[isig5],A_masked[isig5],s=5*s, c="red", edgecolor="none")    
+    ax1.scatter(x_masked[isig5],A_masked[isig5],s=3*s, c="red", edgecolor="none")    
     if mask_caution is not None:
-        ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=5*s, c="blue", edgecolor="none")
+        ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=3*s, c="blue", edgecolor="none")
     ax1.set_xlim([xmin, xmax])
     ax1.set_ylim([-2,np.max(A_masked)*1.1])
     ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
     
     ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
-    ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=5*s, c="red", edgecolor="none")        
+    ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=3*s, c="red", edgecolor="none")        
     ax2.axhline(y=5, ls="--", lw=2, c="blue")
     if mask_caution is not None:
-        ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
+        ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=3*s, c="blue", edgecolor="none")    
     ax2.set_xlim([xmin, xmax])
     ax2.set_ylim([-1,np.max(S2N_masked)*1.1])
     ax2.set_ylabel(r"S/N", fontsize=ft_size)
     
     ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
-    ax3.scatter(x_masked[isig5],chi_masked[isig5],s=5*s, c="red", edgecolor="none")        
+    ax3.scatter(x_masked[isig5],chi_masked[isig5],s=3*s, c="red", edgecolor="none")        
     if mask_caution is not None:
-        ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=5*s, c="blue", edgecolor="none")    
+        ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=3*s, c="blue", edgecolor="none")    
     ax3.set_xlim([xmin, xmax])
     ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
     ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
-    ax3.set_ylabel("$\chi^2$", fontsize=ft_size)    
+    ax3.set_ylabel("neg. reduced $\chi^2$", fontsize=ft_size)    
     
     fig.subplots_adjust(hspace=0.05)
     if plot_save:
@@ -297,6 +297,8 @@ def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
         A_tmp, varA_tmp, chi_tmp, S2N_tmp = process_spec(d, divar, width_guesses[i], x_mean, mask=mask)
         # Swith values if chi squar is higher. Note the we defined chi sq.
         ibool = (chi_tmp>chi) #& ~np.isnan(chi_tmp) 
+        # ibool = (np.abs(1-chi_tmp)<np.abs(1-chi)) #& ~np.isnan(chi_tmp)
+        # ibool = S2N_tmp>S2N
         A[ibool] = A_tmp[ibool]
         varA[ibool] = varA_tmp[ibool]
         chi[ibool] = chi_tmp[ibool]
