@@ -216,10 +216,25 @@ def median_filter(data, mask=None, window_pixel_size=50):
         ans[i] = np.median(tmp)
     return ans    
 
+def spec_lines():
+    """
+    # OII emission line (3727.3 ̊A), we used the emission lines Hδ (4102.8 ̊A), 
+    # Hγ (4340 ̊A), Hβ (4861.3 ̊A), OIII (4959 ̊A, 5006.8 ̊A), Hα (6562.8 ̊A), and S2 (6716 ̊A); 
+    # and the absorption lines Ca(H) (3933.7 ̊A), Ca(K) (3968.5 ̊A), G-band (4304.4 ̊A), 
+    # Mg (5175.3 ̊A), and Na (5894.0 ̊A)    
+    """
+    emissions = [3727.3, 4102.8, 4340, 4861.3, 4959,5006.8, 6562.8, 6716]
+    absorptions  = [3933.7, 3968.6, 4304.4, 5175.3, 5984.0]
+    return emissions, absorptions
+
+def OII_wavelength():
+    return 3727.3
+
+
 def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
              plot_show=True, plot_save=False, save_dir=None, plot_title=""):
     """
-    Plot a spectrum given x,d.
+    Plot a spectrum and its fits.
     """
     if mask is not None:
         S2N[mask] = 0
@@ -237,50 +252,107 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
     if mask_caution is not None:
         mask_caution = mask_caution[ibool]
 
-    # Create a figure where x-axis is shared
-    ft_size = 15        
-    fig, (ax0, ax1,ax2,ax3) = plt.subplots(4,figsize=(12,10),sharex=True)
-        
-    ax0.set_title(plot_title)
-    ax0.plot(x_masked,d_masked,lw=0.5, c="black")
-    ax0.set_xlim([xmin, xmax])
-    ax0.set_ylim([max(np.min(d_masked)*1.1,-2),np.max(d_masked)*1.1])
-    ax0.set_ylabel(r"Original Flux", fontsize=ft_size)
+    # Emission and absorption lines
+    emissions, absorptions = spec_lines()
+    OII_line = OII_wavelength()
     
+    # Find peaks in S2N. Must have 5-sigma.
     isig5 = (S2N_masked>threshold)
-    ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
-    ax1.scatter(x_masked[isig5],A_masked[isig5],s=3*s, c="red", edgecolor="none")    
-    if mask_caution is not None:
-        ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=3*s, c="blue", edgecolor="none")
-    ax1.set_xlim([xmin, xmax])
-    ax1.set_ylim([-2,np.max(A_masked)*1.1])
-    ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
-    
-    ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
-    ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=3*s, c="red", edgecolor="none")        
-    ax2.axhline(y=5, ls="--", lw=2, c="blue")
-    if mask_caution is not None:
-        ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=3*s, c="blue", edgecolor="none")    
-    ax2.set_xlim([xmin, xmax])
-    ax2.set_ylim([-1,np.max(S2N_masked)*1.1])
-    ax2.set_ylabel(r"S/N", fontsize=ft_size)
-    
-    ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
-    ax3.scatter(x_masked[isig5],chi_masked[isig5],s=3*s, c="red", edgecolor="none")        
-    if mask_caution is not None:
-        ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=3*s, c="blue", edgecolor="none")    
-    ax3.set_xlim([xmin, xmax])
-    ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
-    ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
-    ax3.set_ylabel("neg. reduced $\chi^2$", fontsize=ft_size)    
-    
-    fig.subplots_adjust(hspace=0.05)
-    if plot_save:
-        plt.savefig(save_dir+plot_title, bbox_inches="tight", dpi=200)
-    if plot_show:
-        plt.show()
-    plt.close() 
+    # Create a vector that tells where a peak cluster starts and end. 
+    S2N_start_end = np.zeros_like(S2N_masked)
+    S2N_start_end[isig5] = 1
+    S2N_start_end[1:] = S2N_start_end[1:]-S2N_start_end[:-1]
+    S2N_start_end[0] = 0
+    # For each [1,...,-1] cluster, finding the idx of maximum and find
+    # the corresponding x value.
+    starts = np.where(S2N_start_end==1)[0]
+    ends = np.where(S2N_start_end==-1)[0]
+    z_peak_list = []
+    s2n_peak_list = []
+    oii_flux_list = []
+    for i in range(len(starts)):
+        start = starts[i]
+        end = ends[i]
+        if start==(end-1):
+            val = S2N_masked[start]
+        else:
+            val = np.max(S2N_masked[start:end])
+        idx = np.where(S2N_masked ==val)[0]
+        z_peak_list.append(x_masked[idx]/OII_line-1)
+        s2n_peak_list.append(S2N_masked[idx])
+        oii_flux_list.append(A_masked[idx])
+        
+    for guess_num,z_pk in enumerate(z_peak_list):
+        info_str = "-".join(["z%.2f"%z_pk,"oii%.2f"%oii_flux_list[guess_num], "s2n%.2f"%s2n_peak_list[guess_num]])
+        title_str = "-".join([plot_title, "guess%d"%guess_num , info_str])
+        # Create a figure where x-axis is shared
+        ft_size = 15        
+        fig, (ax0, ax1,ax2,ax3) = plt.subplots(4,figsize=(12,10),sharex=True)
 
+        # Draw lines
+        for em in emissions:
+            ax0.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax0.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax0.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")                        
+        ax0.set_title(title_str, fontsize=ft_size)
+        ax0.plot(x_masked,d_masked,lw=1, c="black")
+        ax0.set_xlim([xmin, xmax])
+        ax0.set_ylim([max(np.min(d_masked)*1.1,-2),np.max(d_masked)*1.1])
+        ax0.set_ylabel(r"Original Flux", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax1.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax1.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax1.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")
+        ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
+        ax1.scatter(x_masked[isig5],A_masked[isig5],s=s, c="red", edgecolor="none")    
+        if mask_caution is not None:
+            ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=s, c="blue", edgecolor="none")                    
+        ax1.set_xlim([xmin, xmax])
+        ax1.set_ylim([-2,np.max(A_masked)*1.1])
+        ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax2.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax2.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax2.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue") 
+        ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
+        ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=s, c="red", edgecolor="none")        
+        ax2.axhline(y=5, ls="--", lw=2, c="blue")
+        if mask_caution is not None:
+            ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=s, c="blue", edgecolor="none")       
+        ax2.set_xlim([xmin, xmax])
+        ax2.set_ylim([-1,np.max(S2N_masked)*1.1])
+        ax2.set_ylabel(r"S/N", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax3.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax3.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax3.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")
+        ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
+        ax3.scatter(x_masked[isig5],chi_masked[isig5],s=s, c="red", edgecolor="none")        
+        if mask_caution is not None:
+            ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=s, c="blue", edgecolor="none")            
+        ax3.set_xlim([xmin, xmax])
+        ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
+        ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
+        ax3.set_ylabel("neg. reduced $\chi^2$", fontsize=ft_size)    
+
+        fig.subplots_adjust(hspace=0.05)
+        if plot_save:
+            plt.savefig(save_dir+plot_title, bbox_inches="tight", dpi=200)
+        if plot_show:
+            plt.show()
+        plt.close() 
+        
+    return 
 
 def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
     """
@@ -2134,7 +2206,7 @@ def match_cat1_to_cat2(ra1, dec1, ra2, dec2):
     return idx, d2d.degree
 
 def closest_idx(arr, val):
-    return np.argmin(np.abs(arr-val))
+    return np.argmin(np.abs(arr-val))   
 
 
 
