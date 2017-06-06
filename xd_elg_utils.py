@@ -191,7 +191,7 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     
     return A, varA, chi, S2N
 
-def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
+def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
              plot_show=True, plot_save=False, save_dir=None, plot_title=""):
     """
     Plot a spectrum given x,d.
@@ -200,6 +200,7 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
         S2N[mask] = 0
         A[mask] = 0
         chi[mask] = 0
+        d[mask] = 0
 
     # Limit plot range
     ibool = (x>xmin)&(x<xmax)
@@ -207,15 +208,21 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
     S2N_masked = S2N[ibool]
     chi_masked = chi[ibool]
     A_masked = A[ibool]
+    d_masked = d[ibool]
     if mask_caution is not None:
         mask_caution = mask_caution[ibool]
 
     # Create a figure where x-axis is shared
     ft_size = 15        
-    fig, (ax1,ax2,ax3) = plt.subplots(3,figsize=(10,10),sharex=True)
+    fig, (ax0, ax1,ax2,ax3) = plt.subplots(4,figsize=(12,10),sharex=True)
+        
+    ax0.set_title(plot_title)
+    ax0.plot(x_masked,d_masked,lw=0.5, c="black")
+    ax0.set_xlim([xmin, xmax])
+    ax0.set_ylim([np.min(d_masked)*1.1,np.max(d_masked)*1.1])
+    ax0.set_ylabel(r"Original Flux", fontsize=ft_size)
     
     isig5 = (S2N_masked>threshold)
-    ax1.set_title(plot_title)
     ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
     ax1.scatter(x_masked[isig5],A_masked[isig5],s=5*s, c="red", edgecolor="none")    
     if mask_caution is not None:
@@ -244,11 +251,10 @@ def plot_fit(x, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=450
     
     fig.subplots_adjust(hspace=0.05)
     if plot_save:
-        plt.savefig(save_dir+title_str, bbox_inches="tight", dpi=200)
+        plt.savefig(save_dir+plot_title, bbox_inches="tight", dpi=200)
     if plot_show:
         plt.show()
     plt.close() 
-    
 
 
 def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
