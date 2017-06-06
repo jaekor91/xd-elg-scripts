@@ -26,8 +26,8 @@ xmin = 4500
 # Load targets
 print("Load target photo info.")
 table = load_fits_table(photo_data_fname) 
-fib_idx_observed = table["FIB_NUM_TWO"][table["OBSERVED_TWO"]==1]-1 # -1 for zero indexing    
-
+fib_idx_observed = table["FIB_NUM_ONE"][(table["OBSERVED_ONE"]==1)&(table["DR3_G"]>21)]-1 # -1 for zero indexing    
+z
 # Load spectra
 print("Load MMT spec data from spHect-file. Only our targets.")
 x, d, divar, AND_mask = load_MMT_specdata(spec_data_fname, fib_idx_observed)
