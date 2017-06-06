@@ -2131,7 +2131,10 @@ def match_cat1_to_cat2(ra1, dec1, ra2, dec2):
     cat2 = SkyCoord(ra=ra2*u.degree, dec=dec2*u.degree)  
     idx, d2d, d3d = cat1.match_to_catalog_sky(cat2)
     
-    return idx, d2d.degree    
+    return idx, d2d.degree
+
+def closest_idx(arr, val):
+    return np.argmin(np.abs(arr-val))
 
 
 
