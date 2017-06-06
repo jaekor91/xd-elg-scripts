@@ -5,7 +5,7 @@ from astropy.io import fits as FITS
 import matplotlib.pyplot as plt
 # from scipy.signal import savgol_filter
 
-%matplotlib inline
+
 # Constants
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
@@ -47,11 +47,12 @@ print("Median/std: %.3f/%.3f"%(x_median,x_std))
 
 ##############################################################################
 print("Process spectra.")
-print("Total number %d"%A_array.shape[0])
 A_array = np.zeros_like(x)
 S2N_array = np.zeros_like(x)
 AND_array = np.zeros(x.shape, dtype=bool)
 Chi_array = np.zeros_like(x)
+print("Total number %d"%A_array.shape[0])
+
 
 # For each, spectrum process them as save their A and S2N 
 for i in range(A_array.shape[0]):
