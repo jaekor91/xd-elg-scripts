@@ -187,7 +187,7 @@ def process_spec(d, divar, width_guess, x_mean, mask=None):
     N_sample = np.convolve(N_sample, v_N, mode="same")    
 
     # Chi sq. # -1 since we are only estimating one parameter.
-    chi = -(-2*A_numerator*A+varA*(A**2))#/(N_sample-1) 
+    chi = -(-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
     
     return A, varA, chi, S2N
 
@@ -272,7 +272,7 @@ def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=
     ax3.set_xlim([xmin, xmax])
     ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
     ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
-    ax3.set_ylabel("$neg. \chi^2$", fontsize=ft_size)    
+    ax3.set_ylabel("neg. reduced $\chi^2$", fontsize=ft_size)    
     
     fig.subplots_adjust(hspace=0.05)
     if plot_save:
