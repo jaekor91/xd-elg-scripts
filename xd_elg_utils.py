@@ -12,7 +12,7 @@ from os.path import isfile, join
 import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
-# import extreme_deconvolution as XD
+import extreme_deconvolution as XD
 
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
@@ -217,12 +217,6 @@ def median_filter(data, mask=None, window_pixel_size=50):
     return ans    
 
 def spec_lines():
-    """
-    # OII emission line (3727.3 ̊A), we used the emission lines Hδ (4102.8 ̊A), 
-    # Hγ (4340 ̊A), Hβ (4861.3 ̊A), OIII (4959 ̊A, 5006.8 ̊A), Hα (6562.8 ̊A), and S2 (6716 ̊A); 
-    # and the absorption lines Ca(H) (3933.7 ̊A), Ca(K) (3968.5 ̊A), G-band (4304.4 ̊A), 
-    # Mg (5175.3 ̊A), and Na (5894.0 ̊A)    
-    """
     emissions = [3727.3, 4102.8, 4340, 4861.3, 4959,5006.8, 6562.8, 6716]
     absorptions  = [3933.7, 3968.6, 4304.4, 5175.3, 5984.0]
     return emissions, absorptions
