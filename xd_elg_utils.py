@@ -93,6 +93,341 @@ def MMT_DECaLS_quality(fits, mask=None):
         
     return (gany==0)&(rany==0)&(zany==0)&(givar>0)&(rivar>0)&(zivar>0)&(bp)&(r_dev<1.5)&(r_exp<1.5)
 
+def load_MMT_specdata(fname, fib_idx=None):
+    """
+    Given spHect* file address, return wavelength (x),
+    flux value (d), inverse variance (divar), and
+    AND_mask.
+
+    If fib_idx is not None, then return only spectra
+    indicated. 
+    """
+    table_spec = fits.open(fname)
+    x = table_spec[0].data
+    d = table_spec[1].data
+    divar = table_spec[2].data # Inverse variance
+    AND_mask = table_spec[3].data
+
+    if fib_idx is not None:
+        x = x[fib_idx,:]
+        d = d[fib_idx,:]
+        divar = divar[fib_idx,:]
+        AND_mask = AND_mask[fib_idx,:]
+    return x, d, divar, AND_mask
+
+def box_car_avg(d,window_pixel_size=50,mask=None):
+    """
+    Take a running average of window_piexl_size pixels.
+    Exclude masked pixels from averaging.
+    """
+    # Filter
+    v = np.ones(window_pixel_size)
+    
+    # Array that tells how many pixels were used
+    N_sample = np.ones(d.size)
+    if mask is not None:
+        N_sample[mask]=0
+    N_sample = np.convolve(N_sample, v,mode="same")
+    
+    # Running sum of the data excluding masked pixels
+    if mask is not None:
+        d[mask]=0
+    d_boxed = np.convolve(d, v,mode="same")
+    
+    # Taking average
+    d_boxed /= N_sample
+    
+    return d_boxed
+
+
+
+def process_spec(d, divar, width_guess, x_mean, mask=None):
+    """
+    Given the data vector d and its corresopnding inverse
+    variance and pix_sigma width for the filter
+    compute, integrated flux A, var(A), and chi sq.
+    Also, return S2N. width_guess is in Angstrom.
+    """
+    # Filter
+    pix_sigma = width_guess/x_mean # Peak width in terms of pixels
+    filter_size = np.ceil(pix_sigma*4*2) # How large the filter has to be to encompass 4-sig
+    # If filter size is odd, add one.
+    if filter_size%2==0:
+        filter_size+=1
+
+    # Centered around the filter, create a gaussian.
+    v_center = int(filter_size/2)
+    v = np.arange(int(filter_size))-v_center
+    v = np.exp(-(v**2)/(2*(pix_sigma**2)))/(pix_sigma*np.sqrt(2*np.pi))
+    # Note: v = G(A=1)
+    
+    # If mask is used, then block out the appropriate
+    # portion.
+    if mask is not None:
+        d[mask]=0
+        divar[mask]=0
+    
+    # varA: Running sum of (ivar*v^2) excluding masked pixels
+    varA = np.convolve(divar, v**2, mode="same")
+    
+    # A_numerator: Running sum of (d*v*ivar)
+    A_numerator = np.convolve(d*divar, v, mode="same")
+    A = A_numerator/varA
+    
+    # SN
+    S2N = A/np.sqrt(varA)
+    
+    # Compute reduced chi. sq.
+    # To do, compute the number of samples used.
+    # Filter
+    v_N = np.ones(int(filter_size))    
+    N_sample = np.ones(d.size)
+    if mask is not None:
+        N_sample[mask]=0
+    N_sample = np.convolve(N_sample, v_N, mode="same")    
+
+    # Chi sq. # -1 since we are only estimating one parameter.
+    chi = -(-2*A_numerator*A+varA*(A**2))/(N_sample-1) 
+    
+    return A, varA, chi, S2N
+
+def median_filter(data, mask=None, window_pixel_size=50):
+    """
+    Given the data array and window size, compute median
+    without mask.
+    """
+    array_length = data.size
+    
+    if window_pixel_size%2==0:
+        window_pixel_size+=1
+        
+    if mask is None:
+        mask = np.ones(array_length)
+        
+    pass_mask = np.logical_not(mask)
+
+    ans = np.zeros(array_length)
+    for i in range(array_length):
+        idx_l = max(0, i-int(window_pixel_size/2))
+        idx_h = min(array_length, i+int(window_pixel_size/2))+1
+#         print(idx_l, idx_h)
+        tmp = data[idx_l:idx_h][pass_mask[idx_l:idx_h]]
+#         print(tmp.size)
+        ans[i] = np.median(tmp)
+    return ans    
+
+def spec_lines():
+    """
+    # OII emission line (3727.3 ̊A), we used the emission lines Hδ (4102.8 ̊A), 
+    # Hγ (4340 ̊A), Hβ (4861.3 ̊A), OIII (4959 ̊A, 5006.8 ̊A), Hα (6562.8 ̊A), and S2 (6716 ̊A); 
+    # and the absorption lines Ca(H) (3933.7 ̊A), Ca(K) (3968.5 ̊A), G-band (4304.4 ̊A), 
+    # Mg (5175.3 ̊A), and Na (5894.0 ̊A)    
+    """
+    emissions = [3727.3, 4102.8, 4340, 4861.3, 4959,5006.8, 6562.8, 6716]
+    absorptions  = [3933.7, 3968.6, 4304.4, 5175.3, 5984.0]
+    return emissions, absorptions
+
+def OII_wavelength():
+    return 3727.3
+
+
+def plot_fit(x, d, A, S2N, chi, threshold=5, mask=None, mask_caution=None, xmin=4500, xmax=8500, s=1,\
+             plot_show=True, plot_save=False, save_dir=None, plot_title=""):
+    """
+    Plot a spectrum and its fits.
+    """
+    if mask is not None:
+        S2N[mask] = 0
+        A[mask] = 0
+        chi[mask] = 0
+        d[mask] = 0
+
+    # Limit plot range
+    ibool = (x>xmin)&(x<xmax)
+    x_masked = x[ibool]
+    S2N_masked = S2N[ibool]
+    chi_masked = chi[ibool]
+    A_masked = A[ibool]
+    d_masked = d[ibool]
+    if mask_caution is not None:
+        mask_caution = mask_caution[ibool]
+
+    # Emission and absorption lines
+    emissions, absorptions = spec_lines()
+    OII_line = OII_wavelength()
+    
+    # Find peaks in S2N. Must have 5-sigma.
+    isig5 = (S2N_masked>threshold)
+    # Create a vector that tells where a peak cluster starts and end. 
+    S2N_start_end = np.zeros_like(S2N_masked)
+    S2N_start_end[isig5] = 1
+    S2N_start_end[1:] = S2N_start_end[1:]-S2N_start_end[:-1]
+    S2N_start_end[0] = 0
+    # For each [1,...,-1] cluster, finding the idx of maximum and find
+    # the corresponding x value.
+    starts = np.where(S2N_start_end==1)[0]
+    ends = np.where(S2N_start_end==-1)[0]
+    z_peak_list = []
+    s2n_peak_list = []
+    oii_flux_list = []
+    for i in range(len(ends)):
+        start = starts[i]
+        end = ends[i]
+        if (start==(end-1)) or (start==end):
+            val = S2N_masked[start]
+        else:
+            val = np.max(S2N_masked[start:end])
+        idx = np.where(S2N_masked ==val)[0]
+        z_peak_list.append(x_masked[idx]/OII_line-1)
+        s2n_peak_list.append(S2N_masked[idx])
+        oii_flux_list.append(A_masked[idx])
+        
+    for guess_num,z_pk in enumerate(z_peak_list):
+        info_str = "-".join(["z%.2f"%z_pk,"oii%.2f"%oii_flux_list[guess_num], "s2n%.2f"%s2n_peak_list[guess_num]])
+        title_str = "-".join([plot_title, "guess%d"%guess_num , info_str])
+        # Create a figure where x-axis is shared
+        ft_size = 15        
+        fig, (ax0, ax1,ax2,ax3) = plt.subplots(4,figsize=(12,10),sharex=True)
+
+        # Draw lines
+        for em in emissions:
+            ax0.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax0.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax0.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")                        
+        ax0.set_title(title_str, fontsize=ft_size)
+        ax0.plot(x_masked,d_masked,lw=1, c="black")
+        ax0.set_xlim([xmin, xmax])
+        ax0.set_ylim([max(np.min(d_masked)*1.1,-2),np.max(d_masked)*1.1])
+        ax0.set_ylabel(r"Original Flux", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax1.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax1.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax1.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")
+        ax1.scatter(x_masked,A_masked,s=s, c="black", edgecolor="none")
+        ax1.scatter(x_masked[isig5],A_masked[isig5],s=s, c="red", edgecolor="none")    
+        if mask_caution is not None:
+            ax1.scatter(x_masked[mask_caution],A_masked[mask_caution],s=s, c="blue", edgecolor="none")                    
+        ax1.set_xlim([xmin, xmax])
+        ax1.set_ylim([-2,np.max(A_masked)*1.1])
+        ax1.set_ylabel(r"Integrated Flux", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax2.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax2.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax2.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue") 
+        ax2.scatter(x_masked,S2N_masked,s=s, c="black", edgecolor="none")    
+        ax2.scatter(x_masked[isig5],S2N_masked[isig5],s=s, c="red", edgecolor="none")        
+        ax2.axhline(y=5, ls="--", lw=2, c="blue")
+        if mask_caution is not None:
+            ax2.scatter(x_masked[mask_caution],S2N_masked[mask_caution],s=s, c="blue", edgecolor="none")       
+        ax2.set_xlim([xmin, xmax])
+        ax2.set_ylim([-1,np.max(S2N_masked)*1.1])
+        ax2.set_ylabel(r"S/N", fontsize=ft_size)
+
+        # Draw lines
+        for em in emissions:
+            ax3.axvline(x=(em*(z_pk+1)), ls="--", lw=2, c="red")
+        for ab in absorptions:
+            ax3.axvline(x=(ab*(z_pk+1)), ls="--", lw=2, c="green")            
+        ax3.axvline(x=(OII_line*(z_pk+1)), ls="--", lw=2, c="blue")
+        ax3.scatter(x_masked,chi_masked,s=s, c="black", edgecolor="none")
+        ax3.scatter(x_masked[isig5],chi_masked[isig5],s=s, c="red", edgecolor="none")        
+        if mask_caution is not None:
+            ax3.scatter(x_masked[mask_caution],chi_masked[mask_caution],s=s, c="blue", edgecolor="none")            
+        ax3.set_xlim([xmin, xmax])
+        ax3.set_ylim([-0.5,np.max(chi_masked)*1.1])    
+        ax3.set_xlabel("Wavelength ($\AA$)", fontsize=ft_size)
+        ax3.set_ylabel("neg. reduced $\chi^2$", fontsize=ft_size)    
+
+        fig.subplots_adjust(hspace=0.05)
+        if plot_save:
+            plt.savefig(save_dir+title_str+".png", bbox_inches="tight", dpi=200)
+        if plot_show:
+            plt.show()
+        plt.close() 
+        
+    return 
+
+def process_spec_best(d, divar, width_guesses, x_mean, mask=None):
+    """
+    The same as process_spec(), except returns A, varA, chi, S2N values for
+    best chi.
+    
+    width guesses is either a list or numpy array. 
+    """
+    width_guesses = np.asarray(width_guesses)
+    
+    # First
+    A, varA, chi, S2N = process_spec(d, divar, width_guesses[0], x_mean, mask=mask)    
+    for i in range(1,width_guesses.size):
+        A_tmp, varA_tmp, chi_tmp, S2N_tmp = process_spec(d, divar, width_guesses[i], x_mean, mask=mask)
+        # Swith values if chi squar is higher. Note the we defined chi sq.
+        ibool = (chi_tmp>chi) #& ~np.isnan(chi_tmp) 
+        # ibool = (np.abs(1-chi_tmp)<np.abs(1-chi)) #& ~np.isnan(chi_tmp)
+        # ibool = S2N_tmp>S2N
+        A[ibool] = A_tmp[ibool]
+        varA[ibool] = varA_tmp[ibool]
+        chi[ibool] = chi_tmp[ibool]
+        S2N[ibool] = S2N_tmp[ibool]
+        
+    return  A, varA, chi, S2N    
+
+
+def plot_spectrum(x,d,x2=None,d2=None, xmin=4000, xmax=8700, lw=0.25, lw2=1, mask=None, mask2=None):
+    """
+    Plot a spectrum given x,d.
+    """
+    if mask is not None:
+        d[mask] = 0
+    ibool = (x>xmin)&(x<xmax)        
+    
+    fig = plt.figure(figsize=(10,5))
+    plt.plot(x[ibool],d[ibool],lw=lw, c="black")
+    
+    if (x2 is not None) and (d2 is not None):
+        ibool = (x2>xmin)&(x2<xmax)
+        if mask2 is not None:
+            d2[mask2]=0
+        plt.plot(x2[ibool],d2[ibool],lw=lw2, c="red")
+        
+    ft_size = 15
+    
+    plt.xlim([xmin, xmax])
+    plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    plt.ylabel(r"Flux ($10^{-17}$ ergs/cm^2/s/$\AA$)", fontsize=ft_size)
+    plt.show()
+    plt.close()
+
+def plot_S2N(x, S2N, mask=None, xmin=4500, xmax=8500, s=1):
+    """
+    Plot a spectrum given x,d.
+    """
+    if mask is not None:
+        S2N[mask] = 0
+    ibool = (x>xmin)&(x<xmax)        
+    
+    fig = plt.figure(figsize=(10,5))
+    S2N_masked = S2N[ibool]
+    plt.scatter(x[ibool],S2N_masked,s=s, c="black")
+        
+    ft_size = 15
+    
+    plt.xlim([xmin, xmax])
+    plt.ylim([np.min(S2N_masked)*1.2,np.max(S2N_masked)*1.2])
+    plt.xlabel(r"Wavelength ($\AA$)", fontsize=ft_size)
+    plt.ylabel(r"S/N", fontsize=ft_size)
+    plt.show()
+    plt.close()    
+
+
+
+    
 def MMT_radec(field, MMT_data_directory="./MMT_data/"):
     """
     field is one of [0,1,2]:
@@ -118,6 +453,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("5"):
                 ibool1[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool1[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool1[i]]
         # Extract ra,dec
         ra_str = [APID_targets[i].split("'")[1].split(" ")[1] for i in range(len(APID_targets))]
         dec_str = [APID_targets[i].split("'")[1].split(" ")[2] for i in range(len(APID_targets))]
@@ -138,6 +474,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("5"):
                 ibool2[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool2[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool2[i]]
         # print(APID_targets[0])
         # Extract ra,dec
         ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
@@ -159,6 +496,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
             if e.startswith("3"):
                 ibool3[i] = True        
         APID_targets = [OnlyAPID[i] for i in range(num_fibers) if ibool3[i]]
+        fib = [i+1 for i in range(num_fibers) if ibool3[i]]        
         # print(APID_targets[0])
         # Extract ra,dec
         ra_str = [APID_targets[i].split(" ")[1] for i in range(len(APID_targets))]
@@ -166,7 +504,7 @@ def MMT_radec(field, MMT_data_directory="./MMT_data/"):
         ra = [HMS2deg(ra=ra_str[i]) for i in range(len(ra_str))]
         dec = [HMS2deg(dec=dec_str[i]) for i in range(len(ra_str))]
     
-    return np.asarray(ra), np.asarray(dec)
+    return np.asarray(ra), np.asarray(dec), np.asarray(fib)
 
 
 
@@ -1631,17 +1969,25 @@ def save_fits_join(data1,data2, fname):
 def load_weight(fits):
     return fits["TARG_WEIGHT"]    
 
-def fits_append(table, new_col, col_name, idx1, idx2):
+def fits_append(table, new_col, col_name, idx1, idx2, dtype="default", dtype_user=None):
     """
     Given fits table and field column/name pair,
     append the new field to the table using the idx1 and idx2 that correspond to 
     fits table and new column indices.
+
+    If dtype =="default", then the default of float variable type is used.
+    If dtype =="user", then user provided data type is used.
     """
     global large_random_constant
     new_col_sorted = np.ones(table.shape[0])*large_random_constant
     new_col_sorted[idx1] = new_col[idx2]
     
-    new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
+    if dtype=="default":
+        new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=new_col_sorted.dtype, usemask=False, asrecarray=True)
+    else:
+        new_table = rec.append_fields(table, col_name, new_col_sorted, dtypes=dtype_user, usemask=False, asrecarray=True)
+
+
     return new_table
 
 def load_fits_table(fname):
@@ -1857,7 +2203,10 @@ def match_cat1_to_cat2(ra1, dec1, ra2, dec2):
     cat2 = SkyCoord(ra=ra2*u.degree, dec=dec2*u.degree)  
     idx, d2d, d3d = cat1.match_to_catalog_sky(cat2)
     
-    return idx, d2d.degree    
+    return idx, d2d.degree
+
+def closest_idx(arr, val):
+    return np.argmin(np.abs(arr-val))   
 
 
 
