@@ -12,7 +12,7 @@ from os.path import isfile, join
 import scipy.stats as stats
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
-import extreme_deconvolution as XD
+# import extreme_deconvolution as XD
 
 import confidence_contours as cc
 from confidence_level_height_estimation import confidence_level_height_estimator, summed_gm, inverse_cdf_gm
