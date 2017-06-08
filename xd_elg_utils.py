@@ -1486,13 +1486,19 @@ def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol
 
 
 
-def combine_grz(list1,list2,list3):
+def combine_grz(list1,list2,list3=None):
     """
-    Convenience function for combining three sets data in a list.
+    Convenience function for combining two or three sets data in a list.
     """
-    g = np.concatenate((list1[0], list2[0], list3[0]))
-    r = np.concatenate((list1[1], list2[1], list3[1]))
-    z = np.concatenate((list1[2], list2[2], list3[2]))
+    if list3 is not None:
+        g = np.concatenate((list1[0], list2[0], list3[0]))
+        r = np.concatenate((list1[1], list2[1], list3[1]))
+        z = np.concatenate((list1[2], list2[2], list3[2]))
+    else:
+        g = np.concatenate((list1[0], list2[0]))
+        r = np.concatenate((list1[1], list2[1]))
+        z = np.concatenate((list1[2], list2[2]))
+
     return [g, r,z]
 
 
