@@ -176,7 +176,7 @@ grid_fiducial, last_FoM_fiducial = XD.generate_XD_selection(param_directory, gli
                           reg_r=5e-4,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = 21.5+w_mag/2., \
                           maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1])
 print("Time taken: %.2f seconds" % (time.time()-start))
-print("Computed last FoM based on the grid: %.3f"%last_FoM)
+print("Computed last FoM based on the grid: %.3f"%last_FoM_fiducial)
 
 iXD_fiducial, FoM_fiducial = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM_fiducial, param_directory, \
             glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
