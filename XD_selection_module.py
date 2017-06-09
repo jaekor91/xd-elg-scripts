@@ -433,10 +433,10 @@ def generate_grid_var(w_cc, w_mag, minmag, maxmag):
     for selection boolean vector.
     """
     # Global params.
-    xmin1,xmax1 = (-1.0,0.20)
-    ymin1,ymax1 = (-.50,2.5)
-    xmin2,xmax2 = (0.2,1.2)
-    ymin2,ymax2 = (0.0,2.5)
+    xmin1,xmax1 = (-.75,0.20)
+    ymin1,ymax1 = (-.50,2.0)
+    xmin2,xmax2 = (0.2,1.5)
+    ymin2,ymax2 = (-.50,2.0)
     zmin,zmax = (minmag,maxmag)
 
     # +w*0.5 to center. Also note the convention [start, end)
@@ -475,10 +475,10 @@ def generate_grid_var(w_cc, w_mag, minmag, maxmag):
 
 def generate_grid(w_cc, w_mag, minmag, maxmag):
     # Global params.
-    xmin1,xmax1 = (-1.0,0.20)
-    ymin1,ymax1 = (-.50,2.5)
-    xmin2,xmax2 = (0.2,1.2)
-    ymin2,ymax2 = (0.0,2.5)
+    xmin1,xmax1 = (-.75,0.20)
+    ymin1,ymax1 = (-.50,2.0)
+    xmin2,xmax2 = (0.2,1.5)
+    ymin2,ymax2 = (-.50,2.0)
     zmin,zmax = (minmag,maxmag)
 
     # +w*0.5 to center. Also note the convention [start, end)
