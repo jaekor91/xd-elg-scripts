@@ -45,14 +45,14 @@ two_projections = True
 
 # XD1: Boundary plots 
 plot_bnd = True
-plot_bnd_movie = False # Generate many slices for a movie.
+plot_bnd_movie = True # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
 plot_bnd2 = True
-plot_bnd_movie2 = False # Generate many slices for a movie.
+plot_bnd_movie2 = True # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
 mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
@@ -69,7 +69,7 @@ dNdz_label2 = "XD2"
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
 plot_bnd_diff = True
-plot_bnd_diff_movie = False
+plot_bnd_diff_movie = True
 
 # dNdm plots
 plot_dNdm = True # Plot XD1.
@@ -106,13 +106,13 @@ rlim=23.4
 zlim=22.4
 
 # Total number of fibers to be used.
-N_tot=8000
+N_tot=5000
 
 # Figure of Merit (FoM) weights. Recall FoM = (sum_j f_j * n_j ) / (sum_i n_i)
 # Note that this is different "class efficiency" which we define as
 # the fraction of objects in each class we expect to be good objects
 # for DESI.
-f_i=[1., 1., 0., 0.25, 0., .75, 0.]
+f_i=[1.5, 1.5, 0., 0.25, 0., 1., 0.]
 
 # Reference points based on which the number density conserving noise are
 # calculated.
@@ -124,7 +124,7 @@ rz_ref=0.5
 # Regularizing parameter to be added to the denomitor when calculating FoM.
 # Note: Keep the default value 5e-4 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
-reg_r=4e-2
+reg_r=8e-3
 
 # Grid parameters. The finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
