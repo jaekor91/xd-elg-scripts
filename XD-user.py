@@ -44,14 +44,14 @@ two_projections = True
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = False
+plot_bnd = True
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
-plot_bnd2 = False
+plot_bnd2 = True
 plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
@@ -68,7 +68,7 @@ dNdz_label2 = "XD2"
 # XD1-XD2-boundary difference plots
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = False
+plot_bnd_diff = True
 plot_bnd_diff_movie = False
 
 # dNdm plots
@@ -88,6 +88,10 @@ dNdm_label2 = "XD2"
 # stored. See README for download instruction.
 param_directory = "./XD-parameters/"
 
+# Use Field 3 or 4 data only? If yes, set this variable to "-Field34"
+# If not leave it as an empty string "".
+use_field34 = "-Field34"
+
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
 dNdm_type = [1, 1, 0, 1, 0, 0, 1]
@@ -102,13 +106,13 @@ rlim=23.4
 zlim=22.4
 
 # Total number of fibers to be used.
-N_tot=3000
+N_tot=8000
 
 # Figure of Merit (FoM) weights. Recall FoM = (sum_j f_j * n_j ) / (sum_i n_i)
 # Note that this is different "class efficiency" which we define as
 # the fraction of objects in each class we expect to be good objects
 # for DESI.
-f_i=[1., 1., 0., 0.25, 0., 0.25, 0.]
+f_i=[1., 1., 0., 0.25, 0., .75, 0.]
 
 # Reference points based on which the number density conserving noise are
 # calculated.
@@ -118,9 +122,9 @@ gr_ref=0.5
 rz_ref=0.5
 
 # Regularizing parameter to be added to the denomitor when calculating FoM.
-# Note: Do not change these parameters unless the user is sure of what
-# is being done.
-reg_r=5e-4
+# Note: Keep the default value 5e-4 unless pathologic behavior boundary occurs,
+# in which case it should be raised to a higher value.
+reg_r=4e-2
 
 # Grid parameters. The finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
@@ -148,6 +152,10 @@ NoZ_eff = 0.25
 # This is a directory where all XD parameters required for projections are
 # stored. See README for download instruction.
 param_directory2 = "./XD-parameters/"
+
+# Use Field 3 or 4 data only? If yes, set this variable to "-Field34"
+# If not leave it as an empty string "".
+use_field34_2 = "-Field34"
 
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
@@ -179,9 +187,9 @@ gr_ref2=0.5
 rz_ref2=0.5
 
 # Regularizing parameter to be added to the denomitor when calculating FoM.
-# Note: Do not change these parameters unless the user is sure of what
-# is being done.
-reg_r2=5e-4
+# Note: Keep the default value 5e-4 unless pathologic behavior boundary occurs,
+# in which case it should be raised to a higher value.
+reg_r2=2e-3
 
 # Grid parameters. The finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
@@ -286,7 +294,7 @@ start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=glim, rlim=rlim, zlim=zlim, \
                           gr_ref=gr_ref, rz_ref=rz_ref, N_tot=N_tot, f_i=f_i, \
                           reg_r=reg_r,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = minmag, \
-                          maxmag = maxmag, K_i = K_i, dNdm_type = dNdm_type)
+                          maxmag = maxmag, K_i = K_i, dNdm_type = dNdm_type, param_tag2=use_field34)
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
@@ -297,7 +305,7 @@ if two_projections:
 	grid2, last_FoM2 = XD.generate_XD_selection(param_directory2, glim=glim2, rlim=rlim2, zlim=zlim2, \
 	                          gr_ref=gr_ref2, rz_ref=rz_ref2, N_tot=N_tot2, f_i=f_i2, \
 	                          reg_r=reg_r2,zaxis="g", w_cc = w_cc2, w_mag = w_mag2, minmag = minmag2, \
-	                          maxmag = maxmag2, K_i = K_i2, dNdm_type = dNdm_type2)
+	                          maxmag = maxmag2, K_i = K_i2, dNdm_type = dNdm_type2, param_tag2=use_field34_2)
 	print("Time taken: %.2f seconds" % (time.time()-start))
 	print("Computed last FoM based on the grid: %.3f"%last_FoM2)
 	print("Completed.\n")	
@@ -313,7 +321,7 @@ print("Apply XD selection 1 to DEEP2-DECaLS data.")
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
                         glim=glim, rlim=rlim, zlim=zlim, gr_ref=gr_ref,\
                        rz_ref=rz_ref, reg_r=reg_r/(w_cc**2 * w_mag), f_i=f_i,\
-                       gmin = gmin, gmax = gmax, K_i = K_i, dNdm_type = dNdm_type)
+                       gmin = gmin, gmax = gmax, K_i = K_i, dNdm_type = dNdm_type, param_tag2=use_field34)
 print("Completed.\n")
 
 if two_projections:
@@ -321,7 +329,7 @@ if two_projections:
 	iXD2, FoM2 = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM2, param_directory2, \
 	                        glim=glim2, rlim=rlim2, zlim=zlim2, gr_ref=gr_ref2,\
 	                       rz_ref=rz_ref2, reg_r=reg_r2/(w_cc2**2 * w_mag2), f_i=f_i2,\
-	                       gmin = gmin2, gmax = gmax2, K_i = K_i2, dNdm_type = dNdm_type2)
+	                       gmin = gmin2, gmax = gmax2, K_i = K_i2, dNdm_type = dNdm_type2, param_tag2=use_field34_2)
 	print("Completed.\n")
 
 
