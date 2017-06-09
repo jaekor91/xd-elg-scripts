@@ -2125,7 +2125,7 @@ def is_reasonable_color(grz):
     gr = g-r
     rz = r-z
     
-    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
+    return (gr>-0.75) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
 
 
 def is_grzflux_pos(grzflux):
