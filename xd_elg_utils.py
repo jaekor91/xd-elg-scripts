@@ -217,12 +217,6 @@ def median_filter(data, mask=None, window_pixel_size=50):
     return ans    
 
 def spec_lines():
-    """
-    # OII emission line (3727.3 ̊A), we used the emission lines Hδ (4102.8 ̊A), 
-    # Hγ (4340 ̊A), Hβ (4861.3 ̊A), OIII (4959 ̊A, 5006.8 ̊A), Hα (6562.8 ̊A), and S2 (6716 ̊A); 
-    # and the absorption lines Ca(H) (3933.7 ̊A), Ca(K) (3968.5 ̊A), G-band (4304.4 ̊A), 
-    # Mg (5175.3 ̊A), and Na (5894.0 ̊A)    
-    """
     emissions = [3727.3, 4102.8, 4340, 4861.3, 4959,5006.8, 6562.8, 6716]
     absorptions  = [3933.7, 3968.6, 4304.4, 5175.3, 5984.0]
     return emissions, absorptions
@@ -1486,13 +1480,19 @@ def dNdm_fit(mag, weight, bw, magmin, magmax, area, niter = 5, cn2fit=0, pow_tol
 
 
 
-def combine_grz(list1,list2,list3):
+def combine_grz(list1,list2,list3=None):
     """
-    Convenience function for combining three sets data in a list.
+    Convenience function for combining two or three sets data in a list.
     """
-    g = np.concatenate((list1[0], list2[0], list3[0]))
-    r = np.concatenate((list1[1], list2[1], list3[1]))
-    z = np.concatenate((list1[2], list2[2], list3[2]))
+    if list3 is not None:
+        g = np.concatenate((list1[0], list2[0], list3[0]))
+        r = np.concatenate((list1[1], list2[1], list3[1]))
+        z = np.concatenate((list1[2], list2[2], list3[2]))
+    else:
+        g = np.concatenate((list1[0], list2[0]))
+        r = np.concatenate((list1[1], list2[1]))
+        z = np.concatenate((list1[2], list2[2]))
+
     return [g, r,z]
 
 
@@ -2125,7 +2125,7 @@ def is_reasonable_color(grz):
     gr = g-r
     rz = r-z
     
-    return (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
+    return (gr>-0.75) & (gr<2.5) & (rz>-0.5) &(rz<2.7)
 
 
 def is_grzflux_pos(grzflux):
