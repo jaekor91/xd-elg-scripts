@@ -90,10 +90,10 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
     thres = 2
     igrz_SN2 =  ((gflux*np.sqrt(givar))>thres)&((rflux*np.sqrt(rivar))>thres)&((zflux*np.sqrt(zivar))>thres)
     # Combination of above cuts.
-    ireasonable = iflux_positive & ireasonable_color & igrz_SN2
+    ireasonable = iflux_positive & ireasonable_color #& igrz_SN2
 
     ####### A rough cut #######
-    irough = (gr<1.3) & np.logical_or(gr<(rz+0.3) ,gr<0.3)
+    irough = (gr<1.5) & np.logical_or(gr<(rz+0.5) ,gr<0.5)
 
     ####### Objects for which FoM to be calculated. #######
     ibool = ireasonable & irough 
