@@ -88,3 +88,34 @@ fname = "cc-gr-rz-g24-all"
 plot_grz_class_all(grz, cn, w, area_total, mask=ibool,fname=fname, pt_size1=2., pt_size2=1.5)        
 print("Completed.\n")
 
+
+##############################################################################
+print("4. Plot the objects by class. Only g>21. Only Field 3 and 4.")
+print("Output plot filenames: cc-gr-rz-g21to24-**-Field34.png")
+
+iF34 = np.zeros(cn.size, dtype=bool)
+iF34[cn2.size:] = True
+ibool = (grz[0]>21) & iF34
+
+area_total = np.sum(area[1:])
+fname = None
+for i,e in enumerate(cnames[:7]):
+	print(e)
+	if i <6:
+		pt_size=.7
+		fname = "cc-gr-rz-g24-%d%s-Field34"%(i,e)        
+		plot_grz_class(grz, cn, w, area_total, pick=i,mask=ibool,fname=fname, pt_size=pt_size)
+	elif i == 6:
+		pt_size=0.3
+		fname = "cc-gr-rz-g24-%d%s-Field34"%(i,e)        
+		plot_grz_class(grz, cn, w, area_total, pick=i,mask=ibool,fname=fname, pt_size=pt_size)        
+print("Completed.\n")
+
+
+##############################################################################
+print("5. Plot objects in all classes. Only g>21. Only Field 3 and 4.")
+print("Output plot filenames: cc-gr-rz-g21to24-all-Field34.png")
+fname = "cc-gr-rz-g24-all-Field34"
+plot_grz_class_all(grz, cn, w, area_total, mask=ibool,fname=fname, pt_size1=2., pt_size2=1.5)        
+print("Completed.\n")
+
