@@ -23,6 +23,8 @@ mpl.rcParams['xtick.major.size'] = 10
 mpl.rcParams['xtick.major.width'] = 1.5
 mpl.rcParams['ytick.major.size'] = 10
 mpl.rcParams['ytick.major.width'] = 1.5
+mpl.rcParams['xtick.labelsize'] = 15
+mpl.rcParams['ytick.labelsize'] = 15
 
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
