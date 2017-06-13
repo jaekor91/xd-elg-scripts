@@ -226,6 +226,7 @@ grzivar2 = load_grz_invar(set2)
 d2m2 = load_DEEP2matched(set2) # DEEP2_matched?
 redz2 = load_redz(set2)
 oii2 = load_oii(set2)
+num_Field2 = oii2.size # Number of Field 2 objects.
 
 
 # Field 3
@@ -257,16 +258,18 @@ oii4 = load_oii(set4)
 area = np.loadtxt("intersection-area-f234").sum()
 area_34 = np.loadtxt("intersection-area-f234").sum()
 
-# Combine 
+# Combine all three fields
 cn = np.concatenate((cn2,cn3,cn4))
 w = np.concatenate((w2, w3, w4))
 grz = combine_grz(grz2, grz3, grz4)
 grzflux = combine_grz(grzflux2, grzflux3, grzflux4)
 grzivar = combine_grz(grzivar2, grzivar3, grzivar4)
 d2m = np.concatenate((d2m2, d2m3, d2m4))
-num_unmatched = (d2m==0).sum()
 redz = np.concatenate((redz2, redz3, redz4))
 oii = np.concatenate((oii2, oii3, oii4))
+# Giving unmatched objects its proper number.
+cn[cn<0] = 7
+num_unmatched = (d2m==0).sum()
 # print("Total number of unmatched objects: %d" % num_unmatched)
 # print("In density: %.2f" % (num_unmatched/area.sum()))
 # print((cn<0).sum())
@@ -277,14 +280,10 @@ iGoldSilver = np.logical_or((cn==0), (cn==1))
 oii_goldsilver = oii[iGoldSilver]*1e17
 w_goldsilver = w[iGoldSilver]
 
-
 DESI_frac = frac_above_new_oii(oii_goldsilver, w_goldsilver, new_oii_lim(N_tot, 2400))
 if two_projections:	
 	DESI_frac2 = frac_above_new_oii(oii_goldsilver, w_goldsilver, new_oii_lim(N_tot2, 2400))
 
-
-# Giving unmatched objects its proper number.
-cn[cn<0] = 7
 print("Completed.\n")
 
 
