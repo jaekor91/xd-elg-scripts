@@ -605,7 +605,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
  
     plt.xlim([0.5,1.4+wNoZ+0.1])
-    plt.legend(loc="upper right", fontsize=15)  
+    plt.legend(loc="upper right", fontsize=20)  
     ymax=250
     if plot_total:
         ymax = 450
@@ -698,7 +698,7 @@ def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_siz
         else:
             density = np.sum(cn==pick)/area
         title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
-        plt.title(title_str,fontsize=15)
+        plt.title(title_str,fontsize=20)
 
     # FDR boundary practice:
     plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
@@ -708,8 +708,8 @@ def plot_grz_class(grz, cn, weight, area, mask=None, pick=None,fname=None,pt_siz
     # Broad
 #     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
     # Decoration
-    plt.xlabel("$r-z$",fontsize=15)
-    plt.ylabel("$g-r$",fontsize=15)
+    plt.xlabel("$r-z$",fontsize=20)
+    plt.ylabel("$g-r$",fontsize=20)
     plt.axis("equal")
     plt.axis([-.5, 2.0, -.5, 2.0])
     if fname is not None:
@@ -752,7 +752,7 @@ def plot_grzflux_class(grzflux, cn, weight, area, mask=None, pick=None,fname=Non
         else:
             density = np.sum(cn==pick)/area
         title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
-        plt.title(title_str,fontsize=15)
+        plt.title(title_str,fontsize=20)
 
     # # FDR boundary practice:
     # plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
@@ -762,8 +762,8 @@ def plot_grzflux_class(grzflux, cn, weight, area, mask=None, pick=None,fname=Non
     # Broad
 #     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
     # Decoration
-    plt.xlabel("$r-z$ flux ratio",fontsize=15)
-    plt.ylabel("$g-r$ flux ratio",fontsize=15)
+    plt.xlabel("$r-z$ flux ratio",fontsize=20)
+    plt.ylabel("$g-r$ flux ratio",fontsize=20)
     plt.axis("equal")
     plt.axis([xmin, xmax, ymin, ymax])
     if fname is not None:
@@ -807,7 +807,7 @@ def plot_fluxratio_class(ratio1, ratio2, cn, weight, area, mask=None, pick=None,
         else:
             density = np.sum(cn==pick)/area
         title_str = "%s: Raw=%d, Density=%d" %(cnames[pick],raw, density)
-        plt.title(title_str,fontsize=15)
+        plt.title(title_str,fontsize=20)
 
     # # FDR boundary practice:
     # plt.plot( [0.3, 0.30], [-4, 0.195],'k-', lw=bnd_lw, c="blue")
@@ -817,8 +817,8 @@ def plot_fluxratio_class(ratio1, ratio2, cn, weight, area, mask=None, pick=None,
     # Broad
 #     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
     # Decoration
-    plt.xlabel(xlabel,fontsize=15)
-    plt.ylabel(ylabel,fontsize=15)
+    plt.xlabel(xlabel,fontsize=20)
+    plt.ylabel(ylabel,fontsize=20)
     plt.axis("equal")
     plt.axis([xmin, xmax, ymin, ymax])
     if fname is not None:
@@ -867,8 +867,8 @@ def plot_grz_class_all(grz, cn, weight, area, mask=None, fname=None, pt_size1=0.
     # Broad
 #     plt.plot(xbroad,ybroad, linewidth=bnd_lw, c='blue')
     # Decoration
-    plt.xlabel("$r-z$",fontsize=15)
-    plt.ylabel("$g-r$",fontsize=15)
+    plt.xlabel("$r-z$",fontsize=20)
+    plt.ylabel("$g-r$",fontsize=20)
     plt.axis("equal")
     plt.axis([-.5, 2.0, -.5, 2.0])
     if fname is not None:
@@ -965,7 +965,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     ax2.plot(sum_fit, xvec,lw=elw*1.5, color ="blue", alpha=1.)
     # Deocration     
     ax2.set_ylabel("$g-r$",fontsize=18)
-    ax2.set_xlabel("Normalized density", fontsize=15)
+    ax2.set_xlabel("Normalized density", fontsize=20)
     ax2.set_ylim([grmin, grmax])
     
     
@@ -986,7 +986,7 @@ def plot_XD_fit(ydata, weight, Sxamp_init, Sxmean_init, Sxcovar_init, Sxamp, Sxm
     ax3.plot(xvec,sum_fit,lw=elw*1.5, color ="blue", alpha=1.)    
     # Decoration
     ax3.set_xlabel("$r-z$",fontsize=18)
-    ax3.set_ylabel("Normalized density", fontsize=15)
+    ax3.set_ylabel("Normalized density", fontsize=20)
     ax3.set_xlim([rzmin, rzmax])
     
     
@@ -1132,7 +1132,7 @@ def plot_XD_fit_K(ydata, ycovar, Sxamp, Sxmean, Sxcovar, fname=None, pt_size=5, 
     # Decoration
     axarr[0,0].set_xlabel("$g-r$",fontsize=18)
     axarr[0,0].set_ylabel("$r-z$",fontsize=18)
-    axarr[0,0].set_title("Data",fontsize=15)        
+    axarr[0,0].set_title("Data",fontsize=20)        
     axarr[0,0].axis("equal")
     axarr[0,0].axis([grmin, grmax, rzmin, rzmax]) 
     
@@ -1152,7 +1152,7 @@ def plot_XD_fit_K(ydata, ycovar, Sxamp, Sxmean, Sxcovar, fname=None, pt_size=5, 
         # Decoration
         axarr[i//2, i%2].set_xlabel("$g-r$",fontsize=18)
         axarr[i//2, i%2].set_ylabel("$r-z$",fontsize=18)
-        axarr[i//2, i%2].set_title("Simulation %d" % sim_counter,fontsize=15); sim_counter+=1
+        axarr[i//2, i%2].set_title("Simulation %d" % sim_counter,fontsize=20); sim_counter+=1
         axarr[i//2, i%2].axis("equal")
         axarr[i//2, i%2].axis([grmin, grmax, rzmin, rzmax])     
 
