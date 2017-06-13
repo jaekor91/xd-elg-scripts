@@ -3,8 +3,7 @@
 import numpy as np
 from xd_elg_utils import *
 # Note that table_utils must be called after xd_elg_utils to overwrite certain
-# routine definitions. I understand that this is a bad practice but for this
-# non-critical application, I will condone this.
+# routine definitions.
 from table_utils import *
 import XD_selection_module as XD
 import time
@@ -19,8 +18,8 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # Introduction: Once having downloaded the git repository from
 #   https://github.com/jaekor91/xd-elg-scripts.git
 # the user can run this script to make projections for how XD algorithm will 
-# peform when used to select DESI ELG sample. The user must XD parameters
-# and which outputs are wanted.
+# peform when used to select DESI ELG sample. The user must specify the directory
+# for XD parameters and which outputs are wanted.
 #
 # Required data: README contains instruction for downloading required data
 # for this section.
@@ -29,7 +28,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # 
 # Note: This script can be used to make upto two projections based on two different
 # sets of parameters. When making comparisons, the projection based on the second
-# set is considered as a reference.
+# set is considered as reference.
 
 
 ##############################################################################
@@ -122,11 +121,11 @@ gr_ref=0.5
 rz_ref=0.5
 
 # Regularizing parameter to be added to the denomitor when calculating FoM.
-# Note: Keep the default value 5e-4 unless pathologic behavior boundary occurs,
+# Note: Keep the default value 2e-3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
 reg_r=8e-3
 
-# Grid parameters. The finer grid will slowdown the calculation but may 
+# Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
 # Note: Do not change these parameters unless the user is sure of what
 # is being done.
@@ -187,11 +186,11 @@ gr_ref2=0.5
 rz_ref2=0.5
 
 # Regularizing parameter to be added to the denomitor when calculating FoM.
-# Note: Keep the default value 5e-4 unless pathologic behavior boundary occurs,
+# Note: Keep the default value 2-e3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
 reg_r2=2e-3
 
-# Grid parameters. The finer grid will slowdown the calculation but may 
+# Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
 # Note: Do not change these parameters unless the user is sure of what
 # is being done.
@@ -256,6 +255,7 @@ oii4 = load_oii(set4)
 
 # Load the intersection area
 area = np.loadtxt("intersection-area-f234").sum()
+area_34 = np.loadtxt("intersection-area-f234").sum()
 
 # Combine 
 cn = np.concatenate((cn2,cn3,cn4))
