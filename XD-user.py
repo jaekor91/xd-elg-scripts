@@ -43,14 +43,14 @@ two_projections = True
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = False
+plot_bnd = True
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
-plot_bnd2 = False
+plot_bnd2 = True
 plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
@@ -357,6 +357,18 @@ return_format = ["FDR", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "No
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
+# FDR - Field 3 and 4
+return_format = ["FDR", "F34", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
+print(class_breakdown_cut(cn[iFDR & iF34], w[iFDR & iF34], area_34,rwd="D", num_classes=8, \
+     return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
+
+# FDR - Field 2
+return_format = ["FDR", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
+print(class_breakdown_cut(cn[iFDR & iF2], w[iFDR & iF2], area_2,rwd="D", num_classes=8, \
+     return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
+
 # XD cut
 return_format = ["XD1", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
@@ -453,8 +465,8 @@ if two_projections and plot_bnd_movie2:
 
 
 ##############################################################################
-print("Plot n(z) for XD projections.")
 if plot_dNdz:
+	print("Plot n(z) for XD projections.")
 	if two_projections and plot_dNdz2:
 		# For both
 		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
@@ -506,9 +518,8 @@ if two_projections and plot_bnd_diff_movie:
 
 
 # ##############################################################################
-print("Make dNdm plots.")
-
 if plot_dNdm:
+	print("Make dNdm plots.")	
 	if two_projections and plot_dNdm2:
 		# For both
 		XD.plot_dNdm_XD(grid, grid2, fname=dNdm_fname, plot_type=dNdm_plot_type, label1 =dNdm_label1, label2 = dNdm_label2, \
