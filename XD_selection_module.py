@@ -131,13 +131,9 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
     return iXD, FoM
 
 # Helper function 1.
-def GMM_vectorized(gr, rz, amps, means, covars, gvar, rvar, zvar):
+def GMM_vectorized(rz, gr, amps, means, covars, gvar, rvar, zvar):
     """
     Color-color density.
-
-    Note 1: This routine was originally written based on gr vs. rz convention. However, I decided to adopt
-    rz vs. gr convention and therefore, the user must provide "gr=rz, rz=gr" as input in order for this
-    function to work properly.
 
     Params
     ------
@@ -149,17 +145,17 @@ def GMM_vectorized(gr, rz, amps, means, covars, gvar, rvar, zvar):
     # Compute 
     for i in range(amps.size):
         # Calculating Sigma+Error
-        C11 = covars[i][0,0]+gvar+rvar
+        C11 = covars[i][0,0]+rvar+zvar
         C12 = covars[i][0,1]+rvar
-        C22 = covars[i][1,1]+rvar+zvar
+        C22 = covars[i][1,1]+gvar+rvar
         
         # Compute the determinant
         detC = C11*C22-C12**2
         
         # Compute variables
-        x11 = (gr-means[i][0])**2
-        x12 = (gr-means[i][0])*(rz-means[i][1])
-        x22 = (rz-means[i][1])**2
+        x11 = (rz-means[i][0])**2
+        x12 = (rz-means[i][0])*(gr-means[i][1])
+        x22 = (gr-means[i][1])**2
         
         # Calculating the exponetial
         EXP = np.exp(-(C22*x11-2*C12*x12+C11*x22)/(2.*detC+1e-12))
