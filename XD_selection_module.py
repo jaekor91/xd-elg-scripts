@@ -550,12 +550,12 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=18)
-    plt.xlabel("$r-z$",fontsize=18)
+    plt.ylabel("$g-r$",fontsize=20)
+    plt.xlabel("$r-z$",fontsize=20)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("mag = %.3f" % m_cell, fontsize=15)
+    plt.title("mag = %.3f" % m_cell, fontsize=20)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
@@ -630,12 +630,12 @@ def plot_slice_compare(grid, grid_ref, m, bnd_fig_directory, fname="", movie_tag
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=18)
-    plt.xlabel("$r-z$",fontsize=18)
+    plt.ylabel("$g-r$",fontsize=20)
+    plt.xlabel("$r-z$",fontsize=20)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("mag = %.3f" % m_cell, fontsize=15)
+    plt.title("mag = %.3f" % m_cell, fontsize=20)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
