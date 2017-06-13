@@ -35,7 +35,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # --- 1 or 2 projections? --- #
 # If True, two projections based on two sets of parameters below are computed
 # and compared.
-two_projections = True
+two_projections = False
 
 
 ##############################################################################
@@ -43,23 +43,23 @@ two_projections = True
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = True
-plot_bnd_movie = True # Generate many slices for a movie.
+plot_bnd = False
+plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
-plot_bnd2 = True
-plot_bnd_movie2 = True # Generate many slices for a movie.
+plot_bnd2 = False
+plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
 mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # dNdz plots
 dz = 0.05 # Redshift binwidth
-plot_dNdz = True # Plot XD1.
-plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
+plot_dNdz = False # Plot XD1.
+plot_dNdz2 = False # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdz_fname = "dNdz-XD1-XD2.png"
 dNdz_label1 = "XD1"
 dNdz_label2 = "XD2"
@@ -67,12 +67,12 @@ dNdz_label2 = "XD2"
 # XD1-XD2-boundary difference plots
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = True
-plot_bnd_diff_movie = True
+plot_bnd_diff = False
+plot_bnd_diff_movie = False
 
 # dNdm plots
-plot_dNdm = True # Plot XD1.
-plot_dNdm2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
+plot_dNdm = False # Plot XD1.
+plot_dNdm2 = False # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdm_fname = "dNdm-XD1-XD2-Total"
 dNdm_plot_type = "Total" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
 dNdm_label1 = "XD1"
@@ -105,13 +105,13 @@ rlim=23.4
 zlim=22.4
 
 # Total number of fibers to be used.
-N_tot=5000
+N_tot=2400
 
 # Figure of Merit (FoM) weights. Recall FoM = (sum_j f_j * n_j ) / (sum_i n_i)
 # Note that this is different "class efficiency" which we define as
 # the fraction of objects in each class we expect to be good objects
 # for DESI.
-f_i=[1.5, 1.5, 0., 0.25, 0., 1., 0.]
+f_i=[1., 1., 0., 0.25, 0., .25, 0.]
 
 # Reference points based on which the number density conserving noise are
 # calculated.
@@ -123,7 +123,7 @@ rz_ref=0.5
 # Regularizing parameter to be added to the denomitor when calculating FoM.
 # Note: Keep the default value 2e-3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
-reg_r=8e-3
+reg_r=2e-3
 
 # Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
@@ -255,8 +255,9 @@ oii4 = load_oii(set4)
 
 
 # Load the intersection area
-area = np.loadtxt("intersection-area-f234").sum()
-area_34 = np.loadtxt("intersection-area-f234").sum()
+areas = np.loadtxt("intersection-area-f234").sum()
+area_34 = areas[1:].sum()
+area_2 = areas[0]
 
 # Combine all three fields
 cn = np.concatenate((cn2,cn3,cn4))
@@ -344,15 +345,27 @@ print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "N
       "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline")
 
 # FDR
-return_format = ["FDR", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+return_format = ["FDR", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # XD cut
-return_format = ["XD1", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+return_format = ["XD1", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
 print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
+     return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
+
+# XD cut - Field 3 and 4
+return_format = ["XD1", "F34", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
+print(class_breakdown_cut(cn[iXD][num_Field2:], w[iXD][num_Field2:], area_34,rwd="D", num_classes=8, \
+     return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
+
+# XD cut - Field 2
+return_format = ["XD1", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
+print(class_breakdown_cut(cn[iXD][:num_Field2], w[iXD][:num_Field2], area_2,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # XD projection
@@ -362,7 +375,7 @@ print(class_breakdown_cut_grid(grid, return_format, class_eff = [gold_eff*DESI_f
 
 if two_projections:
 	# XD cut
-	return_format = ["XD2", "Avg.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+	return_format = ["XD2", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
 	print(class_breakdown_cut(cn[iXD2], w[iXD2], area,rwd="D", num_classes=8, \
 	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
