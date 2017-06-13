@@ -255,9 +255,10 @@ oii4 = load_oii(set4)
 
 
 # Load the intersection area
-areas = np.loadtxt("intersection-area-f234").sum()
+areas = np.loadtxt("intersection-area-f234")
 area_34 = areas[1:].sum()
 area_2 = areas[0]
+area  = areas.sum()
 
 # Combine all three fields
 cn = np.concatenate((cn2,cn3,cn4))
@@ -274,6 +275,12 @@ num_unmatched = (d2m==0).sum()
 # print("Total number of unmatched objects: %d" % num_unmatched)
 # print("In density: %.2f" % (num_unmatched/area.sum()))
 # print((cn<0).sum())
+
+# Field 2, 3, and 4 boolean
+iF2 = np.zeros(cn.size, dtype=bool)
+iF2[:num_Field2] = True
+iF34 = np.zeros(cn.size, dtype=bool)
+iF34[num_Field2:] = True
 
 # print("Fraction of expected good objects with the rising OII threshold due \n \
 # to the increased fiber number and shorter exposure time.")
@@ -359,13 +366,13 @@ print(class_breakdown_cut(cn[iXD], w[iXD], area,rwd="D", num_classes=8, \
 # XD cut - Field 3 and 4
 return_format = ["XD1", "F34", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iXD][num_Field2:], w[iXD][num_Field2:], area_34,rwd="D", num_classes=8, \
+print(class_breakdown_cut(cn[iXD & iF34], w[iXD & iF34], area_34,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # XD cut - Field 2
 return_format = ["XD1", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iXD][:num_Field2], w[iXD][:num_Field2], area_2,rwd="D", num_classes=8, \
+print(class_breakdown_cut(cn[iXD & iF2], w[iXD & iF2], area_2,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # XD projection
