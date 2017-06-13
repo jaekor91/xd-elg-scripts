@@ -35,7 +35,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # --- 1 or 2 projections? --- #
 # If True, two projections based on two sets of parameters below are computed
 # and compared.
-two_projections = False
+two_projections = True
 
 
 ##############################################################################
@@ -385,6 +385,18 @@ if two_projections:
 	return_format = ["XD2", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
 	print(class_breakdown_cut(cn[iXD2], w[iXD2], area,rwd="D", num_classes=8, \
+	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
+
+	# XD cut - Field 3 and 4
+	return_format = ["XD2", "F34", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
+	print(class_breakdown_cut(cn[iXD2 & iF34], w[iXD2 & iF34], area_34,rwd="D", num_classes=8, \
+	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
+
+	# XD cut - Field 2
+	return_format = ["XD2", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
+	      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
+	print(class_breakdown_cut(cn[iXD2 & iF2], w[iXD2 & iF2], area_2,rwd="D", num_classes=8, \
 	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
 
 	# XD projection
