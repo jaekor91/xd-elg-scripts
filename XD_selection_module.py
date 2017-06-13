@@ -11,6 +11,8 @@ mpl.rcParams['xtick.major.size'] = 10
 mpl.rcParams['xtick.major.width'] = 1.5
 mpl.rcParams['ytick.major.size'] = 10
 mpl.rcParams['ytick.major.width'] = 1.5
+mpl.rcParams['xtick.labelsize'] = 15
+mpl.rcParams['ytick.labelsize'] = 15
 
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
@@ -51,8 +53,7 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
         - Construct a Python dictionary that contains all XD GMM and dNdm parameters
             using a string.
         - Load variables from the input fits table.
-        - Compute which objects pass the reasonable imaging quality cut 
-            (SNR>2, flux positive, and flux invariance positive).
+        - Compute which objects pass the reasonable color cuts. NO DECaLS imaging quality cuts!
         - Compute which objects pass a rough color cut that eliminates a
             bulk of low redshift contaiminants. 
         - For each object that passes the above two cuts, compute Figure of Merit FoM.
@@ -85,18 +86,13 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
     rz = (r-z); gr = (g-r)    
 
     ####### Reaonsable quaity cut. #######
-    iflux_positive = (gflux>0)&(rflux>0)&(zflux>0)
     ireasonable_color = (gr>-0.5) & (gr<2.5) & (rz>-0.5) &(rz<2.7) & (g<gmax) & (g>gmin)
-    thres = 2
-    igrz_SN2 =  ((gflux*np.sqrt(givar))>thres)&((rflux*np.sqrt(rivar))>thres)&((zflux*np.sqrt(zivar))>thres)
-    # Combination of above cuts.
-    ireasonable = iflux_positive & ireasonable_color #& igrz_SN2
 
     ####### A rough cut #######
-    irough = (gr<1.5) & np.logical_or(gr<(rz+0.5) ,gr<0.5)
+    irough = (gr<1.3) & np.logical_or(gr<(rz+0.5) ,gr<0.5)
 
     ####### Objects for which FoM to be calculated. #######
-    ibool = ireasonable & irough 
+    ibool = ireasonable_color & irough 
         
     
     ######## Compute FoM values for objects that pass the cuts. #######
