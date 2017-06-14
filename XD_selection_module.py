@@ -554,7 +554,7 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("mag = %.3f" % m_cell, fontsize=20)
+    plt.title("g = %.3f" % m_cell, fontsize=20)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
