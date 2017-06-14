@@ -94,13 +94,13 @@ param_directory = "./XD-parameters/"
 # Field 2, 3, and 4: ""
 # Field 2 data only: "-Field2"
 # Field 3 or 4 data only: "-Field34"
-GMM_which_subset=""
+GMM_which_subset="-Field34"
 
 # dNdm: For the dNdm model, use parameters trained on which subset? 
 # Field 2, 3, and 4: ""
 # Field 2 data only: "-Field2"
 # Field 3 or 4 data only: "-Field34"
-dNdm_which_subset=""
+dNdm_which_subset="-Field2"
 
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
@@ -167,13 +167,13 @@ param_directory2 = "./XD-parameters/"
 # Field 2, 3, and 4: ""
 # Field 2 data only: "-Field2"
 # Field 3 or 4 data only: "-Field34"
-GMM_which_subset2=""
+GMM_which_subset2="-Field34"
 
 # dNdm: For the dNdm model, use parameters trained on which subset? 
 # Field 2, 3, and 4: ""
 # Field 2 data only: "-Field2"
 # Field 3 or 4 data only: "-Field34"
-dNdm_which_subset2=""
+dNdm_which_subset2="-Field34"
 
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
@@ -320,7 +320,8 @@ start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=glim, rlim=rlim, zlim=zlim, \
                           gr_ref=gr_ref, rz_ref=rz_ref, N_tot=N_tot, f_i=f_i, \
                           reg_r=reg_r,zaxis="g", w_cc = w_cc, w_mag = w_mag, minmag = minmag, \
-                          maxmag = maxmag, K_i = K_i, dNdm_type = dNdm_type, param_tag2=use_field34)
+                          maxmag = maxmag, K_i = K_i, dNdm_type = dNdm_type, \
+                          param_tag_GMM = GMM_which_subset, param_tag_dNdm = dNdm_which_subset)
 print("Time taken: %.2f seconds" % (time.time()-start))
 print("Computed last FoM based on the grid: %.3f"%last_FoM)
 print("Completed.\n")
@@ -331,7 +332,8 @@ if two_projections:
 	grid2, last_FoM2 = XD.generate_XD_selection(param_directory2, glim=glim2, rlim=rlim2, zlim=zlim2, \
 	                          gr_ref=gr_ref2, rz_ref=rz_ref2, N_tot=N_tot2, f_i=f_i2, \
 	                          reg_r=reg_r2,zaxis="g", w_cc = w_cc2, w_mag = w_mag2, minmag = minmag2, \
-	                          maxmag = maxmag2, K_i = K_i2, dNdm_type = dNdm_type2, param_tag2=use_field34_2)
+	                          maxmag = maxmag2, K_i = K_i2, dNdm_type = dNdm_type2, \
+	                          param_tag_GMM = GMM_which_subset2, param_tag_dNdm = dNdm_which_subset2)
 	print("Time taken: %.2f seconds" % (time.time()-start))
 	print("Computed last FoM based on the grid: %.3f"%last_FoM2)
 	print("Completed.\n")	
@@ -347,7 +349,8 @@ print("Apply XD selection 1 to DEEP2-DECaLS data.")
 iXD, FoM = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM, param_directory, \
                         glim=glim, rlim=rlim, zlim=zlim, gr_ref=gr_ref,\
                        rz_ref=rz_ref, reg_r=reg_r/(w_cc**2 * w_mag), f_i=f_i,\
-                       gmin = gmin, gmax = gmax, K_i = K_i, dNdm_type = dNdm_type, param_tag2=use_field34)
+                       gmin = gmin, gmax = gmax, K_i = K_i, dNdm_type = dNdm_type, \
+                      param_tag_GMM = GMM_which_subset, param_tag_dNdm = dNdm_which_subset)
 print("Completed.\n")
 
 if two_projections:
@@ -355,7 +358,8 @@ if two_projections:
 	iXD2, FoM2 = XD.apply_XD_globalerror([g, r, z, givar, rivar, zivar, gflux, rflux, zflux], last_FoM2, param_directory2, \
 	                        glim=glim2, rlim=rlim2, zlim=zlim2, gr_ref=gr_ref2,\
 	                       rz_ref=rz_ref2, reg_r=reg_r2/(w_cc2**2 * w_mag2), f_i=f_i2,\
-	                       gmin = gmin2, gmax = gmax2, K_i = K_i2, dNdm_type = dNdm_type2, param_tag2=use_field34_2)
+	                       gmin = gmin2, gmax = gmax2, K_i = K_i2, dNdm_type = dNdm_type2, 
+                          param_tag_GMM = GMM_which_subset2, param_tag_dNdm = dNdm_which_subset2)
 	print("Completed.\n")
 
 
