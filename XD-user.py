@@ -35,7 +35,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 # --- 1 or 2 projections? --- #
 # If True, two projections based on two sets of parameters below are computed
 # and compared.
-two_projections = True
+two_projections = False
 
 
 ##############################################################################
@@ -75,7 +75,7 @@ dNdm_label2 = "XD2"
 dz = 0.05 # Redshift binwidth
 plot_dNdz = True # Plot XD1.
 plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
-FDR_comparison = False # If True and plot_dNdz2 is False, then dNdz based on XD1 in compared to FDR cut.
+FDR_comparison = True # If True and plot_dNdz2 is False, then dNdz based on XD1 in compared to FDR cut.
 dNdz_fname = "dNdz-XD1-XD2"
 dNdz_label1 = "XD1"
 dNdz_label2 = "XD2"
@@ -233,7 +233,7 @@ NoZ_eff2 = 0.25
 ##############################################################################
 # Below is the part of the program that produces results. 
 ##############################################################################
-print("Load DR3-DEEP2 data.")
+print("Load DR3-DEEP2 data. g<24.")
 # Field 2
 set2 = load_fits_table("DECaLS-DR3-DEEP2f2-glim24.fits")
 set2 = set2[reasonable_mask(set2)] # Applying reasonable mask
@@ -315,6 +315,72 @@ print("Completed.\n")
 
 
 ##############################################################################
+print("Load DR3-DEEP2 data. r<23p4. For the purpose of comparison with FDR cut.")
+# Field 2
+set2_FDR = load_fits_table("DECaLS-DR3-DEEP2f2-rlim23p4.fits")
+set2_FDR = set2_FDR[reasonable_mask(set2_FDR)] # Applying reasonable mask
+grz2_FDR = load_grz(set2_FDR)
+cn2_FDR = load_cn(set2_FDR)
+w2_FDR = load_weight(set2_FDR)
+grzflux2_FDR = load_grz_flux(set2_FDR)
+grzivar2_FDR = load_grz_invar(set2_FDR)
+d2m2_FDR = load_DEEP2matched(set2_FDR) # DEEP2_matched?
+redz2_FDR = load_redz(set2_FDR)
+oii2_FDR = load_oii(set2_FDR)
+num_Field2_FDR = oii2_FDR.size # Number of Field 2 objects.
+
+
+# Field 3
+set3_FDR = load_fits_table("DECaLS-DR3-DEEP2f3-rlim23p4.fits")
+set3_FDR = set3_FDR[reasonable_mask(set3_FDR)] # Applying reasonable mask
+grz3_FDR = load_grz(set3_FDR)
+cn3_FDR = load_cn(set3_FDR)
+w3_FDR = load_weight(set3_FDR)
+grzflux3_FDR = load_grz_flux(set3_FDR)
+grzivar3_FDR = load_grz_invar(set3_FDR)
+d2m3_FDR = load_DEEP2matched(set3_FDR) # DEEP2_matched? 
+redz3_FDR = load_redz(set3_FDR)
+oii3_FDR = load_oii(set3_FDR)
+
+# Field 4
+set4_FDR = load_fits_table("DECaLS-DR3-DEEP2f4-rlim23p4.fits")
+set4_FDR = set4_FDR[reasonable_mask(set4_FDR)] # Applying reasonable mask
+grz4_FDR = load_grz(set4_FDR)
+cn4_FDR = load_cn(set4_FDR)
+w4_FDR = load_weight(set4_FDR)
+grzflux4_FDR = load_grz_flux(set4_FDR)
+grzivar4_FDR = load_grz_invar(set4_FDR)
+d2m4_FDR = load_DEEP2matched(set4_FDR) # DEEP2_matched? 
+redz4_FDR = load_redz(set4_FDR)
+oii4_FDR = load_oii(set4_FDR)
+
+
+# Combine all three fields
+cn_FDR = np.concatenate((cn2_FDR, cn3_FDR, cn4_FDR))
+w_FDR = np.concatenate((w2_FDR, w3_FDR, w4_FDR))
+grz_FDR = combine_grz(grz2_FDR, grz3_FDR, grz4_FDR)
+grzflux_FDR = combine_grz(grzflux2_FDR, grzflux3_FDR, grzflux4_FDR)
+grzivar_FDR= combine_grz(grzivar2_FDR, grzivar3_FDR, grzivar4_FDR)
+d2m_FDR = np.concatenate((d2m2_FDR, d2m3_FDR, d2m4_FDR))
+redz_FDR = np.concatenate((redz2_FDR, redz3_FDR, redz4_FDR))
+oii_FDR = np.concatenate((oii2_FDR, oii3_FDR, oii4_FDR))
+# Giving unmatched objects its proper number.
+cn_FDR[cn_FDR<0] = 7
+num_unmatched_FDR = (d2m_FDR==0).sum()
+# print("Total number of unmatched objects: %d" % num_unmatched)
+# print("In density: %.2f" % (num_unmatched/area.sum()))
+# print((cn<0).sum())
+
+# Field 2, 3, and 4 boolean
+iF2_FDR = np.zeros(cn_FDR.size, dtype=bool)
+iF2_FDR[:num_Field2] = True
+iF34_FDR = np.zeros(cn_FDR.size, dtype=bool)
+iF34_FDR[num_Field2:] = True
+
+print("Completed.\n")
+
+
+##############################################################################
 print("Compute XD projection 1.")
 start = time.time()
 grid, last_FoM = XD.generate_XD_selection(param_directory, glim=glim, rlim=rlim, zlim=zlim, \
@@ -365,7 +431,7 @@ if two_projections:
 
 ##############################################################################
 print("Compute FDR cut.")
-iFDR = FDR_cut(grz)
+iFDR = FDR_cut(grz_FDR)
 print("Completed.\n")
 
 
@@ -377,19 +443,19 @@ print(" & ".join(["Cut", "Type", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "N
 # FDR
 return_format = ["FDR", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
+print(class_breakdown_cut(cn_FDR[iFDR], w_FDR[iFDR], area,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # FDR - Field 3 and 4
 return_format = ["FDR", "F34", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iFDR & iF34], w[iFDR & iF34], area_34,rwd="D", num_classes=8, \
+print(class_breakdown_cut(cn_FDR[iFDR & iF34_FDR], w_FDR[iFDR & iF34_FDR], area_34,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # FDR - Field 2
 return_format = ["FDR", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iFDR & iF2], w[iFDR & iF2], area_2,rwd="D", num_classes=8, \
+print(class_breakdown_cut(cn_FDR[iFDR & iF2_FDR], w_FDR[iFDR & iF2_FDR], area_2,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
 # XD cut
