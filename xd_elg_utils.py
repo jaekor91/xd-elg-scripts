@@ -607,8 +607,8 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
 
  
     plt.xlim([0.5,1.4+wNoZ+0.1])
-    plt.legend(loc="upper right", fontsize=12.5)  
-    ymax=250
+    plt.legend(loc="upper right", fontsize=15)  
+    ymax=300
     if plot_total:
         ymax = 450
     plt.ylim([0,ymax])
