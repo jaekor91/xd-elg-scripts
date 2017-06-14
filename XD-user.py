@@ -43,24 +43,25 @@ two_projections = True
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = False
+plot_bnd = True
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
-plot_bnd2 = False
+plot_bnd2 = True
 plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
 mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD1-XD2-boundary difference plots
+plot_bnd_diff = True
+plot_bnd_diff_movie = False
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = False
-plot_bnd_diff_movie = False
+
 
 # dNdm plots
 plot_dNdm = True # Plot XD1.
@@ -89,9 +90,17 @@ dNdz_label2 = "XD2"
 # stored. See README for download instruction.
 param_directory = "./XD-parameters/"
 
-# Use Field 3 or 4 data only? If yes, set this variable to "-Field34"
-# If not leave it as an empty string "".
-use_field34 = "-Field34"
+# GMM: For the color-color space GMM, use parameters trained on which subset? 
+# Field 2, 3, and 4: ""
+# Field 2 data only: "-Field2"
+# Field 3 or 4 data only: "-Field34"
+GMM_which_subset=""
+
+# dNdm: For the dNdm model, use parameters trained on which subset? 
+# Field 2, 3, and 4: ""
+# Field 2 data only: "-Field2"
+# Field 3 or 4 data only: "-Field34"
+dNdm_which_subset=""
 
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
@@ -102,9 +111,9 @@ dNdm_type = [1, 1, 0, 1, 0, 0, 1]
 K_i = [2,2,2,3,2,2,7]
 
 # The limiting magnitude depths.
-glim=24.7
-rlim=24.35
-zlim=23.1
+glim=23.8
+rlim=23.4
+zlim=22.4
 
 # Total number of fibers to be used.
 N_tot=2400
@@ -154,9 +163,17 @@ NoZ_eff = 0.25
 # stored. See README for download instruction.
 param_directory2 = "./XD-parameters/"
 
-# Use Field 3 or 4 data only? If yes, set this variable to "-Field34"
-# If not leave it as an empty string "".
-use_field34_2 = "-Field34"
+# GMM: For the color-color space GMM, use parameters trained on which subset? 
+# Field 2, 3, and 4: ""
+# Field 2 data only: "-Field2"
+# Field 3 or 4 data only: "-Field34"
+GMM_which_subset2=""
+
+# dNdm: For the dNdm model, use parameters trained on which subset? 
+# Field 2, 3, and 4: ""
+# Field 2 data only: "-Field2"
+# Field 3 or 4 data only: "-Field34"
+dNdm_which_subset2=""
 
 # For each class, choose whether to use power law (0) or broken power law (1).
 # Recall: 0-Gold, 1-Silver, 2-LowOII, 3-NoOII, 4-LowZ, 5-NoZ, 6-D2reject
