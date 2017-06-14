@@ -43,32 +43,24 @@ two_projections = True
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = True
+plot_bnd = False
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # XD2: Boundary plots
-plot_bnd2 = True
+plot_bnd2 = False
 plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
 mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
-# dNdz plots
-dz = 0.05 # Redshift binwidth
-plot_dNdz = True # Plot XD1.
-plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
-dNdz_fname = "dNdz-XD1-XD2.png"
-dNdz_label1 = "XD1"
-dNdz_label2 = "XD2"
-
 # XD1-XD2-boundary difference plots
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = True
-plot_bnd_diff_movie = True
+plot_bnd_diff = False
+plot_bnd_diff_movie = False
 
 # dNdm plots
 plot_dNdm = True # Plot XD1.
@@ -77,6 +69,16 @@ dNdm_fname = "dNdm-XD1-XD2-Total"
 dNdm_plot_type = "Total" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
 dNdm_label1 = "XD1"
 dNdm_label2 = "XD2"
+
+# dNdz plots
+dz = 0.05 # Redshift binwidth
+plot_dNdz = True # Plot XD1.
+plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
+FDR_comparison = False # If True and plot_dNdz2 is False, then dNdz based on XD1 in compared to FDR cut.
+dNdz_fname = "dNdz-XD1-XD2"
+dNdz_label1 = "XD1"
+dNdz_label2 = "XD2"
+
 
 
 
@@ -516,18 +518,71 @@ if plot_dNdm:
 if plot_dNdz:
 	print("Plot n(z) for XD projections.")
 	if two_projections and plot_dNdz2:
-		# For both
+		# For both - Field 2, 3, and 4
 		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
 			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
 			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
 			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
 			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
+
+		# For both - Field 3 and 4
+		plot_dNdz_selection(cn[iF34], w[iF34], iXD[iF34], redz[iF34], area_34, dz=dz,\
+			iselect2=iXD2[iF34], plot_total=False, fname=dNdz_fname+"-Field34", color1="red", color2="black", \
+			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
+			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
+
+		# For both - Field 2
+		plot_dNdz_selection(cn[iF2], w[iF2], iXD[iF2], redz[iF2], area_2, dz=dz,\
+			iselect2=iXD2[iF2], plot_total=False, fname=dNdz_fname+"-Field2", color1="red", color2="black", \
+			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
+			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
 		print("Completed.\n")
+	elif FDR_comparison:
+		# For both - Field 2, 3, and 4
+		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
+			iselect2=iFDR, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
+			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
+			NoOII_eff2 = DESI_frac*NoOII_eff, NoZ_eff2 = DESI_frac*NoZ_eff)
+
+		# For both - Field 3 and 4
+		plot_dNdz_selection(cn[iF34], w[iF34], iXD[iF34], redz[iF34], area_34, dz=dz,\
+			iselect2=iFDR[iF34], plot_total=False, fname=dNdz_fname+"-Field34", color1="red", color2="black", \
+			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
+			NoOII_eff2 = DESI_frac*NoOII_eff, NoZ_eff2 = DESI_frac*NoZ_eff)
+
+		# For both - Field 2
+		plot_dNdz_selection(cn[iF2], w[iF2], iXD[iF2], redz[iF2], area_2, dz=dz,\
+			iselect2=iFDR[iF2], plot_total=False, fname=dNdz_fname+"-Field2", color1="red", color2="black", \
+			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
+			NoOII_eff2 = DESI_frac*NoOII_eff, NoZ_eff2 = DESI_frac*NoZ_eff)
+		print("Completed.\n")		
 	else:
-		# For single
+		# For single - Field 2, 3, and 4
 		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
 			iselect2=None, plot_total=False, fname=dNdz_fname, color1="black", \
 			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
-		print("Completed.\n")
+
+		# For single - Field 3 and 4
+		plot_dNdz_selection(cn[iF34], w[iF34], iXD[iF34], redz[iF34], area_34, dz=dz,\
+			iselect2=None, plot_total=False, fname=dNdz_fname+"-Field34", color1="black", \
+			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
+
+		# For single - Field 2
+		plot_dNdz_selection(cn[iF2], w[iF2], iXD[iF2], redz[iF2], area_2, dz=dz,\
+			iselect2=None, plot_total=False, fname=dNdz_fname+"-Field2", color1="black", \
+			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)					
+		print("Completed.\n")		
