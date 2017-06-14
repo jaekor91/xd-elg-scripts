@@ -2069,27 +2069,26 @@ def load_redz(fits):
 def reasonable_mask(table, decam_mask = "all", SN = True):
     """
     Given DECaLS table, return a boolean index array that indicates whether an object passed flux positivity, reasonable color range, and allmask conditions
-    If SN is True, impose SN>2 cut.
+    Impose SN>2 and decam_mask cut, only if it's requested.
     """
     grzflux = load_grz_flux(table)
-    ibool1 = is_grzflux_pos(grzflux)
+    ibool = is_grzflux_pos(grzflux)
     
     grz = load_grz(table)
-    ibool2 = is_reasonable_color(grz) 
+    ibool &= is_reasonable_color(grz) 
     
     if decam_mask == "all":
         grz_allmask = load_grz_allmask(table)
-        ibool3 = pass_grz_decammask(grz_allmask)
-    else:
+        ibool &= pass_grz_decammask(grz_allmask)
+    elif == "any":
         grz_anymask = load_grz_anymask(table)
-        ibool3 = pass_grz_decammask(grz_anymask)        
+        ibool &= pass_grz_decammask(grz_anymask)        
     
     if SN:
         grzivar = load_grz_invar(table)
-        ibool4 = pass_grz_SN(grzflux, grzivar, thres=2)
-        return ibool1&ibool2&ibool3&ibool4
-    else:
-        return ibool1&ibool2&ibool3
+        ibool &= pass_grz_SN(grzflux, grzivar, thres=2)
+
+    return ibool
 
 def pass_grz_SN(grzflux, grzivar, thres=2):
     gf, rf, zf = grzflux
