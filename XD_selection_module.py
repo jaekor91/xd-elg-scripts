@@ -19,7 +19,8 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 
 def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, zlim=22.4, gr_ref=0.5,\
                        rz_ref=0.5,reg_r=5e-4/(0.025**2 * 0.05),f_i=[1., 1., 0., 0.25, 0., 0.25, 0.],\
-                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], param_tag2=""):
+                       gmin = 21., gmax = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], \
+                       param_tag_GMM="", param_tag_dNdm=""):
     """ Apply ELG XD selection. Default uses fiducial set of parameters.
 
     Args:
@@ -61,7 +62,7 @@ def apply_XD_globalerror(objs, last_FoM, param_directory, glim=23.8, rlim=23.4, 
         - Append this selection column to the table and return.
     """
 
-    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag2)
+    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag_GMM, tag3=param_tag_dNdm)
 
     ####### Load variables. #######
     if type(objs) is list:
@@ -184,7 +185,7 @@ def broken_pow_law(params, flux):
     return phi/((flux/fs)**alpha+(flux/fs)**beta + 1e-12)    
 
 
-def generate_XD_model_dictionary(param_directory, tag1="glim24", tag2="", K_i = [2,2,2,2,3,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
+def generate_XD_model_dictionary(param_directory, tag1="glim24", tag2="", tag3="", K_i = [2,2,2,2,3,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1]):
     """
     Construct a Python dictionary of model parameters for all the relevant classes.
     
@@ -200,9 +201,9 @@ def generate_XD_model_dictionary(param_directory, tag1="glim24", tag2="", K_i = 
     # Adding dNdm parameters for each class
     for i in range(7):
         if dNdm_type[i] == 0:
-            dNdm_params =np.loadtxt((param_directory+"%d-fit-pow-"+tag1+tag2)%i)
+            dNdm_params =np.loadtxt((param_directory+"%d-fit-pow-"+tag1+tag3)%i)
         else:
-            dNdm_params =np.loadtxt((param_directory+"%d-fit-broken-"+tag1+tag2)%i)
+            dNdm_params =np.loadtxt((param_directory+"%d-fit-broken-"+tag1+tag3)%i)
         params[(i, "dNdm")] = dNdm_params
         
     # Adding GMM parameters for each class
@@ -231,7 +232,8 @@ def mag2flux(mag):
 def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
                           reg_r=5e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
-                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], param_tag2=""):
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], \
+                          param_tag_GMM="", param_tag_dNdm=""):
     """
     Summary: 
         - Set up a grid in the selection design region with the given grid parameters. 
@@ -255,7 +257,7 @@ def generate_XD_selection(param_directory, glim=23.8, rlim=23.4, zlim=22.4, \
 
     """
 
-    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag2)
+    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag_GMM, tag3=param_tag_dNdm)
 
     # Create the grid.
     grid = generate_grid(w_cc, w_mag, minmag, maxmag)
@@ -306,7 +308,8 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
                          glim_var=23.8, rlim_var=23.4, zlim_var=22.4,\
                           gr_ref=0.5, rz_ref=0.5, N_tot=2400, f_i=[1., 1., 0., 0.25, 0., 0.25, 0.], \
                           reg_r=5e-4,zaxis="g", w_cc = 0.025, w_mag = 0.05, minmag = 21., \
-                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], param_tag2=""):
+                          maxmag = 24., K_i = [2,2,2,3,2,2,7], dNdm_type = [1, 1, 0, 1, 0, 0, 1], \
+                          param_tag_GMM="", param_tag_dNdm=""):
     """
     Summary: 
         - Set up a grid in the selection design region with the given grid parameters. 
@@ -331,7 +334,7 @@ def generate_XD_selection_var(param_directory, glim=23.8, rlim=23.4, zlim=22.4, 
         w_cc: Width in color-color grid.
     """
     
-    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag2)
+    params = generate_XD_model_dictionary(param_directory, K_i=K_i, dNdm_type=dNdm_type, tag2=param_tag_GMM, tag3=param_tag_dNdm)
 
     # Create the grid.
     grid = generate_grid_var(w_cc, w_mag, minmag, maxmag)
