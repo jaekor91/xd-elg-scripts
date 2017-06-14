@@ -58,8 +58,8 @@ mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825]
 
 # dNdz plots
 dz = 0.05 # Redshift binwidth
-plot_dNdz = False # Plot XD1.
-plot_dNdz2 = False # Plot XD2 in addition to XD1 with XD2 as a reference.
+plot_dNdz = True # Plot XD1.
+plot_dNdz2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdz_fname = "dNdz-XD1-XD2.png"
 dNdz_label1 = "XD1"
 dNdz_label2 = "XD2"
@@ -67,12 +67,12 @@ dNdz_label2 = "XD2"
 # XD1-XD2-boundary difference plots
 diff_bnd_fname = "XD1-XD2-diff"
 diff_bnd_fig_directory = "./bnd_fig_directory/XD1-XD2-diff/"
-plot_bnd_diff = False
-plot_bnd_diff_movie = False
+plot_bnd_diff = True
+plot_bnd_diff_movie = True
 
 # dNdm plots
-plot_dNdm = False # Plot XD1.
-plot_dNdm2 = False # Plot XD2 in addition to XD1 with XD2 as a reference.
+plot_dNdm = True # Plot XD1.
+plot_dNdm2 = True # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdm_fname = "dNdm-XD1-XD2-Total"
 dNdm_plot_type = "Total" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
 dNdm_label1 = "XD1"
@@ -100,9 +100,9 @@ dNdm_type = [1, 1, 0, 1, 0, 0, 1]
 K_i = [2,2,2,3,2,2,7]
 
 # The limiting magnitude depths.
-glim=23.8
-rlim=23.4
-zlim=22.4
+glim=24.7
+rlim=24.35
+zlim=23.1
 
 # Total number of fibers to be used.
 N_tot=2400
@@ -123,7 +123,7 @@ rz_ref=0.5
 # Regularizing parameter to be added to the denomitor when calculating FoM.
 # Note: Keep the default value 2e-3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
-reg_r=2e-3
+reg_r=1e-3
 
 # Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
@@ -188,7 +188,7 @@ rz_ref2=0.5
 # Regularizing parameter to be added to the denomitor when calculating FoM.
 # Note: Keep the default value 2-e3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
-reg_r2=2e-3
+reg_r2=1e-3
 
 # Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.
@@ -464,26 +464,6 @@ if two_projections and plot_bnd_movie2:
 
 
 
-##############################################################################
-if plot_dNdz:
-	print("Plot n(z) for XD projections.")
-	if two_projections and plot_dNdz2:
-		# For both
-		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
-			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
-			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
-			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
-			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
-			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
-		print("Completed.\n")
-	else:
-		# For single
-		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
-			iselect2=None, plot_total=False, fname=dNdz_fname, color1="black", \
-			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
-			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
-		print("Completed.\n")
-
 
 ##############################################################################
 # Make comparison boundary plots.
@@ -530,3 +510,24 @@ if plot_dNdm:
 			class_eff =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.])
 	print("Completed.\n")
 
+
+
+##############################################################################
+if plot_dNdz:
+	print("Plot n(z) for XD projections.")
+	if two_projections and plot_dNdz2:
+		# For both
+		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
+			iselect2=iXD2, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
+			label1=dNdz_label1, label2=dNdz_label2, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
+			gold_eff2 = gold_eff2*DESI_frac2, silver_eff2 = silver_eff2*DESI_frac2, \
+			NoOII_eff2 = DESI_frac2*NoOII_eff2, NoZ_eff2 = DESI_frac2*NoZ_eff2)
+		print("Completed.\n")
+	else:
+		# For single
+		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
+			iselect2=None, plot_total=False, fname=dNdz_fname, color1="black", \
+			label1=dNdz_label1, gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
+			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff)
+		print("Completed.\n")
