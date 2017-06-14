@@ -2080,7 +2080,7 @@ def reasonable_mask(table, decam_mask = "all", SN = True):
     if decam_mask == "all":
         grz_allmask = load_grz_allmask(table)
         ibool &= pass_grz_decammask(grz_allmask)
-    elif == "any":
+    elif decam_mask == "any":
         grz_anymask = load_grz_anymask(table)
         ibool &= pass_grz_decammask(grz_anymask)        
     
