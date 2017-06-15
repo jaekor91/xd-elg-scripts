@@ -31,14 +31,14 @@ plot_bnd = True
 plot_bnd_movie = True # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
 bnd_fname = "XD-fiducial"
-mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 24.0]
+mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 23.975]
 
 # XD2: Boundary plots
 plot_bnd2 = False
 plot_bnd_movie2 = False # Generate many slices for a movie.
 bnd_fig_directory2 = "./bnd_fig_directory/XD2-bnd/"
 bnd_fname2 = "XD2-bnd"
-mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 24.0]
+mag_slices2 = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 23.975]
 
 # XD1-XD2-boundary difference plots
 plot_bnd_diff = False

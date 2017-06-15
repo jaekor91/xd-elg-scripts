@@ -7,12 +7,12 @@ import numba as nb
 
 # matplotlib ticks
 import matplotlib as mpl 
-mpl.rcParams['xtick.major.size'] = 10
-mpl.rcParams['xtick.major.width'] = 1.5
-mpl.rcParams['ytick.major.size'] = 10
-mpl.rcParams['ytick.major.width'] = 1.5
-mpl.rcParams['xtick.labelsize'] = 15
-mpl.rcParams['ytick.labelsize'] = 15
+mpl.rcParams['xtick.major.size'] = 15
+mpl.rcParams['xtick.major.width'] = 2.
+mpl.rcParams['ytick.major.size'] = 15
+mpl.rcParams['ytick.major.width'] = 2.
+mpl.rcParams['xtick.labelsize'] = 20
+mpl.rcParams['ytick.labelsize'] = 20
 
 
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
@@ -549,12 +549,12 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=20)
-    plt.xlabel("$r-z$",fontsize=20)
+    plt.ylabel("$g-r$",fontsize=30)
+    plt.xlabel("$r-z$",fontsize=30)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("g = %.3f" % m_cell, fontsize=20)
+    plt.title("g = %.3f" % m_cell, fontsize=30)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
@@ -629,12 +629,12 @@ def plot_slice_compare(grid, grid_ref, m, bnd_fig_directory, fname="", movie_tag
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=20)
-    plt.xlabel("$r-z$",fontsize=20)
+    plt.ylabel("$g-r$",fontsize=30)
+    plt.xlabel("$r-z$",fontsize=30)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("mag = %.3f" % m_cell, fontsize=20)
+    plt.title("g = %.3f" % m_cell, fontsize=30)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
@@ -674,6 +674,9 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
                 glim2 = None, rlim2 =None, zlim2 = None, label1="", label2="Fid.", label3=None,\
                 class_eff = [1., 1., 0., 0.6, 0., 0.25, 0.], 
                 class_eff2 = [1., 1., 0., 0.6, 0., 0.25, 0.], lw=1.5):
+
+    mpl.rcParams['xtick.labelsize'] = 15
+    mpl.rcParams['ytick.labelsize'] = 15
 
     ibool = grid["select"][:]==1 # only interested in the selected cells.
     gmag = grid["mag"][:][ibool]
@@ -740,9 +743,9 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
     if (zlim2 is not None):
     	if (np.abs(zlim2-zlim)>1e-6):
         	plt.axvline(zlim2,c="purple", linestyle="-.", lw=lw*1.5)    
-    plt.xlabel("Magnitude")
-    plt.ylabel("Number density per 0.025 mag bin")
-    plt.legend(loc="upper left")
+    plt.xlabel("Magnitude", fontsize=20)
+    plt.ylabel("Number density per 0.025 mag bin", fontsize=20)
+    plt.legend(loc="upper left", fontsize=15)
     plt.xlim([20,24.5])
     plt.ylim([0,80])      
 

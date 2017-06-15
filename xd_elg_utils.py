@@ -19,12 +19,12 @@ from confidence_level_height_estimation import confidence_level_height_estimator
 
 # Matplot ticks
 import matplotlib as mpl
-mpl.rcParams['xtick.major.size'] = 10
-mpl.rcParams['xtick.major.width'] = 1.5
-mpl.rcParams['ytick.major.size'] = 10
-mpl.rcParams['ytick.major.width'] = 1.5
-mpl.rcParams['xtick.labelsize'] = 15
-mpl.rcParams['ytick.labelsize'] = 15
+mpl.rcParams['xtick.major.size'] = 15
+mpl.rcParams['xtick.major.width'] = 2.
+mpl.rcParams['ytick.major.size'] = 15
+mpl.rcParams['ytick.major.width'] = 2.
+mpl.rcParams['xtick.labelsize'] = 20
+mpl.rcParams['ytick.labelsize'] = 20
 
 colors = ["orange", "grey", "brown", "purple", "red", "salmon","black", "white","blue"]
 cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched","D2unobserved"]
@@ -526,6 +526,9 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     label1, label2, lbael_total: Labels
     """
 
+    mpl.rcParams['xtick.labelsize'] = 20
+    mpl.rcParams['ytick.labelsize'] = 20
+
     if plot_total:
         ibool = np.logical_or((cn==0),(cn==1)) 
         plt.hist(redz[ibool], bins = np.arange(0.6,1.7,dz), weights=w[ibool]/area,\
@@ -618,8 +621,8 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
         ymax = 450
     plt.ylim([0,ymax])
     # plt.legend(loc="upper left")
-    plt.xlabel("Redshift z")
-    plt.ylabel("dN/d(%.3fz) per sq. degs."%dz)
+    plt.xlabel("Redshift z", fontsize=20)
+    plt.ylabel("dN/d(%.3fz) per sq. degs."%dz, fontsize=20)
     plt.savefig(fname, bbox_inches="tight", dpi=400)
     # plt.show()
     plt.close()
