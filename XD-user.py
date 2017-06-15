@@ -43,7 +43,7 @@ two_projections = False
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = True
+plot_bnd = False
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
@@ -486,7 +486,7 @@ if two_projections:
 	return_format = ["XD2", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
 	print(class_breakdown_cut_grid(grid2, return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0.]))
-	
+
 	# XD cut
 	return_format = ["XD2", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
@@ -632,7 +632,7 @@ if plot_dNdz:
 	elif FDR_comparison:
 		# For both - Field 2, 3, and 4
 		plot_dNdz_selection(cn, w, iXD, redz, area, dz=dz,\
-			iselect2=iFDR, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
+			iselect2=iFDR, cn2=cn_FDR, w2=w_FDR, redz2=redz_FDR, plot_total=False, fname=dNdz_fname, color1="red", color2="black", \
 			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
 			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
@@ -640,7 +640,7 @@ if plot_dNdz:
 
 		# For both - Field 3 and 4
 		plot_dNdz_selection(cn[iF34], w[iF34], iXD[iF34], redz[iF34], area_34, dz=dz,\
-			iselect2=iFDR[iF34], plot_total=False, fname=dNdz_fname+"-Field34", color1="red", color2="black", \
+			iselect2=iFDR[iF34_FDR], cn2=cn_FDR[iF34_FDR], w2=w_FDR[iF34_FDR], redz2=redz_FDR[iF34_FDR], plot_total=False, fname=dNdz_fname+"-Field34", color1="red", color2="black", \
 			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
 			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
@@ -648,7 +648,7 @@ if plot_dNdz:
 
 		# For both - Field 2
 		plot_dNdz_selection(cn[iF2], w[iF2], iXD[iF2], redz[iF2], area_2, dz=dz,\
-			iselect2=iFDR[iF2], plot_total=False, fname=dNdz_fname+"-Field2", color1="red", color2="black", \
+			iselect2=iFDR[iF2_FDR], cn2=cn_FDR[iF2_FDR], w2=w_FDR[iF2_FDR], redz2=redz_FDR[iF2_FDR], plot_total=False, fname=dNdz_fname+"-Field2", color1="red", color2="black", \
 			label1=dNdz_label1, label2="FDR", gold_eff = gold_eff*DESI_frac, silver_eff = silver_eff*DESI_frac, \
 			NoOII_eff = DESI_frac*NoOII_eff, NoZ_eff = DESI_frac*NoZ_eff, \
 			gold_eff2 = gold_eff*DESI_frac, silver_eff2 = silver_eff*DESI_frac, \
