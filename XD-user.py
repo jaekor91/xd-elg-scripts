@@ -18,7 +18,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 ##############################################################################
 print("Reading param values from user config file.")
 
-from XD_user_config import * 
+from XD_user_config_fiducial import * 
 
 
 ##############################################################################
