@@ -458,6 +458,11 @@ return_format = ["FDR", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ"
 print(class_breakdown_cut(cn_FDR[iFDR & iF2_FDR], w_FDR[iFDR & iF2_FDR], area_2,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
+# XD projection
+return_format = ["XD1", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
+print(class_breakdown_cut_grid(grid, return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.]))
+
 # XD cut
 return_format = ["XD1", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
       "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
@@ -476,12 +481,12 @@ return_format = ["XD1", "F2", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ"
 print(class_breakdown_cut(cn[iXD & iF2], w[iXD & iF2], area_2,rwd="D", num_classes=8, \
      return_format = return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0. ,0.]))
 
-# XD projection
-return_format = ["XD1", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
-      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
-print(class_breakdown_cut_grid(grid, return_format, class_eff = [gold_eff*DESI_frac, gold_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.]))
-
 if two_projections:
+	# XD projection
+	return_format = ["XD2", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
+	print(class_breakdown_cut_grid(grid2, return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0.]))
+	
 	# XD cut
 	return_format = ["XD2", "F234", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
@@ -499,11 +504,6 @@ if two_projections:
 	      "DESI", "Total", "Eff", str("%.3f"%last_FoM),  "\\\\ \hline"]
 	print(class_breakdown_cut(cn[iXD2 & iF2], w[iXD2 & iF2], area_2,rwd="D", num_classes=8, \
 	     return_format = return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0., 0.]))
-
-	# XD projection
-	return_format = ["XD2", "Proj.", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
-	      "DESI", "Total", "Eff", str("%.3f"%last_FoM2),  "\\\\ \hline"]
-	print(class_breakdown_cut_grid(grid2, return_format, class_eff = [gold_eff2*DESI_frac2, gold_eff2*DESI_frac2, 0.0, NoOII_eff2*DESI_frac2, 0., NoZ_eff2*DESI_frac2, 0.]))
 
 print("Completed.\n")
 
