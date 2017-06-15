@@ -519,6 +519,9 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
 
     movie_tag: Must be an integer. Used to index slices that together can turn into a movie.
     """
+    mpl.rcParams['xtick.labelsize'] = 25
+    mpl.rcParams['ytick.labelsize'] = 25
+
     # Cell size
     cell_size=5.
     
@@ -537,7 +540,7 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
     # Plotting
     # Accept region
     ibool = iselect & imag # Only the selected cells with mag == m_cell            
-    plt.scatter(rz[ibool], gr[ibool], edgecolors="none", s=cell_size, c="green", alpha= 0.7)
+    plt.scatter(rz[ibool], gr[ibool], edgecolors="none", s=cell_size, c="green", alpha= 1.)
 
     # Boundaries
     bnd_lw =2
@@ -549,18 +552,18 @@ def plot_slice(grid, m, bnd_fig_directory, fname="", movie_tag=None):
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=30)
-    plt.xlabel("$r-z$",fontsize=30)
+    plt.ylabel("$g-r$",fontsize=35)
+    plt.xlabel("$r-z$",fontsize=35)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("g = %.3f" % m_cell, fontsize=30)
+    plt.title("$g = %.3f$" % m_cell, fontsize=35, y=1.05)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
         plt.savefig((bnd_fig_directory+fname+"-mag%d-%d.png"%(0*1000,movie_tag)), bbox_inches="tight", dpi=400)
     else:
-        plt.savefig((bnd_fig_directory+fname+"-mag%d.png"%(m_cell*1000)), bbox_inches="tight", dpi=400)            
+        plt.savefig((bnd_fig_directory+fname+("-mag%.3f"%m_cell).replace(".", "p"))+".png", bbox_inches="tight", dpi=400)            
     plt.close()
 
     return
@@ -577,6 +580,9 @@ def plot_slice_compare(grid, grid_ref, m, bnd_fig_directory, fname="", movie_tag
 
     movie_tag: Must be an integer. Used to index slices that together can turn into a movie.
     """
+    mpl.rcParams['xtick.labelsize'] = 25
+    mpl.rcParams['ytick.labelsize'] = 25
+
     # Cell size
     cell_size=5.
     
@@ -629,18 +635,18 @@ def plot_slice_compare(grid, grid_ref, m, bnd_fig_directory, fname="", movie_tag
 
     # Decoration
     # Figure ranges
-    plt.ylabel("$g-r$",fontsize=30)
-    plt.xlabel("$r-z$",fontsize=30)
+    plt.ylabel("$g-r$",fontsize=35)
+    plt.xlabel("$r-z$",fontsize=35)
     plt.axis("equal")
     plt.axis([-0.5, 2.0, -0.5, 1.5])    
 
-    plt.title("g = %.3f" % m_cell, fontsize=30)
+    plt.title("$g = %.3f$" % m_cell, fontsize=35, y=1.05)
 
     # Save 
     if movie_tag is not None: # Then generate images with proper numbering for making a movie.
         plt.savefig((bnd_fig_directory+fname+"-mag%d-%d.png"%(0*1000,movie_tag)), bbox_inches="tight", dpi=400)
     else:
-        plt.savefig((bnd_fig_directory+fname+"-mag%d.png"%(m_cell*1000)), bbox_inches="tight", dpi=400)            
+        plt.savefig((bnd_fig_directory+fname+("-mag%.3f"%m_cell).replace(".", "p"))+".png", bbox_inches="tight", dpi=400)            
     plt.close()
 
     return    
@@ -745,9 +751,9 @@ def plot_dNdm_XD(grid, grid2=None, fname=None, plot_type="DESI", glim=23.8, rlim
         	plt.axvline(zlim2,c="purple", linestyle="-.", lw=lw*1.5)    
     plt.xlabel("Magnitude", fontsize=20)
     plt.ylabel("Number density per 0.025 mag bin", fontsize=20)
-    plt.legend(loc="upper left", fontsize=15)
+    plt.legend(loc="upper left", fontsize=20)
     plt.xlim([20,24.5])
-    plt.ylim([0,80])      
+    plt.ylim([0,100])      
 
     plt.savefig(fname+".pdf", bbox_inches="tight", dpi=200)
     # plt.show()

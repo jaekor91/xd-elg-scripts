@@ -28,7 +28,7 @@ two_projections = False
 
 # XD1: Boundary plots 
 plot_bnd = True
-plot_bnd_movie = True # Generate many slices for a movie.
+plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
 bnd_fname = "XD-fiducial"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 23.975]

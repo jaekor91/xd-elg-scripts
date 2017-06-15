@@ -508,7 +508,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     gold_eff2=1, silver_eff2=1, NoZ_eff2=0.25, NoOII_eff2=0.6,\
     cn2=None, w2=None, iselect2=None, redz2=None, plot_total=True, fname="dNdz.png", color1="black", color2="red", color_total="green",\
      label1="Selection 1", label2="Selection 2", label_total="DEEP2 Total", wNoOII=0.1, wNoZ=0.5, lw=1.5, \
-     label_np1="nP=1", color_np1="deepskyblue", plot_np1 = True):
+     label_np1="nP=1", color_np1="blue", plot_np1 = True):
     """
     Given class number (cn), mask (iselect1), weights (w), redshifts, class efficiencies, plot the redshift
     histogram. 
@@ -611,7 +611,7 @@ def plot_dNdz_selection(cn, w, iselect1, redz, area, dz=0.05, gold_eff=1, silver
     # Plotting np=1 line
     if plot_np1:
         X,Y = np1_line(dz)
-        plt.plot(X,Y, color=color_np1, label=label_np1, lw=lw*1.5, ls="-.")
+        plt.plot(X,Y, color=color_np1, label=label_np1, lw=lw*2., ls="-.")
 
  
     plt.xlim([0.5,1.4+wNoZ+0.1])
