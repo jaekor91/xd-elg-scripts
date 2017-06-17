@@ -18,7 +18,7 @@ cnames = ["Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3un
 ##############################################################################
 print("Reading param values from user config file.")
 
-from XD_user_config_fiducial import * 
+from XD_user_config_Ntot3000 import * 
 
 
 ##############################################################################
@@ -101,6 +101,9 @@ w_goldsilver = w[iGoldSilver]
 DESI_frac = frac_above_new_oii(oii_goldsilver, w_goldsilver, new_oii_lim(N_tot, 2400))
 if two_projections:	
 	DESI_frac2 = frac_above_new_oii(oii_goldsilver, w_goldsilver, new_oii_lim(N_tot2, 2400))
+
+print("DESI_frac: %.3f"%DESI_frac)
+print("DESI_frac2: %.3f"%DESI_frac2)
 
 print("Completed.\n")
 
