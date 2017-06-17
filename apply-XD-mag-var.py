@@ -103,6 +103,7 @@ GMM_which_subset = "-Field34"
 gold_eff = 1
 NoOII_eff = 0.6
 NoZ_eff = 0.25
+silver_eff = 1
 g,r,z = grz
 givar, rivar, zivar = grzivar
 gflux, rflux, zflux = grzflux
@@ -168,10 +169,13 @@ for dm in dm_list:
 		zlim_var = zlim
 		if k == 0:
 			glim_var += dm
+			mag_str = "g, %.2f"%dm
 		elif k == 1:
 			rlim_var += dm
+			mag_str = "r, %.2f"%dm			
 		elif k == 2:
 			zlim_var += dm
+			mag_str = "z, %.2f"%dm			
 		grid, last_FoM, last_FoM_var = XD.generate_XD_selection_var(param_directory, glim=glim, rlim=rlim, zlim=zlim, \
 									glim_var=glim_var, rlim_var=rlim_var, zlim_var=zlim_var, \
 			                          gr_ref=gr_ref, rz_ref=rz_ref, N_tot=N_tot, f_i=f_i, \
@@ -179,13 +183,25 @@ for dm in dm_list:
 			                          maxmag = maxmag, K_i = K_i, dNdm_type = dNdm_type, \
 			                          param_tag_GMM = GMM_which_subset, param_tag_dNdm = dNdm_which_subset)
 
+		# Full print out
+		# # XD projection - Selection based on "true" depth
+		# return_format = ["XD", "Adap.", "%.3f"%glim_var, "%.3f"%rlim_var, "%.3f"%zlim_var, "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+		#       "DESI", "Total", "Eff", "%.3f"%last_FoM_var,  "\\\ \hline"]
+		# print(class_breakdown_cut_grid(grid, return_format, selection="select_var"))
+
+		# # XD projection - Selection based on assumed depth
+		# return_format = ["XD", "Fid.", "--", "--","--","Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+		#       "DESI", "Total", "Eff", "%.3f"%last_FoM,  "\\\\\hline"]
+		# print(class_breakdown_cut_grid(grid, return_format))
+
+		# Limited print out
 		# XD projection - Selection based on "true" depth
-		return_format = ["XD", "Adap.", "%.3f"%glim_var, "%.3f"%rlim_var, "%.3f"%zlim_var, "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+		return_format = [mag_str, "Adap.",  \
 		      "DESI", "Total", "Eff", "%.3f"%last_FoM_var,  "\\\ \hline"]
 		print(class_breakdown_cut_grid(grid, return_format, selection="select_var"))
 
 		# XD projection - Selection based on assumed depth
-		return_format = ["XD", "Fid.", "--", "--","--","Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "--", \
+		return_format = ["--", "Fid.",  \
 		      "DESI", "Total", "Eff", "%.3f"%last_FoM,  "\\\\\hline"]
 		print(class_breakdown_cut_grid(grid, return_format))
 
@@ -194,11 +210,17 @@ for dm in dm_list:
 		# Make dNdm plots.
 		# Total 
 		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-Total"%(glim_var*1000,rlim_var*1000,zlim_var*1000)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="Total", label1="Fid. Glb.", label2 ="Fid. Orig.", \
+			label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var,\
+			class_eff =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.],\
+			class_eff2 =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.])
 
 		# DESI
 		fname = "dNdm-XD-glimvar%d-rlimvar%d-zlimvar%d-fiducial-dNdm-DESI"%(glim_var*1000,rlim_var*1000,zlim_var*1000)
-		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var)
+		XD.plot_dNdm_XD(grid, grid_fiducial, fname=fname, plot_type="DESI", label1="Fid. Glb.", label2 ="Fid. Orig.", \
+			label3="Adap.", glim2=glim_var, rlim2=rlim_var, zlim2=zlim_var,\
+			class_eff =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.],\
+			class_eff2 =  [gold_eff*DESI_frac, silver_eff*DESI_frac, 0.0, NoOII_eff*DESI_frac, 0., NoZ_eff*DESI_frac, 0.])			
 
 
 
