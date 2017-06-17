@@ -27,7 +27,7 @@ two_projections = False
 # XD1 for projection based on first set and XD2 corresponding to the second set
 
 # XD1: Boundary plots 
-plot_bnd = False
+plot_bnd = True
 plot_bnd_movie = False # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD1-bnd/"
 bnd_fname = "XD1-bnd"
@@ -106,7 +106,7 @@ N_tot=2400
 # Note that this is different "class efficiency" which we define as
 # the fraction of objects in each class we expect to be good objects
 # for DESI.
-f_i=[1., 1., 0., 0.25, 0., .25, 0.]
+f_i=[1., 1., 0., 0.25, 0., 2., 0.]
 
 # Reference points based on which the number density conserving noise are
 # calculated.
@@ -118,7 +118,7 @@ rz_ref=0.5
 # Regularizing parameter to be added to the denomitor when calculating FoM.
 # Note: Keep the default value 2e-3 unless pathologic behavior boundary occurs,
 # in which case it should be raised to a higher value.
-reg_r=1e-3
+reg_r=2e-3
 
 # Grid parameters. A finer grid will slowdown the calculation but may 
 # give marginal-to-somewhat more accurate result.

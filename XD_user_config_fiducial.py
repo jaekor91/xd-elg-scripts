@@ -28,7 +28,7 @@ two_projections = False
 
 # XD1: Boundary plots 
 plot_bnd = True
-plot_bnd_movie = False # Generate many slices for a movie.
+plot_bnd_movie = True # Generate many slices for a movie.
 bnd_fig_directory = "./bnd_fig_directory/XD-fiducial/"
 bnd_fname = "XD-fiducial"
 mag_slices = [22., 22.5, 23.0, 23.5, 23.75, 23.825, 23.975]
@@ -52,7 +52,7 @@ plot_dNdm = True # Plot XD1.
 plot_dNdm2 = False # Plot XD2 in addition to XD1 with XD2 as a reference.
 dNdm_fname = "dNdm-XD-fiducial-Total"
 dNdm_plot_type = "Total" # "Total" if plotting all that are selected, "DESI" if plotting the projection.
-dNdm_label1 = "Fiducial"
+dNdm_label1 = ""
 dNdm_label2 = ""
 
 # dNdz plots
