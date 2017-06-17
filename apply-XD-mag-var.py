@@ -78,22 +78,11 @@ N_tot = 2400
 glim = 23.8
 rlim = 23.4
 zlim = 22.4
-reg_r = 5e-4 
+reg_r = 1e-3
 g,r,z = grz
 givar, rivar, zivar = grzivar
 gflux, rflux, zflux = grzflux
 
-
-##############################################################################
-# FDR Cut
-iFDR = FDR_cut(grz)
-print(" & ".join(["Cut", "Type", "glim", "rlim", "zlim", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
-      "DESI", "Total", "Eff", "FoM"]) + "\\\\ \hline")
-# FDR
-return_format = ["FDR", "Avg.", "--", "--", "--", "Gold", "Silver", "LowOII", "NoOII", "LowZ", "NoZ", "D2reject", "DR3unmatched", \
-      "DESI", "Total", "Eff", "--",  "\\\\ \hline"]
-print(class_breakdown_cut(cn[iFDR], w[iFDR], area,rwd="D", num_classes=8, \
-     return_format = return_format))
 
 ##############################################################################
 # Compute XD projection based on fiducial set of parameters.
