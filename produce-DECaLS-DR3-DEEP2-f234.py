@@ -167,6 +167,10 @@ area_f3 = est_spec_area("windowf.31.fits")+est_spec_area("windowf.32.fits")+est_
 area_f4 = est_spec_area("windowf.41.fits")+est_spec_area("windowf.42.fits")
 
 
+# 6/30/2017 Note: I investigated whether the area estimation could be 
+# improved if the Tycho-2 mask is not imposed prior to cross-matching.
+# In short, the conclusion is that it does so very little.
+
 # Making correction according to # of objects masked by star mask.
 print("Field 2")
 fname ="DECaLS-DR3-Tractor-DEEP2f2.fits"
