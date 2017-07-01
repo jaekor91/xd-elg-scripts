@@ -69,6 +69,8 @@ areas = np.loadtxt("intersection-area-f234")
 area_34 = areas[1:].sum()
 area_2 = areas[0]
 area  = areas.sum()
+print("Areas 2, 3, 4: ", areas)
+print("Total area: ", area)
 
 # Combine all three fields
 cn = np.concatenate((cn2,cn3,cn4))
